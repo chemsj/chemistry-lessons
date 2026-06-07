@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>화학 수업 자료실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #11201c;
+    --paper: #f4f1e9;
+    --paper-2: #eae5d8;
+    --accent: #1f6f5c;
+    --accent-2: #c2683a;
+    --line: #d8d2c2;
+    --muted: #5c6660;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'IBM Plex Sans KR', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(31,111,92,.06), transparent 38%),
+      radial-gradient(circle at 88% 82%, rgba(194,104,58,.06), transparent 42%);
+  }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  header {
+    padding: 72px 0 40px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .eyebrow {
+    font-size: .8rem;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-family: 'Gowun Batang', serif;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -.01em;
+  }
+  h1 .dot { color: var(--accent-2); }
+  .sub {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 1.02rem;
+    max-width: 580px;
+  }
+  .meta {
+    margin-top: 28px;
+    font-size: .82rem;
+    color: var(--muted);
+    letter-spacing: .04em;
+  }
+
+  /* Subject section */
+  main { padding: 48px 0 80px; }
+  .subject { margin-bottom: 56px; }
+  .subject:last-child { margin-bottom: 0; }
+
+  .section-label {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0 0 22px;
+  }
+  .section-label .code {
+    font-size: .72rem;
+    letter-spacing: .14em;
+    font-weight: 600;
+    color: var(--accent-2);
+    padding: 4px 10px;
+    border: 1px solid var(--accent-2);
+    border-radius: 999px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .section-label .name {
+    font-family: 'Gowun Batang', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .section-label .rule {
+    flex-grow: 1;
+    height: 1px;
+    background: var(--line);
+    align-self: center;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 24px 22px 20px;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform .25s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px -16px rgba(17,32,28,.45);
+    border-color: var(--accent);
+  }
+  .card:hover::before { transform: scaleY(1); }
+
+  .card .num {
+    font-family: 'Gowun Batang', serif;
+    font-size: .9rem;
+    color: var(--accent-2);
+    letter-spacing: .1em;
+    margin-bottom: 10px;
+  }
+  .card .title {
+    font-size: 1.16rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 8px;
+  }
+  .card .desc {
+    font-size: .88rem;
+    color: var(--muted);
+    flex-grow: 1;
+  }
+  .card .go {
+    margin-top: 16px;
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card .go .arrow { transition: transform .25s ease; }
+  .card:hover .go .arrow { transform: translateX(4px); }
+
+  .tag {
+    position: absolute;
+    top: 16px; right: 16px;
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(194,104,58,.14);
+    color: var(--accent-2);
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 30px 0 60px;
+    font-size: .8rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.8;
+  }
+  footer .copy { font-weight: 600; color: var(--ink); }
+  footer .notice { font-size: .74rem; }
+
+  @media (max-width: 560px) {
+    header { padding: 52px 0 32px; }
+    main { padding: 36px 0 64px; }
+    .section-label .name { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="eyebrow">경해여자고등학교 · 최수진</div>
+      <h1>화학 수업 자료실<span class="dot">.</span></h1>
+      <p class="sub">과목·단원별 학습 자료를 모아둔 공간입니다. 이 페이지를 즐겨찾기 해두면 자료가 추가되거나 수정되어도 항상 최신 내용을 볼 수 있어요.</p>
+      <div class="meta" id="updated"></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap" id="subjects"></div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="copy">© <span id="year"></span> 최수진 · 경해여자고등학교</div>
+      <div class="notice">본 자료의 저작권은 제작자에게 있으며, 무단 복제·배포·재사용을 금합니다.</div>
+    </div>
+  </footer>
+
+<script>
+/* =========================================================
+   과목과 단원을 여기서 관리합니다.
+   - 새 단원 추가: 해당 과목 lessons 안에 한 칸 복사해서 추가
+   - 새 과목 추가: subjects 배열에 { code, name, lessons:[...] } 추가
+   각 칸 항목:
+     title : 단원 이름
+     file  : 해당 단원 폴더 경로 (예: "chem-1-language/")
+     desc  : 한 줄 설명 (생략하려면 "")
+     tag   : "신규" 같은 배지 (생략하려면 "")
+   ========================================================= */
+const subjects = [
+  {
+    code: "2022 개정",
+    name: "화학",
+    lessons: [
+      { title: "화학의 언어",        file: "chem-1-language/",     desc: "", tag: "" },
+      { title: "물질의 구조와 성질",  file: "chem-2-structure/",    desc: "", tag: "" },
+      { title: "화학 평형",          file: "chem-3-equilibrium/",  desc: "동적 평형·평형 이동(농도·압력·온도)·일상 적용", tag: "자료 있음" },
+      { title: "역동적인 화학 반응",  file: "chem-4-reactions/",    desc: "", tag: "" },
+    ]
+  },
+  {
+    code: "2022 개정",
+    name: "물질과 에너지",
+    lessons: [
+      { title: "물질의 세 가지 상태", file: "me-1-states/",         desc: "", tag: "" },
+      { title: "용액의 성질",        file: "me-2-solution/",       desc: "", tag: "" },
+      { title: "화학 변화의 자발성",  file: "me-3-spontaneity/",    desc: "전기 화학(화학 전지) 등", tag: "자료 있음" },
+      { title: "반응 속도",          file: "me-4-rate/",           desc: "", tag: "" },
+    ]
+  },
+];
+
+/* ---- 아래는 수정할 필요 없습니다 ---- */
+const root = document.getElementById('subjects');
+subjects.forEach(subject => {
+  const sec = document.createElement('section');
+  sec.className = 'subject';
+
+  const label = document.createElement('div');
+  label.className = 'section-label';
+  label.innerHTML = `
+    <span class="code">${subject.code}</span>
+    <span class="name">${subject.name}</span>
+    <span class="rule"></span>
+  `;
+  sec.appendChild(label);
+
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  subject.lessons.forEach((l, i) => {
+    const a = document.createElement('a');
+    a.className = 'card';
+    a.href = l.file;
+    a.innerHTML = `
+      ${l.tag ? `<span class="tag">${l.tag}</span>` : ''}
+      <span class="num">${String(i + 1).padStart(2, '0')}</span>
+      <span class="title">${l.title}</span>
+      <span class="desc">${l.desc || ''}</span>
+      <span class="go">자료 열기 <span class="arrow">&rarr;</span></span>
+    `;
+    grid.appendChild(a);
+  });
+  sec.appendChild(grid);
+  root.appendChild(sec);
+});
+
+const now = new Date();
+document.getElementById('year').textContent = now.getFullYear();
+document.getElementById('updated').textContent =
+  '최근 업데이트 ' + now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+</script>
+</body>
+</html>

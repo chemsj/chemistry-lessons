@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>물질의 세 가지 상태 · 화학 수업 자료실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#11201c;--paper:#f4f1e9;--paper-2:#eae5d8;--accent:#1f6f5c;--accent-2:#c2683a;--line:#d8d2c2;--muted:#5c6660;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'IBM Plex Sans KR',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;min-height:100vh;
+    background-image:radial-gradient(circle at 12% 18%,rgba(31,111,92,.06),transparent 38%),radial-gradient(circle at 88% 82%,rgba(194,104,58,.06),transparent 42%);}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+  header{padding:56px 0 36px;border-bottom:2px solid var(--ink);}
+  .back{display:inline-block;font-size:.82rem;font-weight:600;letter-spacing:.04em;color:var(--accent);text-decoration:none;margin-bottom:18px;
+    border-bottom:1px solid rgba(31,111,92,.35);}
+  .back:hover{border-bottom-color:var(--accent);}
+  .eyebrow{font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent-2);font-weight:600;margin-bottom:10px;}
+  h1{font-family:'Gowun Batang',serif;font-size:clamp(2rem,5vw,2.9rem);font-weight:700;line-height:1.15;}
+  .sub{margin-top:14px;color:var(--muted);font-size:1rem;max-width:600px;}
+  main{padding:44px 0 80px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+  .card{position:relative;display:flex;flex-direction:column;background:var(--paper-2);border:1px solid var(--line);border-radius:4px;
+    padding:24px 22px 20px;text-decoration:none;color:inherit;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);transform:scaleY(0);transform-origin:top;transition:transform .25s;}
+  .card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -16px rgba(17,32,28,.45);border-color:var(--accent);}
+  .card:hover::before{transform:scaleY(1);}
+  .card.disabled{cursor:default;opacity:.5;}
+  .card.disabled:hover{transform:none;box-shadow:none;border-color:var(--line);}
+  .card.disabled:hover::before{transform:scaleY(0);}
+  .card .num{font-family:'Gowun Batang',serif;font-size:.9rem;color:var(--accent-2);letter-spacing:.1em;margin-bottom:10px;}
+  .card .title{font-size:1.12rem;font-weight:600;line-height:1.35;margin-bottom:8px;}
+  .card .desc{font-size:.86rem;color:var(--muted);flex-grow:1;}
+  .card .go{margin-top:16px;font-size:.8rem;font-weight:600;letter-spacing:.04em;color:var(--accent);display:inline-flex;align-items:center;gap:6px;}
+  .card .go .arrow{transition:transform .25s;}
+  .card:hover .go .arrow{transform:translateX(4px);}
+  .tag{position:absolute;top:16px;right:16px;font-size:.66rem;font-weight:600;letter-spacing:.08em;padding:3px 9px;border-radius:999px;background:rgba(194,104,58,.14);color:var(--accent-2);}
+  .empty{display:none;background:var(--paper-2);border:1px dashed var(--line);border-radius:6px;padding:48px 24px;text-align:center;color:var(--muted);font-size:.95rem;}
+  footer{border-top:1px solid var(--line);padding:30px 0 60px;font-size:.8rem;color:var(--muted);text-align:center;line-height:1.8;}
+  footer .copy{font-weight:600;color:var(--ink);}
+  footer .notice{font-size:.74rem;}
+  @media(max-width:560px){header{padding:40px 0 28px;}main{padding:32px 0 60px;}}
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <a class="back" href="../">&larr; 자료실</a>
+      <div class="eyebrow">2022 개정</div>
+      <h1>물질의 세 가지 상태</h1>
+      <p class="sub">기체·액체·고체의 성질과 상태 변화.</p>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty">이 단원의 자료는 <strong>준비 중</strong>입니다. 곧 추가될 예정이에요.</div>
+    </div>
+  </main>
+  <footer>
+    <div class="wrap">
+      <div class="copy">&copy; <span id="year"></span> 최수진 · 경해여자고등학교</div>
+      <div class="notice">본 자료의 저작권은 제작자에게 있으며, 무단 복제·배포·재사용을 금합니다.</div>
+    </div>
+  </footer>
+<script>
+const lessons = [];
+const grid = document.getElementById('grid');
+if(!lessons.length){ document.getElementById('empty').style.display='block'; }
+lessons.forEach((l,i)=>{
+  const el = document.createElement(l.file ? 'a' : 'div');
+  el.className = 'card' + (l.file ? '' : ' disabled');
+  if(l.file) el.href = l.file;
+  el.innerHTML =
+    (l.tag ? '<span class="tag">'+l.tag+'</span>' : '') +
+    '<span class="num">'+String(i+1).padStart(2,'0')+'</span>' +
+    '<span class="title">'+l.title+'</span>' +
+    '<span class="desc">'+(l.desc||'')+'</span>' +
+    (l.file ? '<span class="go">자료 열기 <span class="arrow">&rarr;</span></span>'
+            : '<span class="go" style="color:var(--muted)">준비 중</span>');
+  grid.appendChild(el);
+});
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

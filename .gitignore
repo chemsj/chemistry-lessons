@@ -1,0 +1,14 @@
+# 교과서 PDF (저작권·대용량 954MB) — push 제외, 로컬에만 보관
+교과서파일/
+
+# OS / 에디터 잔여물
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# 로컬 전용 설정 (launch.json은 공유)
+.claude/settings.local.json
+
+# 기타
+*.zip
+node_modules/

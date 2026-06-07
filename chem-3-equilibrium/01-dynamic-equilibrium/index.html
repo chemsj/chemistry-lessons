@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>화학 평형과 평형 상수 · 화학 반응의 진행 방향</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+
+:root{
+  --bg:#eef4f3;
+  --bg2:#e3eeec;
+  --surface:#ffffff;
+  --ink:#15302c;
+  --muted:#5d7470;
+  --primary:#0f766e;
+  --primary-d:#0b5650;
+  --primary-l:#d6efeb;
+  --primary-ll:#eafaf7;
+  --accent:#e08a1e;
+  --accent-l:#fcefda;
+  --ok:#10936b;
+  --ok-l:#dcf3ea;
+  --no:#d6435f;
+  --no-l:#fbe2e8;
+  --line:#dbe7e4;
+  --no2:#9a3412;     /* NO2 적갈색 */
+  --atomN:#2f6fb0;   /* 질소 파랑 */
+  --atomO:#c0392b;   /* 산소 빨강 */
+  --shadow:0 18px 40px -22px rgba(15,118,110,.45);
+  --shadow-s:0 6px 18px -10px rgba(15,48,44,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Pretendard','Pretendard Variable',-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(900px 500px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 55%),
+    radial-gradient(700px 600px at 105% 8%, var(--primary-ll) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(160deg,var(--bg) 0%, var(--bg2) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.var{font-family:Georgia,'Times New Roman',serif;font-style:italic}
+sub,sup{font-size:.7em;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.28em}
+
+/* ---------- Header ---------- */
+header{
+  position:sticky;top:0;z-index:30;
+  backdrop-filter:saturate(1.2) blur(8px);
+  background:rgba(255,255,255,.72);
+  border-bottom:1px solid var(--line);
+}
+.hbar{max-width:1080px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:11px;flex:1;min-width:0}
+.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,var(--primary),var(--primary-d));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;box-shadow:var(--shadow-s);flex:none}
+.brand b{font-size:15px;font-weight:800}
+.brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin-top:1px}
+.dots{display:flex;gap:7px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;background:#c6d8d4;cursor:pointer;transition:.25s;border:none;padding:0}
+.dot:hover{transform:scale(1.25)}
+.dot.on{background:var(--primary);width:24px;border-radius:6px}
+.dot.done{background:var(--ok)}
+
+/* ---------- Layout ---------- */
+main{max-width:1080px;margin:0 auto;padding:26px 22px 120px}
+.slide{display:none;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.slide.active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.kicker{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:12.5px;
+  color:var(--primary-d);background:var(--primary-l);padding:7px 14px;border-radius:999px;letter-spacing:.2px}
+.kicker .n{background:var(--primary);color:#fff;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px}
+h1.title{font-size:30px;font-weight:800;letter-spacing:-.6px;margin:14px 0 6px;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;font-weight:600;line-height:1.6}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:var(--shadow);margin-top:18px}
+.card.tight{padding:20px 22px}
+
+.tag{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:12.5px;padding:6px 12px;border-radius:999px;margin-bottom:12px}
+.tag.q{color:#8a5208;background:var(--accent-l)}
+.tag.sim{color:var(--primary-d);background:var(--primary-l)}
+.tag.sum{color:#0c6a4f;background:var(--ok-l)}
+.dotmark{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+.ask{font-size:18px;font-weight:700;line-height:1.6;color:var(--ink)}
+.ask .hl{background:linear-gradient(transparent 58%, #ffe2b3 58%);padding:0 2px;border-radius:2px}
+.helper{font-size:13.5px;color:var(--muted);font-weight:600;margin-top:10px;line-height:1.6}
+
+.sumlist{list-style:none;display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.sumlist li{display:flex;gap:12px;align-items:flex-start;font-size:15.5px;line-height:1.55;font-weight:600}
+.sumlist .b{flex:none;width:24px;height:24px;border-radius:8px;background:var(--ok-l);color:#0c6a4f;
+  display:grid;place-items:center;font-weight:800;font-size:13px;margin-top:1px}
+.sumlist b{color:var(--primary-d);font-weight:800}
+
+.btn{appearance:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;border-radius:13px;transition:.18s;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;padding:13px 24px;font-size:15px;box-shadow:var(--shadow-s)}
+.btn.primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn.ghost{background:#fff;color:var(--primary-d);border:1.6px solid var(--primary-l);padding:11px 18px;font-size:14px}
+.btn.ghost:hover{background:var(--primary-ll);border-color:var(--primary)}
+.btn.sm{padding:9px 15px;font-size:13.5px;border-radius:11px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---------- Footer nav ---------- */
+.navbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.82);
+  backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+.navin{max-width:1080px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:14px}
+.navlabel{flex:1;font-size:13.5px;font-weight:700;color:var(--muted)}
+.navlabel b{color:var(--ink)}
+.navbtn{appearance:none;border:1.6px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+  font-weight:700;font-size:14px;padding:10px 18px;border-radius:12px;cursor:pointer;transition:.15s}
+.navbtn:hover:not([disabled]){border-color:var(--primary);color:var(--primary-d)}
+.navbtn[disabled]{opacity:.4;cursor:not-allowed}
+.navbtn.go{background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;border:none;box-shadow:var(--shadow-s)}
+
+/* ---------- Sim shared ---------- */
+.simwrap{display:grid;gap:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel{background:var(--primary-ll);border:1px solid var(--primary-l);border-radius:18px;padding:16px}
+.panel h4{font-size:14px;font-weight:800;color:var(--primary-d);margin-bottom:12px;text-align:center}
+.vessel{position:relative;width:100%;height:128px;border-radius:14px 14px 16px 16px;overflow:hidden;
+  background:#fff;border:2px solid #cfe2de;box-shadow:inset 0 -8px 18px -10px rgba(0,0,0,.12)}
+.vessel canvas{position:absolute;inset:0;width:100%;height:100%}
+.vtint{position:absolute;inset:0;transition:background .2s linear;pointer-events:none}
+.grf{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px}
+.grf canvas{width:100%;height:130px;display:block}
+.rates{display:flex;gap:10px;margin-top:10px;align-items:flex-end;justify-content:center;height:64px}
+.ratecol{display:flex;flex-direction:column;align-items:center;gap:5px;width:74px}
+.ratebar{width:100%;height:44px;background:#eef3f1;border-radius:8px;position:relative;overflow:hidden;display:flex;align-items:flex-end}
+.ratebar i{display:block;width:100%;border-radius:8px 8px 0 0;transition:height .12s linear}
+.ratecol small{font-size:11px;font-weight:700;color:var(--muted)}
+.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12.5px;font-weight:700;color:var(--muted);margin-top:4px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:13px;height:13px;border-radius:4px}
+.ctrls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.eqflag{text-align:center;font-weight:800;color:var(--ok);font-size:13.5px;height:20px;transition:.3s;opacity:0}
+.eqflag.on{opacity:1}
+
+/* misconception / quiz */
+.oxbox{background:#fff;border:1.6px dashed var(--accent);border-radius:16px;padding:18px;margin-top:16px}
+.oxq{font-weight:800;font-size:15px;margin-bottom:13px;line-height:1.5}
+.oxq .lab{display:inline-block;background:var(--accent);color:#fff;font-size:11.5px;padding:3px 10px;border-radius:8px;margin-right:8px;vertical-align:middle}
+.choices{display:flex;flex-direction:column;gap:9px}
+.choice{text-align:left;width:100%;background:#fbfdfc;border:1.6px solid var(--line);border-radius:12px;padding:13px 16px;
+  font-family:inherit;font-weight:700;font-size:14.5px;color:var(--ink);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:11px}
+.choice:hover:not(.locked){border-color:var(--primary);background:var(--primary-ll)}
+.choice .mk{flex:none;width:24px;height:24px;border-radius:7px;background:#eef3f1;display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--muted)}
+.choice.correct{border-color:var(--ok);background:var(--ok-l)}
+.choice.correct .mk{background:var(--ok);color:#fff}
+.choice.wrong{border-color:var(--no);background:var(--no-l)}
+.choice.wrong .mk{background:var(--no);color:#fff}
+.fb{margin-top:12px;font-size:14px;font-weight:700;line-height:1.6;padding:12px 14px;border-radius:12px;display:none}
+.fb.show{display:block}
+.fb.good{background:var(--ok-l);color:#0c6a4f}
+.fb.bad{background:var(--no-l);color:#a31d36}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;overflow:hidden;border-radius:12px}
+.tbl th,.tbl td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--line)}
+.tbl thead th{background:var(--primary-l);color:var(--primary-d);font-weight:800;font-size:12.5px}
+.tbl tbody tr:nth-child(even){background:#f7faf9}
+.tbl td.res{font-weight:800;color:var(--muted);font-family:Georgia,serif}
+.tbl td.res.filled{color:var(--primary-d)}
+.tbl col.hi,.tbl th.hi{background:var(--ok-l)!important}
+.tbl td.hi{background:var(--ok-l)}
+.fbtns{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
+.fbtn{flex:1;min-width:150px;background:#fff;border:1.6px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;
+  font-family:inherit;transition:.15s;text-align:center}
+.fbtn:hover{border-color:var(--primary);background:var(--primary-ll)}
+.fbtn.sel{border-color:var(--primary);background:var(--primary-ll);box-shadow:var(--shadow-s)}
+.fbtn .fl{font-weight:800;color:var(--primary-d);font-size:15px;margin-bottom:5px}
+.fbtn .fe{font-size:15px}
+.proc{background:#0f201d;color:#d9f3ee;border-radius:14px;padding:14px 16px;margin-top:14px;font-size:13.5px;
+  min-height:54px;font-family:'Pretendard',monospace;line-height:1.85;display:none}
+.proc.show{display:block}
+.proc .pl{opacity:0;animation:pl .35s forwards}
+@keyframes pl{to{opacity:1}}
+.proc .num{color:#f3c46b;font-family:Georgia,serif}
+
+/* K builder */
+.kbuild{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:center;background:var(--primary-ll);
+  border:1px solid var(--primary-l);border-radius:16px;padding:20px}
+.rxn{display:flex;align-items:center;gap:7px;font-size:19px;font-weight:700;flex-wrap:wrap;justify-content:center}
+.coef{display:inline-flex;flex-direction:column;border:1.6px solid var(--primary-l);border-radius:10px;overflow:hidden;background:#fff}
+.coef button{border:none;background:#fff;color:var(--primary-d);font-weight:800;cursor:pointer;font-size:11px;padding:1px 8px;line-height:1.3}
+.coef button:hover{background:var(--primary-l)}
+.coef span{text-align:center;font-weight:800;font-size:15px;padding:1px 0;border-top:1px solid var(--primary-l);border-bottom:1px solid var(--primary-l);font-family:Georgia,serif;color:var(--primary-d)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;text-align:center}
+.frac .top,.frac .bot{padding:3px 12px;font-size:20px;font-weight:700}
+.frac .bar{height:2.5px;background:var(--ink);width:100%;border-radius:2px}
+.keq{display:flex;align-items:center;gap:14px;justify-content:center;margin-top:20px;font-size:24px;font-weight:700}
+.toggle{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:14px;user-select:none}
+.tg{width:46px;height:26px;border-radius:999px;background:#cdddd9;position:relative;transition:.2s;flex:none}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.toggle.on .tg{background:var(--primary)}
+.toggle.on .tg::after{left:23px}
+.calcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:800;color:var(--primary-d)}
+.field input{font-family:Georgia,serif;font-size:16px;font-weight:700;padding:11px 12px;border:1.6px solid var(--line);
+  border-radius:11px;text-align:center;color:var(--ink);width:100%}
+.field input:focus{outline:none;border-color:var(--primary);background:var(--primary-ll)}
+.result{margin-top:16px;background:var(--ok-l);border-radius:14px;padding:16px 18px;text-align:center;font-size:18px;font-weight:800;color:#0c6a4f}
+.result .var{color:#0c6a4f}
+.note{font-size:13px;color:var(--muted);font-weight:600;line-height:1.6;margin-top:10px;background:#f7faf9;border-radius:12px;padding:12px 14px;border-left:3px solid var(--primary-l)}
+
+/* K meaning */
+.kmeter{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:center;margin-top:6px}
+.balloon{height:230px;background:#fff;border:1px solid var(--line);border-radius:16px;position:relative;overflow:hidden;display:grid;place-items:center}
+.balloon .lbl{position:absolute;top:12px;left:0;right:0;text-align:center;font-weight:800;font-size:13.5px;color:var(--muted)}
+.circ{border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;transition:width .25s,height .25s;text-align:center;line-height:1.2}
+.circ.react{background:radial-gradient(circle at 35% 30%,#f08aa0,var(--no))}
+.circ.prod{background:radial-gradient(circle at 35% 30%,#4fcfa6,var(--ok))}
+.kreadout{text-align:center;margin-top:18px;font-size:20px;font-weight:800}
+.kreadout .var{color:var(--primary-d)}
+.kverdict{text-align:center;font-size:15px;font-weight:700;color:var(--muted);margin-top:6px;min-height:22px}
+.slider{-webkit-appearance:none;width:100%;height:8px;border-radius:999px;margin-top:22px;
+  background:linear-gradient(90deg,var(--no) 0%,#e7ecea 50%,var(--ok) 100%);outline:none}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;
+  border:3px solid var(--primary);cursor:pointer;box-shadow:var(--shadow-s)}
+.slider::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--primary);cursor:pointer}
+.scaleLbl{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);margin-top:8px}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;justify-content:center}
+.chip{background:#fff;border:1.6px solid var(--line);border-radius:12px;padding:11px 15px;cursor:pointer;font-family:inherit;
+  font-weight:700;font-size:13.5px;transition:.15s;text-align:left;line-height:1.4}
+.chip:hover{border-color:var(--accent);background:var(--accent-l)}
+.chip small{display:block;color:var(--muted);font-weight:700;font-size:11.5px}
+
+/* Q bars */
+.qkstage{display:flex;gap:26px;align-items:flex-end;justify-content:center;height:230px;background:#fff;
+  border:1px solid var(--line);border-radius:16px;padding:24px 18px 18px;position:relative}
+.qkbase{position:absolute;left:18px;right:18px;bottom:46px;border-bottom:2px dashed #c9d8d4}
+.bargrp{display:flex;flex-direction:column;align-items:center;gap:0;width:90px;height:100%;justify-content:flex-end;z-index:1}
+.bar3d{width:64px;border-radius:9px 9px 0 0;transition:height .15s;position:relative;display:flex;align-items:flex-start;justify-content:center;color:#fff;font-weight:800;padding-top:6px;font-size:14px}
+.bar3d.q{background:linear-gradient(180deg,#f3b24c,var(--accent))}
+.bar3d.k{background:linear-gradient(180deg,#7d6fd6,#5c4fb3)}
+.barcap{margin-top:8px;font-weight:800;font-size:15px}
+.barcap.q{color:#b06a10}.barcap.k{color:#4a3da0}
+.arrowzone{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:140px}
+.bigarrow{font-size:38px;font-weight:800;transition:.2s}
+.dirtext{font-weight:800;font-size:15px;text-align:center;margin-top:4px}
+.qkverdict{margin-top:18px;text-align:center;font-size:17px;font-weight:800;padding:14px;border-radius:14px;transition:.2s}
+
+/* step reveal */
+.steps{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.step{background:#fbfdfc;border:1.6px solid var(--line);border-radius:14px;padding:0;overflow:hidden;transition:.2s}
+.step .sh{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;font-weight:800;font-size:14.5px}
+.step .sh .sn{flex:none;width:26px;height:26px;border-radius:8px;background:var(--primary-l);color:var(--primary-d);display:grid;place-items:center;font-size:13px}
+.step .sb{max-height:0;overflow:hidden;transition:max-height .3s;padding:0 16px;font-size:14.5px;line-height:1.7;font-weight:600}
+.step.open{border-color:var(--primary-l);box-shadow:var(--shadow-s)}
+.step.open .sb{max-height:240px;padding:0 16px 16px 54px}
+.eqn{font-family:Georgia,serif;font-size:17px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:inline-block;margin:6px 0}
+.scoreband{display:flex;align-items:center;gap:14px;background:var(--primary-ll);border-radius:14px;padding:14px 18px;margin-top:18px}
+.scoreband .sc{font-size:22px;font-weight:800;color:var(--primary-d)}
+.scoreband span{font-weight:700;color:var(--muted);font-size:14px}
+
+.endhero{text-align:center;padding:18px 10px}
+.endhero h2{font-size:24px;font-weight:800;margin-bottom:8px}
+.recap{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;text-align:left}
+.recap .rc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.recap .rc b{color:var(--primary-d);font-size:14px}
+.recap .rc p{font-size:14px;font-weight:600;color:var(--muted);margin-top:7px;line-height:1.6}
+
+@media(max-width:780px){
+  .two{grid-template-columns:1fr}
+  .recap{grid-template-columns:1fr}
+  .calcgrid{grid-template-columns:1fr}
+  h1.title{font-size:25px}
+  main{padding:20px 14px 120px}
+  .qkstage{gap:12px}
+  .arrowzone{min-width:90px}
+}
+
+
+/* ===== 16:9 landscape deck overrides ===== */
+html,body{height:100%;overflow:hidden;background:#0b1a18}
+body{padding:0}
+header,.navbar{display:none!important}
+.viewport{position:fixed;inset:0;display:grid;place-items:center;
+  background:
+    radial-gradient(1200px 700px at 20% -10%, #14302c 0%, rgba(0,0,0,0) 60%),
+    radial-gradient(900px 700px at 110% 120%, #0f2a26 0%, rgba(0,0,0,0) 55%),
+    #0b1a18;}
+.deck{width:1280px;height:720px;flex:none;transform-origin:center center;
+  border-radius:22px;overflow:hidden;display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 500px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 55%),
+    radial-gradient(700px 600px at 105% 8%, var(--primary-ll) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(160deg,var(--bg) 0%, var(--bg2) 100%);
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.05);}
+.topbar{height:54px;flex:none;display:flex;align-items:center;gap:16px;padding:0 24px;
+  background:rgba(255,255,255,.62);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+.topbar .brand{display:flex;align-items:center;gap:11px;flex:1;min-width:0}
+.topbar .logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(145deg,var(--primary),var(--primary-d));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px;flex:none;box-shadow:var(--shadow-s)}
+.topbar b{font-size:14px;font-weight:800}
+.topbar .brand span{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.stage{position:relative;flex:1;overflow:hidden}
+.slide{position:absolute;inset:0;padding:18px 26px;display:none;margin:0}
+.slide.active{display:grid;grid-template-columns:minmax(340px,400px) 1fr;gap:22px;animation:rise .4s cubic-bezier(.2,.7,.2,1)}
+.slide.single{padding:26px 30px}
+.slide.single.active{display:block;overflow:auto}
+.col-l,.col-r{overflow:auto;min-height:0;height:100%;padding-right:8px}
+.col-l>*:first-child,.col-r>*:first-child{margin-top:0}
+.col-l::-webkit-scrollbar,.col-r::-webkit-scrollbar,.slide.single::-webkit-scrollbar{width:9px;height:9px}
+.col-l::-webkit-scrollbar-thumb,.col-r::-webkit-scrollbar-thumb,.slide.single::-webkit-scrollbar-thumb{background:#c2d6d2;border-radius:9px}
+.botbar{height:56px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;
+  background:rgba(255,255,255,.7);border-top:1px solid var(--line);backdrop-filter:blur(6px)}
+.botbar .navlabel{flex:1;font-size:13px;font-weight:700;color:var(--muted)}
+.botbar .navlabel b{color:var(--ink)}
+
+/* compact typography for slides */
+.kicker{font-size:11.5px;padding:6px 12px}
+.kicker .n{width:18px;height:18px;font-size:10px}
+h1.title{font-size:22px;margin:9px 0 4px;line-height:1.25}
+.sub{font-size:13px;line-height:1.55}
+.card{padding:17px 18px;border-radius:18px;margin-top:12px;box-shadow:var(--shadow-s)}
+.card.tight{padding:15px 17px}
+.tag{margin-bottom:9px;font-size:11.5px;padding:5px 11px}
+.ask{font-size:15px;line-height:1.55}
+.helper{font-size:12.5px;margin-top:8px}
+.sumlist{gap:8px}
+.sumlist li{font-size:13px;line-height:1.45}
+.sumlist .b{width:21px;height:21px;font-size:12px;border-radius:7px}
+.note{font-size:12px;padding:10px 12px;margin-top:9px}
+
+/* compact simulation pieces */
+.vessel{height:104px}
+.grf canvas{height:104px}
+.grf{padding:6px;margin-top:9px}
+.rates{height:50px;margin-top:8px}
+.ratebar{height:36px}
+.panel{padding:13px}
+.panel h4{margin-bottom:9px;font-size:13px}
+.oxbox{padding:15px;margin-top:13px}
+.oxq{font-size:13.5px;margin-bottom:11px}
+.choice{padding:11px 13px;font-size:13.5px}
+.fb{font-size:13px;padding:10px 12px;margin-top:10px}
+.two{gap:14px}
+.legend{font-size:11.5px;margin-top:8px;gap:12px}
+.tbl th,.tbl td{padding:8px 6px;font-size:12.5px}
+.fbtn{padding:11px;min-width:130px}
+.fbtn .fl{font-size:14px}.fbtn .fe{font-size:13.5px}
+.proc{font-size:12.5px;padding:12px 14px;line-height:1.7}
+.keq{font-size:21px;margin-top:15px}.frac .top,.frac .bot{font-size:18px}
+.kbuild{padding:16px}.rxn{font-size:17px}
+.calcgrid{gap:10px}.field input{font-size:15px;padding:9px}
+.field label{font-size:12px}
+.result{font-size:16px;padding:13px 15px;margin-top:13px}
+.kmeter{gap:12px}.balloon{height:188px}
+.kreadout{font-size:18px;margin-top:14px}.kverdict{font-size:13.5px}
+.slider{margin-top:16px}
+.chips{margin-top:14px;gap:8px}.chip{padding:9px 12px;font-size:12.5px}
+.qkstage{height:188px;padding:18px 16px 14px}.qkbase{bottom:42px}
+.bar3d{width:56px}.barcap{font-size:14px;margin-top:6px}
+.bigarrow{font-size:32px}.dirtext{font-size:14px}
+.qkverdict{font-size:15px;padding:12px;margin-top:14px}
+.steps{gap:9px}.step .sh{padding:12px 14px;font-size:13.5px}
+.step.open .sb{font-size:13.5px}
+.scoreband{padding:12px 16px;margin-top:14px}.scoreband .sc{font-size:20px}
+.endhero h2{font-size:21px}
+.recap{gap:12px;margin-top:14px}.recap .rc{padding:15px}
+.recap .rc p{font-size:13px}
+.btn.primary{padding:11px 20px;font-size:14px}
+.btn.ghost{padding:9px 15px;font-size:13px}
+
+@media (max-width:560px){
+  .slide.active{grid-template-columns:1fr;grid-auto-rows:min-content;overflow:auto}
+  .col-l,.col-r{overflow:visible;height:auto}
+}
+
+/* ===== gated 핵심 정리 (reveal after activity) ===== */
+.card.summary{display:none}
+.card.summary.show{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.revealwrap{margin-top:12px}
+.revealbtn{width:100%;border:1.7px dashed var(--ok);background:var(--ok-l);color:#0c6a4f;
+  font-family:inherit;font-weight:800;font-size:13px;padding:13px;border-radius:16px;cursor:pointer;
+  transition:.15s;display:flex;align-items:center;justify-content:center;gap:9px}
+.revealbtn:hover{background:#cdeee0;transform:translateY(-1px)}
+.revealbtn .rdot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none}
+.cnts{display:flex;justify-content:center;gap:14px;margin-top:9px;font-size:12px;font-weight:700;color:var(--muted)}
+.cnts span{display:inline-flex;align-items:center;gap:5px}
+.cnts b{font-family:Georgia,serif;font-size:16px;color:var(--ink);min-width:20px;text-align:right;display:inline-block}
+.cdot{width:11px;height:11px;border-radius:50%;flex:none}
+.fbtn.done{border-color:var(--ok);background:var(--ok-l)}
+.fbtn.done .fl::after{content:" ✓";color:var(--ok);font-size:13px}
+.mindmap{display:flex;flex-direction:column;align-items:center;gap:14px}
+.mm-center{background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;padding:13px 30px;border-radius:16px;font-weight:800;font-size:20px;box-shadow:var(--shadow-s);position:relative}
+.mm-center::after{content:"";position:absolute;left:50%;bottom:-14px;width:2px;height:14px;background:#c2d6d2;transform:translateX(-50%)}
+.mm-center span{display:block;font-size:12px;font-weight:600;opacity:.9;margin-top:3px}
+.mm-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%}
+.mm-branch{display:flex;flex-direction:column;gap:9px}
+.mm-h{font-weight:800;font-size:13.5px;padding:9px 12px;border-radius:11px;text-align:center;color:#fff}
+.mm-h.b02{background:var(--primary)}
+.mm-h.b03{background:#5c4fb3}
+.mm-node{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;font-weight:700;text-align:left;line-height:1.45}
+.mm-node b{color:var(--ink)}
+.mm-node span{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:3px}
+.mm-node.ok{border-color:var(--ok);background:var(--ok-l);color:#0c6a4f}
+.mm-node.mid{border-color:#c9d8d4;background:#eef3f1;color:var(--muted)}
+.mm-node.no{border-color:var(--no);background:var(--no-l);color:#a31d36}
+.eqnote{display:none;margin-top:10px;background:var(--ok-l);color:#0c6a4f;border-radius:12px;padding:11px 13px;font-size:12.5px;font-weight:700;line-height:1.5}
+.eqnote.show{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+@media(max-width:560px){.mm-cols{grid-template-columns:1fr}}
+
+/* ===== compaction: keep activities within one screen ===== */
+.topbar{height:48px}
+.botbar{height:50px}
+.slide{padding:14px 24px}
+.slide.single{padding:18px 24px}
+.card{padding:14px 16px;margin-top:10px}
+.card.tight{padding:12px 14px}
+h1.title{font-size:21px;margin:7px 0 3px}
+.sub{font-size:12.5px}
+.tag{margin-bottom:7px;font-size:11px;padding:5px 10px}
+.ask{font-size:14.5px;line-height:1.5}
+.helper{font-size:12px;margin-top:6px}
+.sumlist{gap:7px}.sumlist li{font-size:12.5px}
+.sumlist .b{width:20px;height:20px;font-size:11.5px}
+.keq{margin-top:10px;font-size:20px}
+.oxbox{padding:12px;margin-top:10px}
+.oxq{margin-bottom:9px;font-size:13px}
+.choice{padding:9px 12px;font-size:13px}
+.choice .mk{width:22px;height:22px}
+.fb{font-size:12.5px;padding:9px 11px;margin-top:9px}
+.vessel{height:96px}.grf canvas{height:90px}.grf{margin-top:8px;padding:6px}
+.rates{height:42px;margin-top:7px}.ratebar{height:30px}
+.ratecol small{font-size:10.5px}
+.panel{padding:11px}.panel h4{margin-bottom:8px;font-size:12.5px}
+.cnts{margin-top:7px}.cnts b{font-size:14px}
+.legend{margin-top:7px;font-size:11px;gap:10px}
+.eqflag{font-size:12.5px;height:18px}
+.proc{font-size:11.5px;padding:10px 12px;line-height:1.5;max-height:108px;overflow:auto}
+.tbl th,.tbl td{padding:7px 5px;font-size:12px}
+.fbtns{margin:12px 0 6px}.fbtn{padding:10px}
+.calcgrid{gap:9px}.field input{padding:8px;font-size:14px}.field label{font-size:11.5px}
+.result{padding:11px 13px;margin-top:11px;font-size:15px}
+.note{padding:9px 11px;margin-top:8px;font-size:11.5px}
+.kmeter{gap:10px}.balloon{height:170px}
+.kreadout{font-size:17px;margin-top:12px}
+.slider{margin-top:13px}
+.chips{margin-top:12px}.chip{padding:8px 11px;font-size:12px}
+.qkstage{height:170px;padding:16px 14px 12px}.qkbase{bottom:40px}
+.bar3d{width:52px}
+.steps{gap:8px}.step .sh{padding:11px 13px;font-size:13px}
+.scoreband{padding:11px 14px;margin-top:11px}.scoreband .sc{font-size:18px}
+.revealwrap{margin-top:10px}.revealbtn{padding:11px;font-size:12.5px}
+.eqnote{margin-top:8px;padding:10px 12px;font-size:12px}
+.mindmap{gap:12px}
+.mm-center{padding:11px 26px;font-size:18px}
+.mm-cols{gap:13px}.mm-branch{gap:8px}
+.mm-h{padding:8px 12px;font-size:12.5px}
+.mm-node{padding:9px 12px;font-size:12.5px}
+.mm-node span{font-size:11.5px}
+.recap{gap:11px}.recap .rc{padding:13px}.recap .rc p{font-size:12.5px}
+
+/* ===== per-slide vertical balance: center content, even out whitespace ===== */
+.slide.active{align-content:safe center}
+.col-l,.col-r{height:auto;max-height:100%}
+.slide.single.active{display:flex;flex-direction:column;justify-content:safe center;align-items:center;overflow:auto}
+
+/* Q vs K fraction-arrow visual */
+.qfrac{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;margin-bottom:12px;flex-wrap:wrap}
+.qfrac .qlead{font-size:19px;font-weight:800}
+.qfrac .qval{font-size:19px;font-weight:800}
+.qfrac .qval b{font-family:Georgia,serif;color:#b06a10;font-size:22px}
+.qfracbody{display:flex;flex-direction:column;align-items:stretch;text-align:center}
+.qnum,.qden{font-family:Georgia,serif;font-size:15px;font-weight:700;padding:3px 12px;display:flex;align-items:center;gap:7px;justify-content:center}
+.qnum small,.qden small{font-family:'Pretendard',sans-serif;font-size:10.5px;color:var(--muted);font-weight:700}
+.qbar2{height:2.5px;background:var(--ink);border-radius:2px;margin:1px 0}
+.qarrow{font-size:17px;font-weight:800;min-width:16px;display:inline-block;text-align:center}
+.slide.single>div{width:100%}
+
+/* ===== free zoom / pan ===== */
+.viewport{overflow:auto;place-content:safe center}
+.sizer{flex:none}
+.deck{transform-origin:top left}
+.zoomctl{position:fixed;top:7px;left:50%;transform:translateX(-50%);z-index:60;display:flex;gap:5px;align-items:center;
+  background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:11px;padding:4px;box-shadow:0 8px 20px -8px rgba(0,0,0,.45)}
+.zoomctl button{border:none;background:#fff;color:var(--ink);font-family:inherit;font-weight:800;font-size:14px;height:30px;min-width:34px;border-radius:8px;cursor:pointer;line-height:1}
+.zoomctl button:hover{background:var(--primary-ll);color:var(--primary-d)}
+.zoomctl #zoomLbl{min-width:52px;font-size:12px;color:var(--primary-d)}
+</style>
+</head>
+<body>
+<div class="viewport" id="viewport"><div class="sizer" id="sizer"><div class="deck" id="deck"><div class="topbar"><div class="brand"><div class="logo">III</div><div><b>화학 평형</b><span>02. 평형과 평형 상수 · 03. 반응의 진행 방향</span></div></div><div class="dots" id="dots"></div></div><div class="stage" id="main">
+<section class="slide single active">
+  <div style="max-width:920px;margin:0 auto">
+    <span class="kicker"><span class="n">★</span> 오늘의 수업</span>
+    <h1 class="title">변했다가 되돌아오는 반응, 그 균형의 비밀을 찾아서</h1>
+    <p class="sub">온도에 따라 색이 변하는 장미에 입김을 불면 색이 변했다가 시간이 지나면 다시 돌아옵니다. 화학 반응에도 이렇게 ‘변했다가 일정해지는’ 상태가 있습니다. 오늘은 그 원리를 직접 조작하며 알아봅니다.</p>
+    <div class="card">
+      <span class="tag sim"><i class="dotmark"></i> 오늘 배울 7가지 꼭지</span>
+      <div class="recap" style="margin-top:6px">
+        <div class="rc"><b>02. 화학 평형과 평형 상수</b>
+          <p>① 동적 평형이란 무엇일까<br>② 평형 농도 속 숨은 규칙 찾기<br>③ 평형 상수 <span class="var">K</span> 세우기<br>④ <span class="var">K</span>가 크면? 작으면?</p></div>
+        <div class="rc"><b>03. 화학 반응의 진행 방향</b>
+          <p>① 반응 지수 <span class="var">Q</span> 알아보기<br>② <span class="var">Q</span>와 <span class="var">K</span>를 비교하면<br>③ 적용 &amp; 형성평가</p></div>
+      </div>
+      <div class="note" style="margin-top:14px">학습 방법 · 각자 기기에서 <b>버튼·슬라이더를 직접 눌러</b> 시뮬레이션을 조작하고, 빈칸 질문에 답하며 따라오세요. 위쪽 점 또는 아래 버튼(← →)으로 이동합니다.</div>
+      <div style="text-align:center;margin-top:16px"><button class="btn primary" onclick="go(1)">수업 시작하기 →</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="col-l">
+    <span class="kicker"><span class="n">1</span> 02. 화학 평형과 평형 상수</span>
+    <h1 class="title">변화가 멈춘 걸까? — 동적 평형</h1>
+    <div class="card">
+      <span class="tag q"><i class="dotmark"></i> 생각 열기</span>
+      <p class="ask">밀폐된 용기 속 <span class="hl">적갈색 NO<sub>2</sub></span> 기체는 시간이 지나면 색이 옅어지다 <span class="hl">일정</span>해집니다. 이때 반응은 정말 ‘멈춘’ 걸까요? 무색 N<sub>2</sub>O<sub>4</sub>만 넣으면 어떻게 될까요?</p>
+      <p class="helper"><b>재생</b>을 눌러 ① 용기 색, ② 분자 수, ③ 두 속도 막대(정·역반응)가 어떻게 변하는지 관찰해 봅시다. <b>두 속도가 같아지면 평형!</b> (2NO<sub>2</sub> ⇌ N<sub>2</sub>O<sub>4</sub>)</p>
+    </div>
+    <div class="oxbox">
+        <div class="oxq"><span class="lab">오개념 점검</span> “화학 평형은 정반응과 역반응이 <u>모두 멈춘</u> 상태이다.”</div>
+        <div class="choices" id="ox1">
+          <button class="choice" onclick="ox(this,false,'ox1','ox1fb')"><span class="mk">O</span> 맞다 — 변화가 안 보이니 멈춘 것이다</button>
+          <button class="choice" onclick="ox(this,true,'ox1','ox1fb')"><span class="mk">X</span> 아니다 — 두 반응이 같은 속도로 계속 일어난다</button>
+        </div>
+        <div class="fb" id="ox1fb"></div>
+      </div>
+    <div class="revealwrap" id="rw1"><button class="revealbtn" onclick="revealSum(1)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="card tight summary" id="sum1">
+      <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+      <ul class="sumlist">
+        <li><span class="b">1</span><div><b>동적 평형</b> · 정반응 속도 = 역반응 속도가 되어, 농도가 일정하게 유지되는 상태</div></li>
+        <li><span class="b">2</span><div>겉보기엔 변화 없지만 두 반응이 <b>같은 속도로 계속</b> 진행 중 (멈춘 것이 아님)</div></li>
+        <li><span class="b">3</span><div><b>양쪽 방향 모두에서 평형 도달</b> · NO<sub>2</sub>에서 시작하든 N<sub>2</sub>O<sub>4</sub>에서 시작하든 같은 동적 평형에 이른다 (전체 N 원자 수가 같아 이 실험에선 평형 농도도 일치)</div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-r">
+    <div class="card">
+      <span class="tag sim"><i class="dotmark"></i> 시뮬레이션 · 직접 조작</span>
+      <div class="ctrls" style="margin-bottom:12px">
+        <button class="btn primary sm" id="eqPlay" onclick="eqToggle()">▶ 재생</button>
+        <button class="btn ghost sm" onclick="eqReset()">↻ 처음으로</button>
+      </div>
+      <div class="two">
+        <div class="panel">
+          <h4>① NO<sub>2</sub>만 넣었을 때</h4>
+          <div class="vessel"><canvas id="vesA"></canvas><div class="vtint" id="tintA"></div></div>
+          <div class="cnts"><span><i class="cdot" style="background:var(--no2)"></i>NO<sub>2</sub> <b id="cntNA">0</b>개</span><span><i class="cdot" style="background:#9fb6cf"></i>N<sub>2</sub>O<sub>4</sub> <b id="cntDA">0</b>개</span></div>
+          <div class="rates">
+            <div class="ratecol"><div class="ratebar"><i id="rfA" style="background:linear-gradient(180deg,#4fcfa6,var(--ok));height:0"></i></div><small>정반응 속도</small></div>
+            <div class="ratecol"><div class="ratebar"><i id="rrA" style="background:linear-gradient(180deg,#f3b24c,var(--accent));height:0"></i></div><small>역반응 속도</small></div>
+          </div>
+          <div class="grf"><canvas id="grA"></canvas></div>
+          <div class="eqflag" id="flagA">속도 같아짐 → 평형!</div>
+        </div>
+        <div class="panel">
+          <h4>② N<sub>2</sub>O<sub>4</sub>만 넣었을 때</h4>
+          <div class="vessel"><canvas id="vesB"></canvas><div class="vtint" id="tintB"></div></div>
+          <div class="cnts"><span><i class="cdot" style="background:var(--no2)"></i>NO<sub>2</sub> <b id="cntNB">0</b>개</span><span><i class="cdot" style="background:#9fb6cf"></i>N<sub>2</sub>O<sub>4</sub> <b id="cntDB">0</b>개</span></div>
+          <div class="rates">
+            <div class="ratecol"><div class="ratebar"><i id="rfB" style="background:linear-gradient(180deg,#4fcfa6,var(--ok));height:0"></i></div><small>정반응 속도</small></div>
+            <div class="ratecol"><div class="ratebar"><i id="rrB" style="background:linear-gradient(180deg,#f3b24c,var(--accent));height:0"></i></div><small>역반응 속도</small></div>
+          </div>
+          <div class="grf"><canvas id="grB"></canvas></div>
+          <div class="eqflag" id="flagB">속도 같아짐 → 평형!</div>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="swatch" style="background:#2f6fb0"></i> N (질소)</span>
+        <span><i class="swatch" style="background:#c0392b"></i> O (산소)</span>
+        <span><i class="swatch" style="background:var(--no2)"></i> 용기 색(적갈색) = NO<sub>2</sub> 농도</span>
+      </div>
+      <div class="eqnote" id="eqNote">평형 도달! 두 용기가 <b>같은 평형 개수</b>로 수렴했습니다. NO<sub>2</sub> 2개가 합쳐져 N<sub>2</sub>O<sub>4</sub> 1개가 되는 <b>2 : 1</b> 관계가 분자 수 변화에서도 보입니다.</div>
+      
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="col-l">
+    <span class="kicker"><span class="n">2</span> 02. 화학 평형과 평형 상수</span>
+    <h1 class="title">평형 농도 속에 숨은 규칙 찾기</h1>
+    <div class="card">
+      <span class="tag q"><i class="dotmark"></i> 생각 열기</span>
+      <p class="ask">처음 농도를 다르게 해도, 평형의 <span class="hl">[NO<sub>2</sub>]</span>와 <span class="hl">[N<sub>2</sub>O<sub>4</sub>]</span> 사이엔 어떤 <span class="hl">변하지 않는 관계</span>가 숨어 있을까요?</p>
+      <p class="helper">식 ㉠·㉡·㉢ 중 하나를 고른 뒤 <b>계산하기</b>를 누르면 실험 1~5 값이 차례로 대입됩니다. 항상 ‘일정한 값’을 주는 식을 찾아보세요.</p>
+    </div>
+    <div class="oxbox" id="judgeBox" style="display:none">
+        <div class="oxq"><span class="lab" style="background:var(--primary)">판단하기</span> 실험 1~5에서 <u>항상 일정한 값</u>을 주는 식은?</div>
+        <div class="choices" id="jc">
+          <button class="choice" onclick="judge(this,0)"><span class="mk">㉠</span> [N<sub>2</sub>O<sub>4</sub>] / [NO<sub>2</sub>]</button>
+          <button class="choice" onclick="judge(this,1)"><span class="mk">㉡</span> [N<sub>2</sub>O<sub>4</sub>] / [NO<sub>2</sub>]<sup>2</sup></button>
+          <button class="choice" onclick="judge(this,2)"><span class="mk">㉢</span> [N<sub>2</sub>O<sub>4</sub>] / (2×[NO<sub>2</sub>])</button>
+        </div>
+        <div class="fb" id="jfb"></div>
+      </div>
+    <div class="revealwrap" id="rw2"><button class="revealbtn" onclick="revealSum(2)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="card tight summary" id="sum2">
+      <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+      <ul class="sumlist">
+        <li><span class="b">1</span><div>㉡ <b>[N<sub>2</sub>O<sub>4</sub>] / [NO<sub>2</sub>]<sup>2</sup> ≈ 212</b> — 처음 농도와 무관하게 일정!</div></li>
+        <li><span class="b">2</span><div>식의 <b>지수(제곱) = 반응식의 계수</b> → 2NO<sub>2</sub>의 계수 2가 [NO<sub>2</sub>]<sup>2</sup>로</div></li>
+        <li><span class="b">3</span><div><b>생성물 농도 곱 ÷ 반응물 농도 곱</b>은 항상 일정 → 이 일정한 값이 곧 평형 상수 <span class="var">K</span> (다음에 배웁니다)</div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-r">
+    <div class="card">
+      <span class="tag sim"><i class="dotmark"></i> 시뮬레이션 · 직접 조작</span>
+      <table class="tbl" id="ratioTbl" style="margin-bottom:4px">
+        <thead><tr><th>실험</th><th>[NO<sub>2</sub>]</th><th>[N<sub>2</sub>O<sub>4</sub>]</th><th id="h0">㉠</th><th id="h1">㉡</th><th id="h2">㉢</th></tr></thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+      <p class="helper" style="margin:6px 0 2px">아래 식을 하나씩 눌러 해당 열을 채워 보세요. <b>세 식을 모두 계산</b>하면 왼쪽에 ‘판단하기’ 문제가 열립니다.</p>
+      <div class="fbtns">
+        <button class="fbtn" id="fb0" onclick="calcCol(0)"><div class="fl">㉠</div><div class="fe">[N<sub>2</sub>O<sub>4</sub>] / [NO<sub>2</sub>]</div></button>
+        <button class="fbtn" id="fb1" onclick="calcCol(1)"><div class="fl">㉡</div><div class="fe">[N<sub>2</sub>O<sub>4</sub>] / [NO<sub>2</sub>]<sup>2</sup></div></button>
+        <button class="fbtn" id="fb2" onclick="calcCol(2)"><div class="fl">㉢</div><div class="fe">[N<sub>2</sub>O<sub>4</sub>] / (2×[NO<sub>2</sub>])</div></button>
+      </div>
+      <div class="proc" id="proc"></div>
+      
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="col-l">
+    <span class="kicker"><span class="n">3</span> 02. 화학 평형과 평형 상수</span>
+    <h1 class="title">평형 상수 <span class="var">K</span> 세우기</h1>
+    <div class="card">
+      <span class="tag q"><i class="dotmark"></i> 생각 열기</span>
+      <p class="ask">앞의 규칙을 <span class="hl">모든 가역 반응</span>으로 넓히면? <span class="var" style="font-size:18px">aA + bB ⇌ cC + dD</span> 의 평형 상수는?</p>
+      <p class="helper">오른쪽에서 계수 <span class="var">a, b, c, d</span>를 ▲▼로 바꾸면 <span class="var">K</span> 식이 자동 완성됩니다. 계수가 농도의 지수가 됨을 확인하세요. <b>(계수·지수 1은 보통 생략하지만, 헷갈리지 않도록 여기서는 1도 표시합니다.)</b></p>
+    </div>
+    
+    
+    <div class="revealwrap" id="rw3"><button class="revealbtn" onclick="revealSum(3)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="card tight summary" id="sum3">
+      <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+      <ul class="sumlist">
+        <li><span class="b">1</span><div><span class="var">aA + bB ⇌ cC + dD</span> → <b><span class="var">K</span> = [C]<sup>c</sup>[D]<sup>d</sup> / [A]<sup>a</sup>[B]<sup>b</sup></b></div></li>
+        <li><span class="b">2</span><div><b>순수한 고체·액체</b>의 농도와 <b>단위</b>는 생략</div></li>
+        <li><span class="b">3</span><div><span class="var">K</span>는 처음 농도와 무관, <b>온도의 영향만</b> 받음</div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-r">
+    <div class="card">
+      <span class="tag sim"><i class="dotmark"></i> 시뮬레이션 ① · <span class="var">K</span> 식 만들기</span>
+      <div class="kbuild"><div class="rxn" id="rxnLine"></div></div>
+      <div class="keq"><span class="var">K</span> <span>=</span>
+        <span class="frac"><span class="top" id="kTop"></span><span class="bar"></span><span class="bot" id="kBot"></span></span></div>
+      <hr style="border:none;border-top:1px solid var(--line);margin:10px 0">
+      <span class="tag sim"><i class="dotmark"></i> 시뮬레이션 ② · 순수한 고체·액체 생략</span>
+      <p class="helper" style="margin-bottom:10px">CaCO<sub>3</sub>(s) ⇌ CaO(s) + CO<sub>2</sub>(g) · 토글을 켜 보세요.</p>
+      <label class="toggle" id="omitTg" onclick="toggleOmit()"><span class="tg"></span> 순수한 고체·액체 농도 생략하기</label>
+      <div class="keq" style="margin-top:12px"><span class="var">K</span> <span>=</span>
+        <span class="frac"><span class="top" id="cTop"></span><span class="bar"></span><span class="bot" id="cBot"></span></span></div>
+      <hr style="border:none;border-top:1px solid var(--line);margin:10px 0">
+      <span class="tag sim"><i class="dotmark"></i> 시뮬레이션 ③ · <span class="var">K</span> 직접 계산</span>
+      <p class="helper" style="margin-bottom:10px">H<sub>2</sub>(g) + I<sub>2</sub>(g) ⇌ 2HI(g) · 평형 농도를 넣고 <span class="var">K</span>를 구해 보세요.</p>
+      <div class="calcgrid">
+        <div class="field"><label>평형 [H<sub>2</sub>]</label><input id="cH2" type="number" step="0.01"></div>
+        <div class="field"><label>평형 [I<sub>2</sub>]</label><input id="cI2" type="number" step="0.01"></div>
+        <div class="field"><label>평형 [HI]</label><input id="cHI" type="number" step="0.01"></div>
+      </div>
+      <div class="ctrls" style="justify-content:flex-start;margin-top:12px">
+        <button class="btn primary sm" onclick="calcK()">K 계산하기</button>
+        <button class="btn ghost sm" onclick="presetHI()">교과서 값 (0.2 / 0.2 / 1.6)</button>
+      </div>
+      <div class="result" id="kResult" style="display:none"></div>
+      <div class="note">평형 상수 <span class="var">K</span>는 몰농도로 계산하고 <b>단위는 생략</b>, <b>온도에만</b> 의존합니다.</div>
+    
+      
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="col-l">
+    <span class="kicker"><span class="n">4</span> 02. 화학 평형과 평형 상수</span>
+    <h1 class="title"><span class="var">K</span>가 크면? 작으면?</h1>
+    <div class="card">
+      <span class="tag q"><i class="dotmark"></i> 생각 열기</span>
+      <p class="ask"><span class="var">K</span> 값 하나로 평형에서 <span class="hl">반응물·생성물 중 무엇이 더 많은지</span> 알 수 있을까요?</p>
+      <p class="helper">슬라이더로 <span class="var">K</span>를 바꿔 원의 크기 변화를 보고, 실제 반응 예시 칩도 눌러 보세요.</p>
+    </div>
+    <div class="revealwrap" id="rw4"><button class="revealbtn" onclick="revealSum(4)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="card tight summary" id="sum4">
+      <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+      <ul class="sumlist">
+        <li><span class="b">1</span><div><b><span class="var">K</span> ≫ 1</b> → 평형에서 <b>생성물이 더 많다</b></div></li>
+        <li><span class="b">2</span><div><b><span class="var">K</span> ≪ 1</b> → 평형에서 <b>반응물이 더 많다</b></div></li>
+        <li><span class="b">3</span><div>SO<sub>3</sub> 생성(<span class="var">K</span>=9.9×10<sup>25</sup>)은 대부분 생성물, 아세트산(<span class="var">K</span>=1.8×10<sup>-5</sup>)은 대부분 반응물</div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-r">
+    <div class="card">
+      <span class="tag sim"><i class="dotmark"></i> 시뮬레이션 · 직접 조작</span>
+      <div class="kmeter">
+        <div class="balloon"><div class="lbl">반응물</div><div class="circ react" id="cReact">반응물</div></div>
+        <div class="balloon"><div class="lbl">생성물</div><div class="circ prod" id="cProd">생성물</div></div>
+      </div>
+      <input class="slider" id="kSlider" type="range" min="0" max="100" value="50" oninput="updK()">
+      <div class="scaleLbl"><span><span class="var">K</span> ≪ 1</span><span><span class="var">K</span> = 1</span><span><span class="var">K</span> ≫ 1</span></div>
+      <div class="kreadout" id="kRead"></div>
+      <div class="kverdict" id="kVerdict"></div>
+      <div class="chips">
+        <button class="chip" onclick="setKex(25.99,'SO3')"><b style="color:var(--ink)">2SO<sub>2</sub> + O<sub>2</sub> ⇌ 2SO<sub>3</sub></b><small><span class="var">K</span> = 9.9 × 10<sup>25</sup> (25 ℃)</small></button>
+        <button class="chip" onclick="setKex(-4.74,'AcOH')"><b style="color:var(--ink)">CH<sub>3</sub>COOH ⇌ CH<sub>3</sub>COO<sup>-</sup> + H<sup>+</sup></b><small><span class="var">K</span> = 1.8 × 10<sup>-5</sup> (25 ℃)</small></button>
+        <button class="chip" onclick="setKex(9.75,'AgCl')"><b style="color:var(--ink)">Ag<sup>+</sup> + Cl<sup>-</sup> ⇌ AgCl(s)</b><small><span class="var">K</span> = 5.6 × 10<sup>9</sup> · 앙금 생성</small></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="col-l">
+    <span class="kicker"><span class="n">5</span> 03. 화학 반응의 진행 방향</span>
+    <h1 class="title">지금 어디쯤? — 반응 지수 <span class="var">Q</span></h1>
+    <div class="card" style="background:linear-gradient(120deg,var(--primary-ll),#fff)">
+      <span class="tag q" style="background:#fff"><i class="dotmark"></i> 연결 다리</span>
+      <p class="ask"><span class="var">K</span>는 <span class="hl">도달할 목적지</span>, <span class="var">Q</span>는 <span class="hl">지금의 현재 위치</span>! 반응물·생성물을 섞어 넣으면 어디로 갈까요?</p>
+      <p class="helper">반응 지수 <span class="var">Q</span> = ‘관찰하는 그 순간의 농도’를 평형 상수식에 넣어 계산한 값.</p>
+    </div>
+    <div class="revealwrap" id="rw5"><button class="revealbtn" onclick="revealSum(5)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="card tight summary" id="sum5">
+      <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+      <ul class="sumlist">
+        <li><span class="b">1</span><div><b>반응 지수 <span class="var">Q</span></b> · 관찰 시점의 농도를 <b>평형 상수식에 넣어</b> 계산한 값</div></li>
+        <li><span class="b">2</span><div><span class="var">K</span>와 식 모양은 같지만 <span class="var">Q</span>는 <b>현재 상태</b>의 값 (시점에 따라 달라짐)</div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-r">
+    <div class="card">
+      <span class="tag sim"><i class="dotmark"></i> 시뮬레이션 · <span class="var">Q</span> 계산기</span>
+      <p class="helper" style="margin-bottom:12px">N<sub>2</sub>(g) + 3H<sub>2</sub>(g) ⇌ 2NH<sub>3</sub>(g) · 현재 농도를 넣으면 <span class="var">Q</span>를 계산합니다.</p>
+      <div class="keq" style="font-size:17px;margin-top:0;margin-bottom:16px">
+        <span class="var">Q</span> <span>=</span>
+        <span class="frac"><span class="top">[NH<sub>3</sub>]<sup>2</sup></span><span class="bar"></span><span class="bot">[N<sub>2</sub>] [H<sub>2</sub>]<sup>3</sup></span></span>
+      </div>
+      <div class="calcgrid">
+        <div class="field"><label>현재 [N<sub>2</sub>]</label><input id="qN2" type="number" step="0.01" value="0.1"></div>
+        <div class="field"><label>현재 [H<sub>2</sub>]</label><input id="qH2" type="number" step="0.01" value="0.1"></div>
+        <div class="field"><label>현재 [NH<sub>3</sub>]</label><input id="qNH3" type="number" step="0.01" value="0.1"></div>
+      </div>
+      <div class="ctrls" style="justify-content:flex-start;margin-top:12px">
+        <button class="btn primary sm" onclick="calcQ()"><span class="var">Q</span> 계산하기</button>
+      </div>
+      <div class="result" id="qResult" style="display:none"></div>
+      <div class="note">이 온도에서 이 반응의 평형 상수는 <b><span class="var">K</span> = 200</b> 입니다. 세 기체가 모두 0.1 mol/L이면 <span class="var">Q</span> = 100 으로 <span class="var">K</span>(200)와 <b>다르므로 아직 평형이 아닙니다</b>.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="col-l">
+    <span class="kicker"><span class="n">6</span> 03. 화학 반응의 진행 방향</span>
+    <h1 class="title"><span class="var">Q</span>와 <span class="var">K</span>를 비교하면 방향이 보인다</h1>
+    <div class="card">
+      <span class="tag q"><i class="dotmark"></i> 생각 열기</span>
+      <p class="ask">현재 위치 <span class="var">Q</span>와 목적지 <span class="var">K</span>를 비교하면 <span class="hl">정·역반응</span> 중 어디로 갈지 알 수 있을까요?</p>
+      <p class="helper">N<sub>2</sub> + 3H<sub>2</sub> ⇌ 2NH<sub>3</sub> (<span class="var">K</span> = 200). 슬라이더로 <span class="var">Q</span>를 바꾸면 막대·화살표·분수가 실시간으로 바뀝니다.</p>
+    </div>
+    <div class="revealwrap" id="rw6"><button class="revealbtn" onclick="revealSum(6)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="card tight summary" id="sum6">
+      <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+      <ul class="sumlist">
+        <li><span class="b">1</span><div><b><span class="var">Q</span> &lt; <span class="var">K</span></b> → <b>정반응</b> 우세 (→)</div></li>
+        <li><span class="b">2</span><div><b><span class="var">Q</span> = <span class="var">K</span></b> → 이미 <b>평형</b></div></li>
+        <li><span class="b">3</span><div><b><span class="var">Q</span> &gt; <span class="var">K</span></b> → <b>역반응</b> 우세 (←)</div></li>
+        <li><span class="b">!</span><div>반응은 늘 <b><span class="var">Q</span> 가 <span class="var">K</span> 와 같아지는 방향</b>으로 진행</div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-r">
+    <div class="card">
+      <span class="tag sim"><i class="dotmark"></i> 시뮬레이션 · 직접 조작</span>
+      <div class="qfrac"><span class="qlead var">Q</span><span class="qlead">=</span><div class="qfracbody"><div class="qnum"><span id="numArrow" class="qarrow"></span>[NH<sub>3</sub>]<sup>2</sup> <small>생성물</small></div><div class="qbar2"></div><div class="qden"><span id="denArrow" class="qarrow"></span>[N<sub>2</sub>][H<sub>2</sub>]<sup>3</sup> <small>반응물</small></div></div><span class="qlead">=</span><span class="qval"><b id="qNow">80</b></span></div>
+      <div class="qkstage">
+        <div class="qkbase"></div>
+        <div class="bargrp"><div class="bar3d q" id="barQ"><span id="barQv"></span></div><div class="barcap q"><span class="var">Q</span></div></div>
+        <div class="arrowzone"><div class="bigarrow" id="bigArrow">→</div><div class="dirtext" id="dirText"></div></div>
+        <div class="bargrp"><div class="bar3d k" id="barK"><span>200</span></div><div class="barcap k"><span class="var">K</span> = 200</div></div>
+      </div>
+      <input class="slider" id="qSlider" type="range" min="0" max="400" value="80" oninput="updQK()" style="background:linear-gradient(90deg,var(--ok) 0%,#e7ecea 50%,var(--no) 100%)">
+      <div class="scaleLbl"><span><span class="var">Q</span> 작음</span><span><span class="var">Q</span> = <span class="var">K</span>(200)</span><span><span class="var">Q</span> 큼</span></div>
+      <div class="qkverdict" id="qkVerdict"></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="col-l">
+    <span class="kicker"><span class="n">7</span> 03. 화학 반응의 진행 방향</span>
+    <h1 class="title">적용하기 &amp; 형성평가</h1>
+    <div class="card">
+      <span class="tag q"><i class="dotmark"></i> 예제 · 단계별로</span>
+      <p class="ask">N<sub>2</sub> + 3H<sub>2</sub> ⇌ 2NH<sub>3</sub> (<span class="var">K</span> = 200) 반응에서, 1 L 용기에 세 기체를 <span class="hl">각각 0.1몰씩</span> 넣으면 어느 방향으로 진행할까요?</p>
+      <div class="steps" style="margin-top:14px">
+        <div class="step" onclick="this.classList.toggle('open')"><div class="sh"><span class="sn">1</span> 반응 지수 <span class="var">Q</span> 식</div>
+          <div class="sb"><span class="eqn"><span class="var">Q</span> = <span class="frac"><span class="top">[NH<sub>3</sub>]<sup>2</sup></span><span class="bar"></span><span class="bot">[N<sub>2</sub>] [H<sub>2</sub>]<sup>3</sup></span></span></span></div></div>
+        <div class="step" onclick="this.classList.toggle('open')"><div class="sh"><span class="sn">2</span> 현재 농도 대입</div>
+          <div class="sb"><span class="eqn"><span class="var">Q</span> = <span class="frac"><span class="top">0.1<sup>2</sup></span><span class="bar"></span><span class="bot">0.1 × 0.1<sup>3</sup></span></span> = <span class="frac"><span class="top">0.01</span><span class="bar"></span><span class="bot">0.0001</span></span> = <b>100</b></span></div></div>
+        <div class="step" onclick="this.classList.toggle('open')"><div class="sh"><span class="sn">3</span> <span class="var">Q</span> vs <span class="var">K</span> → 방향</div>
+          <div class="sb"><span class="var">Q</span>(100) &lt; <span class="var">K</span>(200) → <b style="color:var(--ok)">정반응이 우세</b> (NH<sub>3</sub>가 더 늘어남)</div></div>
+      </div>
+      <p class="helper">각 단계를 클릭해 풀이를 펼쳐 보세요.</p>
+    </div>
+    <div class="revealwrap" id="rw7"><button class="revealbtn" onclick="revealSum(7)"><span class="rdot"></span> 형성평가를 마친 뒤 — 오늘의 한 줄 정리 보기 ↓</button></div>
+    <div class="card endhero summary" id="sum7" style="text-align:center">
+      <h2>오늘의 한 줄 정리</h2>
+      <p class="sub" style="max-width:560px;margin:0 auto">평형에선 <b>농도의 비가 일정</b>(<span class="var">K</span>), 반응은 <b><span class="var">Q</span> 가 <span class="var">K</span> 와 같아지는 방향</b>으로 진행!</p>
+      <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn ghost" onclick="go(0)">↺ 처음으로</button>
+        <button class="btn primary" onclick="go(1)">02단원 다시 보기</button>
+      </div>
+    </div>
+  </div>
+  <div class="col-r">
+    <div class="card">
+      <span class="tag sim" style="background:var(--accent-l);color:#8a5208"><i class="dotmark"></i> 형성평가 · 3문항</span>
+      <div class="oxbox" style="border-style:solid;border-color:var(--line)">
+        <div class="oxq"><span class="lab" style="background:var(--primary)">Q1</span> A(g) ⇌ B(g), <span class="var">K</span> = 1. 현재 [A]=1, [B]=2 이면?</div>
+        <div class="choices">
+          <button class="choice" onclick="quiz(this,false,'q1fb','정반응')"><span class="mk">①</span> 정반응</button>
+          <button class="choice" onclick="quiz(this,true,'q1fb','정답! Q=[B]/[A]=2 &gt; K(1) → 역반응이 우세합니다.')"><span class="mk">②</span> 역반응</button>
+          <button class="choice" onclick="quiz(this,false,'q1fb','평형')"><span class="mk">③</span> 이미 평형</button>
+        </div>
+        <div class="fb" id="q1fb"></div>
+      </div>
+      <div class="oxbox" style="border-style:solid;border-color:var(--line);margin-top:12px">
+        <div class="oxq"><span class="lab" style="background:var(--primary)">Q2</span> 반응 지수 <span class="var">Q</span>에 대한 옳은 설명은?</div>
+        <div class="choices">
+          <button class="choice" onclick="quiz(this,false,'q2fb','오답')"><span class="mk">①</span> 평형 농도를 넣어 계산한 값</button>
+          <button class="choice" onclick="quiz(this,true,'q2fb','정답! 관찰 시점(현재)의 농도를 평형 상수식에 넣어 계산한 값입니다.')"><span class="mk">②</span> 현재(관찰 시점) 농도를 평형 상수식에 넣은 값</button>
+          <button class="choice" onclick="quiz(this,false,'q2fb','오답')"><span class="mk">③</span> 온도에 따라 정해지는 상수</button>
+        </div>
+        <div class="fb" id="q2fb"></div>
+      </div>
+      <div class="oxbox" style="border-style:solid;border-color:var(--line);margin-top:12px">
+        <div class="oxq"><span class="lab" style="background:var(--primary)">Q3</span> 평형 상수 <span class="var">K</span> 값에 영향을 주는 것은?</div>
+        <div class="choices">
+          <button class="choice" onclick="quiz(this,false,'q3fb','오답')"><span class="mk">①</span> 반응물의 처음 농도</button>
+          <button class="choice" onclick="quiz(this,false,'q3fb','오답')"><span class="mk">②</span> 압력</button>
+          <button class="choice" onclick="quiz(this,true,'q3fb','정답! K는 처음 농도·압력과 무관하며 오직 온도에만 의존합니다.')"><span class="mk">③</span> 온도</button>
+        </div>
+        <div class="fb" id="q3fb"></div>
+      </div>
+      <div class="scoreband"><div class="sc" id="scoreNum">0 / 3</div><span id="scoreMsg">문항을 풀어 보세요.</span></div>
+    </div>
+  </div>
+</section>
+<section class="slide single">
+  <div style="max-width:1180px;margin:0 auto;text-align:center">
+    <span class="kicker"><span class="n">✓</span> 수업 마무리</span>
+    <h1 class="title">수고하셨습니다! 오늘 배운 내용 한눈에 보기</h1>
+    <p class="sub">가역 반응의 평형부터 반응의 진행 방향 예측까지, 아래 지도로 정리해 봅시다.</p>
+    <div class="card">
+      <div class="mindmap">
+        <div class="mm-center">화학 평형<span>변했다 일정해지는 균형</span></div>
+        <div class="mm-cols">
+          <div class="mm-branch">
+            <div class="mm-h b02">02 · 평형과 평형 상수</div>
+            <div class="mm-node"><b>동적 평형</b><span>정반응 속도 = 역반응 속도 → 농도 일정</span></div>
+            <div class="mm-node"><b>농도비의 규칙</b><span>생성물곱 ÷ 반응물곱 = 일정 (계수 = 지수)</span></div>
+            <div class="mm-node"><b>평형 상수 <span class="var">K</span></b><span><span class="var">K</span> = [생성물]곱 / [반응물]곱 · 온도만 의존</span></div>
+            <div class="mm-node"><b><span class="var">K</span>의 크기</b><span><span class="var">K</span>≫1 생성물↑ · <span class="var">K</span>≪1 반응물↑</span></div>
+          </div>
+          <div class="mm-branch">
+            <div class="mm-h b03">03 · 진행 방향 예측</div>
+            <div class="mm-node"><b>반응 지수 <span class="var">Q</span></b><span>현재 농도를 <span class="var">K</span> 식에 넣은 값</span></div>
+            <div class="mm-node ok"><b><span class="var">Q</span> &lt; <span class="var">K</span></b> → 정반응 우세</div>
+            <div class="mm-node mid"><b><span class="var">Q</span> = <span class="var">K</span></b> → 평형 (변화 없음)</div>
+            <div class="mm-node no"><b><span class="var">Q</span> &gt; <span class="var">K</span></b> → 역반응 우세</div>
+          </div>
+        </div>
+      </div>
+      <p class="sub" style="margin-top:14px"><b style="color:var(--primary-d)">핵심 한 줄</b> · 반응은 늘 <b><span class="var">Q</span> 가 <span class="var">K</span> 와 같아지는 방향</b>으로 진행하여 평형에 도달합니다.</p>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn ghost" onclick="go(0)">↺ 처음부터</button>
+        <button class="btn primary" onclick="go(1)">02단원 다시 보기</button>
+      </div>
+    </div>
+  </div>
+</section></div><div class="botbar"><button class="navbtn" id="prevBtn" onclick="go(cur-1)">← 이전</button><div class="navlabel"><b id="navTitle"></b> <span id="navCount"></span></div><button class="navbtn go" id="nextBtn" onclick="go(cur+1)">다음 →</button></div></div></div></div>
+<div class="zoomctl"><button onclick="zoomOut()" title="축소 (Ctrl+휠)">−</button><button onclick="zoomReset()" id="zoomLbl" title="화면 맞춤">100%</button><button onclick="zoomIn()" title="확대 (Ctrl+휠)">＋</button></div>
+<script>
+
+/* ============ Navigation ============ */
+const slides=[...document.querySelectorAll('.slide')];
+const titles=['오늘의 수업 안내','02-① 동적 평형','02-② 농도비 규칙성','02-③ 평형 상수 K','02-④ K의 의미','03-① 반응 지수 Q','03-② Q와 K 비교','03-③ 적용·형성평가','수업 마무리'];
+const N=slides.length;
+let cur=0;
+const dotsWrap=document.getElementById('dots');
+for(let i=0;i<N;i++){const b=document.createElement('button');b.className='dot'+(i===0?' on':'');b.onclick=()=>go(i);dotsWrap.appendChild(b);}
+const dotEls=[...dotsWrap.children];
+
+function go(i){
+  if(i<0||i>=N)return;
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  dotEls.forEach((d,k)=>{d.classList.toggle('on',k===cur);d.classList.toggle('done',k<cur);});
+  document.getElementById('navTitle').textContent=titles[cur];
+  document.getElementById('navCount').textContent=`(${cur+1} / ${N})`;
+  document.getElementById('prevBtn').disabled=cur===0;
+  document.getElementById('nextBtn').textContent=cur===N-1?'완료':'다음 →';
+  document.getElementById('nextBtn').disabled=cur===N-1;
+  window.scrollTo({top:0,behavior:'smooth'});
+  initFor(cur);
+}
+const inited={};
+function initFor(i){
+  if(inited[i])return; inited[i]=true;
+  if(i===1)initEq();
+  if(i===2)initData();
+  if(i===3){initKbuild();renderOmit();}
+  if(i===4)updK();
+  if(i===6)updQK();
+}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+go(0);
+
+/* ============ shared canvas helper ============ */
+let deckScale=1;
+function fitCanvas(cv){
+  const r=cv.getBoundingClientRect();const dpr=window.devicePixelRatio||1;const s=deckScale||1;
+  const w=Math.max(2,r.width/s),h=Math.max(2,r.height/s);
+  cv.width=w*dpr;cv.height=h*dpr;
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+function ox(btn,correct,grp,fbId){
+  const wrap=document.getElementById(grp);
+  [...wrap.children].forEach(c=>{c.classList.add('locked');c.onclick=null;});
+  btn.classList.add(correct?'correct':'wrong');
+  const fb=document.getElementById(fbId);fb.className='fb show '+(correct?'good':'bad');
+  fb.innerHTML=correct
+    ? '맞습니다! 평형은 정·역반응이 <b>같은 속도로 계속</b> 일어나는 <b>동적 평형</b>입니다. 겉보기에만 멈춘 듯 보일 뿐이에요.'
+    : '다시 생각해 봐요. 농도는 일정하지만 두 반응은 <b>멈추지 않고</b> 같은 속도로 계속 진행 중입니다. 정답은 X.';
+}
+
+/* ============ Slide 1 : Dynamic equilibrium ============ */
+let eqRun=false,eqRAF=null;
+const KF=0.2,KR=0.2, TMAX=10, DT=0.02;
+const PMAX=30;
+let simA,simB;
+function makeSim(no2,n2o4){
+  return {no2,n2o4,t:0,hist:[],
+    // particle pools with fixed-ish positions + velocities
+    pN:Array.from({length:PMAX},()=>({x:Math.random(),y:Math.random(),vx:(Math.random()-.5),vy:(Math.random()-.5)})),
+    pD:Array.from({length:PMAX},()=>({x:Math.random(),y:Math.random(),vx:(Math.random()-.5),vy:(Math.random()-.5)}))
+  };
+}
+function stepSim(s){
+  if(s.t>=TMAX)return;
+  const rf=KF*s.no2*s.no2, rr=KR*s.n2o4;
+  s.no2+=(-2*rf+2*rr)*DT;
+  s.n2o4+=(rf-rr)*DT;
+  if(s.no2<0)s.no2=0; if(s.n2o4<0)s.n2o4=0;
+  s.t+=DT; s.hist.push({t:s.t,no2:s.no2,n2o4:s.n2o4});
+}
+function drawGraph(cv,s){
+  const {ctx,w,h}=fitCanvas(cv);ctx.clearRect(0,0,w,h);
+  const pad={l:8,r:8,t:8,b:16};
+  const x0=pad.l,x1=w-pad.r,y0=h-pad.b,y1=pad.t,ymax=1.05;
+  // axes
+  ctx.strokeStyle='#dbe7e4';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(x0,y1);ctx.lineTo(x0,y0);ctx.lineTo(x1,y0);ctx.stroke();
+  ctx.fillStyle='#9fb0ac';ctx.font='9px Pretendard';ctx.fillText('농도',x0+2,y1+8);ctx.fillText('시간→',x1-26,y0-3);
+  const X=t=>x0+(t/TMAX)*(x1-x0);
+  const Y=c=>y0-(c/ymax)*(y0-y1);
+  function line(key,color){
+    ctx.strokeStyle=color;ctx.lineWidth=2.4;ctx.beginPath();
+    s.hist.forEach((p,i)=>{const xx=X(p.t),yy=Y(p[key]);i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);});
+    ctx.stroke();
+  }
+  if(s.hist.length>1){line('n2o4','#7d97b3');line('no2','#9a3412');}
+}
+function drawVessel(cv,s){
+  const {ctx,w,h}=fitCanvas(cv);ctx.clearRect(0,0,w,h);
+  const TOTN=24; const nN=2*Math.round(s.no2*(TOTN/2)); const nD=Math.round((TOTN-nN)/2);
+  function move(p){p.x+=p.vx*0.006;p.y+=p.vy*0.006;
+    if(p.x<.06){p.x=.06;p.vx*=-1}if(p.x>.94){p.x=.94;p.vx*=-1}
+    if(p.y<.10){p.y=.10;p.vy*=-1}if(p.y>.90){p.y=.90;p.vy*=-1}}
+  function circle(x,y,r){ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}
+  // N2O4 molecules : planar O2N-NO2 (two N joined by an N-N bond, each N bears 2 O)
+  for(let i=0;i<nD;i++){const p=s.pD[i];if(eqRun)move(p);const cx=p.x*w,cy=p.y*h;
+    ctx.strokeStyle='rgba(55,75,85,.5)';ctx.lineWidth=1.5;ctx.lineCap='round';ctx.beginPath();
+    ctx.moveTo(cx-3,cy);ctx.lineTo(cx+3,cy);                                   // N-N bond
+    ctx.moveTo(cx-3,cy);ctx.lineTo(cx-6,cy-3);ctx.moveTo(cx-3,cy);ctx.lineTo(cx-6,cy+3); // left N-O
+    ctx.moveTo(cx+3,cy);ctx.lineTo(cx+6,cy-3);ctx.moveTo(cx+3,cy);ctx.lineTo(cx+6,cy+3); // right N-O
+    ctx.stroke();
+    ctx.fillStyle='#c0392b';circle(cx-6,cy-3,2.5);circle(cx-6,cy+3,2.5);circle(cx+6,cy-3,2.5);circle(cx+6,cy+3,2.5);
+    ctx.fillStyle='#2f6fb0';circle(cx-3,cy,3.0);circle(cx+3,cy,3.0);
+  }
+  // NO2 molecules : bent, central N with two O (O-N-O ~134°)
+  for(let i=0;i<nN;i++){const p=s.pN[i];if(eqRun)move(p);const cx=p.x*w,cy=p.y*h;
+    ctx.strokeStyle='rgba(55,75,85,.5)';ctx.lineWidth=1.5;ctx.lineCap='round';ctx.beginPath();
+    ctx.moveTo(cx,cy-1);ctx.lineTo(cx-4,cy+3);ctx.moveTo(cx,cy-1);ctx.lineTo(cx+4,cy+3);ctx.stroke();
+    ctx.fillStyle='#c0392b';circle(cx-4,cy+3,2.4);circle(cx+4,cy+3,2.4);
+    ctx.fillStyle='#2f6fb0';circle(cx,cy-1,3.0);
+  }
+  return {nN,nD};
+}
+function drawRates(s,rfId,rrId){
+  const rf=KF*s.no2*s.no2, rr=KR*s.n2o4, mx=0.21;
+  document.getElementById(rfId).style.height=Math.min(100,(rf/mx)*100)+'%';
+  document.getElementById(rrId).style.height=Math.min(100,(rr/mx)*100)+'%';
+}
+function renderEq(){
+  const cA=drawVessel(document.getElementById('vesA'),simA);
+  const cB=drawVessel(document.getElementById('vesB'),simB);
+  document.getElementById('cntNA').textContent=cA.nN;
+  document.getElementById('cntDA').textContent=cA.nD;
+  document.getElementById('cntNB').textContent=cB.nN;
+  document.getElementById('cntDB').textContent=cB.nD;
+  drawGraph(document.getElementById('grA'),simA);
+  drawGraph(document.getElementById('grB'),simB);
+  document.getElementById('tintA').style.background=`rgba(154,52,18,${simA.no2*0.5})`;
+  document.getElementById('tintB').style.background=`rgba(154,52,18,${simB.no2*0.5})`;
+  drawRates(simA,'rfA','rrA');drawRates(simB,'rfB','rrB');
+  document.getElementById('flagA').classList.toggle('on',simA.t>=TMAX*0.9);
+  document.getElementById('flagB').classList.toggle('on',simB.t>=TMAX*0.9);
+  var en=document.getElementById('eqNote'); if(en) en.classList.toggle('show', simA.t>=TMAX*0.9 && simB.t>=TMAX*0.9);
+}
+function eqLoop(){
+  if(cur!==1){eqRAF=requestAnimationFrame(eqLoop);return;}
+  if(eqRun){stepSim(simA);stepSim(simB);
+    if(simA.t>=TMAX&&simB.t>=TMAX){eqRun=false;document.getElementById('eqPlay').innerHTML='▶ 다시 재생';}
+  }
+  renderEq();
+  eqRAF=requestAnimationFrame(eqLoop);
+}
+function initEq(){
+  simA=makeSim(1.0,0.0); simB=makeSim(0.0,0.5);
+  // seed first point
+  simA.hist.push({t:0,no2:1,n2o4:0});simB.hist.push({t:0,no2:0,n2o4:0.5});
+  if(!eqRAF)eqLoop();
+}
+function eqToggle(){
+  if(simA.t>=TMAX&&simB.t>=TMAX){eqReset();}
+  eqRun=!eqRun;
+  document.getElementById('eqPlay').innerHTML=eqRun?'❚❚ 일시정지':'▶ 재생';
+}
+function eqReset(){
+  eqRun=false;
+  simA=makeSim(1.0,0.0);simB=makeSim(0.0,0.5);
+  simA.hist.push({t:0,no2:1,n2o4:0});simB.hist.push({t:0,no2:0,n2o4:0.5});
+  document.getElementById('eqPlay').innerHTML='▶ 재생';
+  renderEq();
+}
+window.addEventListener('resize',()=>{if(inited[1])renderEq();});
+
+/* ============ Slide 2 : Concentration ratio ============ */
+const DATA=[
+  {no2:0.047,n2o4:0.467},{no2:0.051,n2o4:0.551},{no2:0.046,n2o4:0.448},{no2:0.045,n2o4:0.428},{no2:0.053,n2o4:0.595}
+];
+const FORMULAS=[
+  {label:'㉠', calc:d=>d.n2o4/d.no2,         disp:d=>`${fmt(d.n2o4)} ÷ ${fmt(d.no2)}`,        dec:2},
+  {label:'㉡', calc:d=>d.n2o4/(d.no2*d.no2), disp:d=>`${fmt(d.n2o4)} ÷ (${fmt(d.no2)})²`,      dec:1},
+  {label:'㉢', calc:d=>d.n2o4/(2*d.no2),     disp:d=>`${fmt(d.n2o4)} ÷ (2 × ${fmt(d.no2)})`,   dec:2}
+];
+function fmt(x){return x.toFixed(3);}
+const doneF=new Set(); let computing=false;
+function initData(){
+  const tb=document.getElementById('dataBody');tb.innerHTML='';
+  DATA.forEach((d,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><b>${i+1}</b></td><td class="var">${fmt(d.no2)}</td><td class="var">${fmt(d.n2o4)}</td>`+
+      `<td class="res" id="c${i}_0">–</td><td class="res" id="c${i}_1">–</td><td class="res" id="c${i}_2">–</td>`;
+    tb.appendChild(tr);
+  });
+}
+function calcCol(f){
+  if(computing)return;
+  computing=true;
+  const F=FORMULAS[f];
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('fb'+f).classList.add('sel');
+  const proc=document.getElementById('proc');proc.classList.add('show');
+  proc.innerHTML=`<div class="pl"><b>${F.label}</b> 식으로 실험 1~5를 계산합니다 ↓</div>`;
+  let i=0;
+  const iv=setInterval(()=>{
+    const d=DATA[i],v=F.calc(d);
+    const line=document.createElement('div');line.className='pl';
+    line.innerHTML=`실험 ${i+1}: &nbsp;<span class="num">${F.disp(d)} = ${v.toFixed(F.dec)}</span>`;
+    proc.appendChild(line);
+    const cell=document.getElementById('c'+i+'_'+f);cell.textContent=v.toFixed(F.dec);cell.classList.add('filled');
+    i++;
+    if(i>=DATA.length){clearInterval(iv);computing=false;
+      doneF.add(f);document.getElementById('fb'+f).classList.add('done');
+      if(doneF.size===3){const jb=document.getElementById('judgeBox');
+        if(jb.style.display!=='block'){jb.style.display='block';
+          setTimeout(()=>jb.scrollIntoView({behavior:'smooth',block:'center'}),300);}}
+    }
+  },560);
+}
+function judge(btn,f){
+  document.querySelectorAll('#jc .choice').forEach(c=>{c.classList.add('locked');c.onclick=null;});
+  const ok=(f===1);
+  btn.classList.add(ok?'correct':'wrong');
+  document.getElementById('h1').classList.add('hi');
+  DATA.forEach((d,i)=>document.getElementById('c'+i+'_1').classList.add('hi'));
+  const fb=document.getElementById('jfb');fb.className='fb show '+(ok?'good':'bad');
+  if(ok){
+    fb.innerHTML='정확합니다! ㉡ <b>[N<sub>2</sub>O<sub>4</sub>] / [NO<sub>2</sub>]<sup>2</sup> ≈ 212</b> 로 거의 일정합니다. 반응식 2NO<sub>2</sub> ⇌ N<sub>2</sub>O<sub>4</sub>의 <b>계수 2</b>가 제곱으로 나타난 것이죠.';
+  }else{
+    fb.innerHTML='㉠·㉢ 열은 실험마다 값이 들쭉날쭉합니다. ㉡ 열처럼 <b>항상 비슷한 값</b>을 주는 식이 정답입니다. (정답: ㉡)';
+  }
+}
+
+
+/* ============ Slide 3 : K builder ============ */
+const coefs={a:1,b:1,c:1,d:1};
+const sp={a:'A',b:'B',c:'C',d:'D'};
+function initKbuild(){renderRxn();renderK();}
+function coefBox(key){
+  return `<span class="coef"><button onclick="bump('${key}',1)">▲</button><span id="cf_${key}">${coefs[key]}</span><button onclick="bump('${key}',-1)">▼</button></span>`;
+}
+function renderRxn(){
+  const L=document.getElementById('rxnLine');
+  L.innerHTML=`${coefBox('a')}<b>A</b> + ${coefBox('b')}<b>B</b> <span style="color:var(--primary)">⇌</span> ${coefBox('c')}<b>C</b> + ${coefBox('d')}<b>D</b>`;
+}
+function bump(key,dir){
+  coefs[key]=Math.min(4,Math.max(1,coefs[key]+dir));
+  document.getElementById('cf_'+key).textContent=coefs[key];
+  renderK();
+}
+function term(sp,n){return `[${sp}]<sup>${n}</sup>`;}
+function renderK(){
+  document.getElementById('kTop').innerHTML=term('C',coefs.c)+' '+term('D',coefs.d);
+  document.getElementById('kBot').innerHTML=term('A',coefs.a)+' '+term('B',coefs.b);
+}
+let omit=true;
+function toggleOmit(){omit=!omit;document.getElementById('omitTg').classList.toggle('on',omit);renderOmit();}
+function renderOmit(){
+  document.getElementById('omitTg').classList.toggle('on',omit);
+  // CaCO3(s) ⇌ CaO(s) + CO2(g)
+  if(omit){
+    document.getElementById('cTop').innerHTML='[CO<sub>2</sub>]';
+    document.getElementById('cBot').innerHTML='1';
+  }else{
+    document.getElementById('cTop').innerHTML='[CaO] [CO<sub>2</sub>]';
+    document.getElementById('cBot').innerHTML='[CaCO<sub>3</sub>]';
+  }
+}
+function presetHI(){document.getElementById('cH2').value=0.2;document.getElementById('cI2').value=0.2;document.getElementById('cHI').value=1.6;calcK();}
+function calcK(){
+  const h2=+document.getElementById('cH2').value,i2=+document.getElementById('cI2').value,hi=+document.getElementById('cHI').value;
+  const box=document.getElementById('kResult');
+  if(!(h2>0&&i2>0&&hi>=0)){box.style.display='block';box.style.background='var(--no-l)';box.style.color='#a31d36';box.innerHTML='평형 농도를 올바르게 입력하세요 (0보다 큰 값).';return;}
+  const K=(hi*hi)/(h2*i2);
+  box.style.display='block';box.style.background='var(--ok-l)';box.style.color='#0c6a4f';
+  box.innerHTML=`<span class="var">K</span> = [HI]² / ([H<sub>2</sub>][I<sub>2</sub>]) = ${hi}² / (${h2}×${i2}) = <span class="var" style="font-size:24px">${(+K.toFixed(2))}</span>`;
+}
+
+/* ============ Slide 4 : K meaning ============ */
+function updK(){
+  const v=+document.getElementById('kSlider').value;          // 0..100
+  const logK=(v-50)/50*27;                                    // -27..27 covers real examples
+  const K=Math.pow(10,logK);
+  const pf=1/(1+Math.pow(10,-logK));                          // product fraction
+  const rf=1-pf;
+  const minR=34,maxR=150;
+  const rP=minR+(maxR-minR)*Math.sqrt(pf);
+  const rR=minR+(maxR-minR)*Math.sqrt(rf);
+  const cP=document.getElementById('cProd'),cR=document.getElementById('cReact');
+  cP.style.width=cP.style.height=rP+'px';cR.style.width=cR.style.height=rR+'px';
+  cP.style.fontSize=rP>70?'13px':'0px';
+  cR.style.fontSize=rR>70?'13px':'0px';
+  document.getElementById('kRead').innerHTML=`<span class="var">K</span> = ${fmtK(K)}`;
+  let msg='';
+  if(logK>2)msg='K ≫ 1 · 평형에서 생성물이 훨씬 많다';
+  else if(logK<-2)msg='K ≪ 1 · 평형에서 반응물이 훨씬 많다';
+  else if(Math.abs(logK)<0.25)msg='K ≈ 1 · 반응물과 생성물이 비슷하다';
+  else if(logK>0)msg='K > 1 · 생성물이 조금 더 많다';
+  else msg='K < 1 · 반응물이 조금 더 많다';
+  document.getElementById('kVerdict').textContent=msg;
+}
+function fmtK(K){
+  if(K>=1e4||K<1e-3){const e=Math.floor(Math.log10(K));const m=K/Math.pow(10,e);return `${m.toFixed(1)} × 10<sup>${e}</sup>`;}
+  if(K>=1)return K.toFixed(K<100?2:0);
+  return K.toFixed(4);
+}
+function setKex(logK,name){
+  const v=logK/27*50+50;
+  document.getElementById('kSlider').value=Math.max(0,Math.min(100,v));
+  updK();
+}
+
+/* ============ Slide 5 : Q calc ============ */
+function calcQ(){
+  const n2=+document.getElementById('qN2').value,h2=+document.getElementById('qH2').value,nh3=+document.getElementById('qNH3').value;
+  const box=document.getElementById('qResult');
+  if(!(n2>0&&h2>0&&nh3>=0)){box.style.display='block';box.style.background='var(--no-l)';box.style.color='#a31d36';box.innerHTML='현재 농도를 올바르게 입력하세요 (0보다 큰 값).';return;}
+  const Q=(nh3*nh3)/(n2*Math.pow(h2,3));const K=200;const Qs=+Q.toFixed(2);
+  const rel=Q<K?'&lt; <span class="var">K</span>(200) → 아직 평형 아님':(Q>K?'&gt; <span class="var">K</span>(200) → 아직 평형 아님':'= <span class="var">K</span>(200) → 평형!');
+  box.style.display='block';box.style.background='var(--ok-l)';box.style.color='#0c6a4f';
+  box.innerHTML=`<span class="var">Q</span> = ${nh3}² / (${n2} × ${h2}³) = <b class="var" style="font-size:22px">${Qs}</b><br><span style="font-size:14px;font-weight:800">${Qs} ${rel}</span>`;
+}
+
+/* ============ Slide 6 : Q vs K ============ */
+const QK_K=200;
+function updQK(){
+  const Q=+document.getElementById('qSlider').value;
+  const mx=400;
+  document.getElementById('barQ').style.height=Math.max(8,(Q/mx)*150)+'px';
+  document.getElementById('barK').style.height=Math.max(8,(QK_K/mx)*150)+'px';
+  document.getElementById('barQv').textContent=Q;
+  var qn=document.getElementById('qNow'); if(qn) qn.textContent=Q;
+  const arrow=document.getElementById('bigArrow'),dir=document.getElementById('dirText'),vd=document.getElementById('qkVerdict');
+  const na=document.getElementById('numArrow'),da=document.getElementById('denArrow');
+  if(Q===QK_K){
+    arrow.textContent='＝';arrow.style.color='var(--muted)';dir.textContent='평형';dir.style.color='var(--muted)';
+    if(na)na.textContent='';if(da)da.textContent='';
+    vd.style.background='#eef3f1';vd.style.color='var(--muted)';
+    vd.innerHTML='<span class="var">Q</span> = <span class="var">K</span> · 정확히 같을 때만 <b>평형</b> (농도 변화 없음)';
+  }else if(Q<QK_K){
+    arrow.textContent='→';arrow.style.color='var(--ok)';dir.textContent='정반응 우세';dir.style.color='var(--ok)';
+    if(na){na.textContent='↑';na.style.color='var(--ok)';}if(da){da.textContent='↓';da.style.color='var(--no)';}
+    vd.style.background='var(--ok-l)';vd.style.color='#0c6a4f';
+    vd.innerHTML='<span class="var">Q</span> &lt; <span class="var">K</span> · <b>정반응</b> 진행 → 생성물(분자) ↑ · 반응물(분모) ↓ 하여 <span class="var">Q</span>가 커집니다';
+  }else{
+    arrow.textContent='←';arrow.style.color='var(--no)';dir.textContent='역반응 우세';dir.style.color='var(--no)';
+    if(na){na.textContent='↓';na.style.color='var(--no)';}if(da){da.textContent='↑';da.style.color='var(--ok)';}
+    vd.style.background='var(--no-l)';vd.style.color='#a31d36';
+    vd.innerHTML='<span class="var">Q</span> &gt; <span class="var">K</span> · <b>역반응</b> 진행 → 생성물(분자) ↓ · 반응물(분모) ↑ 하여 <span class="var">Q</span>가 작아집니다';
+  }
+}
+
+/* ============ Slide 7 : quiz ============ */
+const qDone={};let score=0;
+function quiz(btn,correct,fbId,msg){
+  const box=btn.closest('.choices');
+  if(qDone[fbId])return;
+  qDone[fbId]=true;
+  [...box.children].forEach(c=>{c.classList.add('locked');c.onclick=null;});
+  btn.classList.add(correct?'correct':'wrong');
+  const fb=document.getElementById(fbId);fb.className='fb show '+(correct?'good':'bad');
+  fb.innerHTML=correct?msg:('아쉬워요. '+msg+' 다시 개념을 확인해 보세요.');
+  if(correct)score++;
+  updScore();
+}
+function updScore(){
+  const done=Object.keys(qDone).length;
+  document.getElementById('scoreNum').textContent=`${score} / 3`;
+  const m=document.getElementById('scoreMsg');
+  if(done<3)m.textContent='남은 문항도 풀어 보세요.';
+  else if(score===3)m.innerHTML='완벽합니다! 화학 평형과 진행 방향을 정확히 이해했어요. 👏';
+  else m.textContent='틀린 문항의 개념을 다시 짚어 보면 좋겠어요.';
+}
+
+/* ===== zoomable 16:9 deck ===== */
+let userZoom=1;
+function applyZoom(){
+  const fit=Math.min(window.innerWidth/1280, window.innerHeight/720);
+  deckScale=fit*userZoom;
+  document.getElementById('deck').style.transform='scale('+deckScale+')';
+  const s=document.getElementById('sizer');
+  s.style.width=(1280*deckScale)+'px';
+  s.style.height=(720*deckScale)+'px';
+  const lbl=document.getElementById('zoomLbl'); if(lbl) lbl.textContent=Math.round(userZoom*100)+'%';
+}
+function setZoom(z){userZoom=Math.min(4,Math.max(0.4,z));applyZoom();}
+function zoomIn(){setZoom(userZoom*1.15);}
+function zoomOut(){setZoom(userZoom/1.15);}
+function zoomReset(){setZoom(1);}
+window.addEventListener('resize',applyZoom);
+(function(){var vp=document.getElementById('viewport');
+  if(vp)vp.addEventListener('wheel',function(e){if(e.ctrlKey||e.metaKey){e.preventDefault();setZoom(userZoom*(e.deltaY<0?1.1:0.9));}},{passive:false});})();
+applyZoom();
+
+function revealSum(k){
+  var c=document.getElementById('sum'+k); if(c)c.classList.add('show');
+  var b=document.getElementById('rw'+k); if(b)b.style.display='none';
+}
+
+</script>
+</body>
+</html>
