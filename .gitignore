@@ -12,3 +12,6 @@ Thumbs.db
 # 기타
 *.zip
 node_modules/
+
+# 2015개정 화학Ⅱ 테스트 자료 (2022개정 레포와 분리, push 제외)
+_archive-화학2(2015)/

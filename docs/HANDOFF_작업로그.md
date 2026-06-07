@@ -8,7 +8,8 @@
 
 ## 0) 한 줄 요약
 화학(2022 개정)·물질과 에너지(2022 개정) 수업을 16:9 인터랙티브 HTML로 제작. **GitHub Pages 배포 구조**로 정리됨:
-**루트 자료실 허브 → 대단원 폴더(허브) → 소단원(수업 index.html)**. 현재 「화학 평형」 4개 + 「화학 변화의 자발성: 전기 화학」 1개 완성.
+**루트 자료실 허브 → 대단원 폴더(허브) → 소단원(수업 index.html)**. 현재 「화학 평형」 4개 소단원 완성, 나머지 7개 대단원은 준비 중.
+※ 2015개정 화학Ⅱ 「전기 화학」 테스트 자료는 본 레포와 **분리**(`_archive-화학2(2015)/`, .gitignore 제외) — 2022개정 자료실에 포함하지 않음.
 
 ## 1) 폴더·파일 명세 (배포 구조 / 작명 규칙)
 ```
@@ -22,11 +23,10 @@
 │   ├─ 03-shift-temperature/    index.html, img/          # 평형 이동: 온도(6슬, CoCl₂)
 │   └─ 04-equilibrium-in-life/  index.html, img/, 출처.md # 일상 속 평형 이동(8슬)
 ├─ chem-4-reactions/ index.html(준비중)                   # 역동적인 화학 반응
-├─ me-1-states/ · me-2-solution/ · me-4-rate/  (준비중)
-├─ me-3-spontaneity/ index.html(대단원 허브) + 소단원     # 화학 변화의 자발성 ★
-│   └─ 02-electrochemical-cells/ index.html, img/, 출처.md # 화학 전지(8슬, 전기화학)
+├─ me-1-states/ · me-2-solution/ · me-3-spontaneity/ · me-4-rate/  (모두 준비중)
 ├─ docs/   README·프로토콜·HANDOFF(이 문서)·lesson_template  # 자료실에 비노출
 ├─ 교과서파일/   (로컬 전용, .gitignore로 push 제외)
+├─ _archive-화학2(2015)/  전기화학(화학Ⅱ 테스트) — 분리, push 제외
 ├─ .gitignore · .claude/launch.json(미리보기 서버)
 ```
 **작명 규칙**
@@ -42,8 +42,8 @@
 | 화학평형·이동(농도·압력) | `chem-3-equilibrium/02-shift-conc-pressure/` | 7 | 완성 | NO₂ 실측 Kc |
 | 화학평형·이동(온도) | `chem-3-equilibrium/03-shift-temperature/` | 6 | **완성·검증** | CoCl₂ 시뮬, 온도-K 실측, 르샤틀리에 종합 |
 | 화학평형·일상 | `chem-3-equilibrium/04-equilibrium-in-life/` | 8 | **완성·검증** | 암모니아·헤모글로빈·탄산음료·해양산성화·치아 |
-| 자발성·화학 전지 | `me-3-spontaneity/02-electrochemical-cells/` | 8 | **완성·검증** | 이온화경향·볼타(분극)·다니엘·실용전지 캔버스 시뮬 |
-| 나머지 6개 대단원 | `chem-1·2·4`, `me-1·2·4` | — | 준비 중 | 대단원 허브만 존재(소단원 차후) |
+| 나머지 7개 대단원 | `chem-1·2·4`, `me-1·2·3·4` | — | 준비 중 | 대단원 허브만 존재(소단원 차후) |
+| (분리) 전기화학 화학Ⅱ | `_archive-화학2(2015)/전기화학-화학전지/` | 8 | 보관 | 2015개정 테스트, **레포·git 제외** |
 
 ## 3) 02 단원 핵심 사항 (이미 반영됨)
 - 6슬라이드: 도입 / CoCl₂ 온도 실험(미시 시뮬) / 온도-K 데이터 탐구 / 르샤틀리에 종합표 / 형성평가 / 마무리.
