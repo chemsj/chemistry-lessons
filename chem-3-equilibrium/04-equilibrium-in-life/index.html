@@ -1,0 +1,1848 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03. 일상생활 속의 화학 평형 이동</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+
+
+:root{
+  --bg:#eef4f3;
+  --bg2:#e3eeec;
+  --surface:#ffffff;
+  --ink:#15302c;
+  --muted:#5d7470;
+  --primary:#0f766e;
+  --primary-d:#0b5650;
+  --primary-l:#d6efeb;
+  --primary-ll:#eafaf7;
+  --accent:#e08a1e;
+  --accent-l:#fcefda;
+  --ok:#10936b;
+  --ok-l:#dcf3ea;
+  --no:#d6435f;
+  --no-l:#fbe2e8;
+  --line:#dbe7e4;
+  --no2:#9a3412;     /* NO2 적갈색 */
+  --atomN:#2f6fb0;   /* 질소 파랑 */
+  --atomO:#c0392b;   /* 산소 빨강 */
+  --shadow:0 18px 40px -22px rgba(15,118,110,.45);
+  --shadow-s:0 6px 18px -10px rgba(15,48,44,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Pretendard','Pretendard Variable',-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(900px 500px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 55%),
+    radial-gradient(700px 600px at 105% 8%, var(--primary-ll) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(160deg,var(--bg) 0%, var(--bg2) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.var{font-family:Georgia,'Times New Roman',serif;font-style:italic}
+sub,sup{font-size:.7em;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.28em}
+
+/* ---------- Header ---------- */
+header{
+  position:sticky;top:0;z-index:30;
+  backdrop-filter:saturate(1.2) blur(8px);
+  background:rgba(255,255,255,.72);
+  border-bottom:1px solid var(--line);
+}
+.hbar{max-width:1080px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:11px;flex:1;min-width:0}
+.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,var(--primary),var(--primary-d));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;box-shadow:var(--shadow-s);flex:none}
+.brand b{font-size:15px;font-weight:800}
+.brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin-top:1px}
+.dots{display:flex;gap:7px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;background:#c6d8d4;cursor:pointer;transition:.25s;border:none;padding:0}
+.dot:hover{transform:scale(1.25)}
+.dot.on{background:var(--primary);width:24px;border-radius:6px}
+.dot.done{background:var(--ok)}
+
+/* ---------- Layout ---------- */
+main{max-width:1080px;margin:0 auto;padding:26px 22px 120px}
+.slide{display:none;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.slide.active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.kicker{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:12.5px;
+  color:var(--primary-d);background:var(--primary-l);padding:7px 14px;border-radius:999px;letter-spacing:.2px}
+.kicker .n{background:var(--primary);color:#fff;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px}
+h1.title{font-size:30px;font-weight:800;letter-spacing:-.6px;margin:14px 0 6px;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;font-weight:600;line-height:1.6}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:var(--shadow);margin-top:18px}
+.card.tight{padding:20px 22px}
+
+.tag{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:12.5px;padding:6px 12px;border-radius:999px;margin-bottom:12px}
+.tag.q{color:#8a5208;background:var(--accent-l)}
+.tag.sim{color:var(--primary-d);background:var(--primary-l)}
+.tag.sum{color:#0c6a4f;background:var(--ok-l)}
+.dotmark{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+.ask{font-size:18px;font-weight:700;line-height:1.6;color:var(--ink)}
+.ask .hl{background:linear-gradient(transparent 58%, #ffe2b3 58%);padding:0 2px;border-radius:2px}
+.helper{font-size:13.5px;color:var(--muted);font-weight:600;margin-top:10px;line-height:1.6}
+
+.sumlist{list-style:none;display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.sumlist li{display:flex;gap:12px;align-items:flex-start;font-size:15.5px;line-height:1.55;font-weight:600}
+.sumlist .b{flex:none;width:24px;height:24px;border-radius:8px;background:var(--ok-l);color:#0c6a4f;
+  display:grid;place-items:center;font-weight:800;font-size:13px;margin-top:1px}
+.sumlist b{color:var(--primary-d);font-weight:800}
+
+.btn{appearance:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;border-radius:13px;transition:.18s;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;padding:13px 24px;font-size:15px;box-shadow:var(--shadow-s)}
+.btn.primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn.ghost{background:#fff;color:var(--primary-d);border:1.6px solid var(--primary-l);padding:11px 18px;font-size:14px}
+.btn.ghost:hover{background:var(--primary-ll);border-color:var(--primary)}
+.btn.sm{padding:9px 15px;font-size:13.5px;border-radius:11px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---------- Footer nav ---------- */
+.navbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.82);
+  backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+.navin{max-width:1080px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:14px}
+.navlabel{flex:1;font-size:13.5px;font-weight:700;color:var(--muted)}
+.navlabel b{color:var(--ink)}
+.navbtn{appearance:none;border:1.6px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+  font-weight:700;font-size:14px;padding:10px 18px;border-radius:12px;cursor:pointer;transition:.15s}
+.navbtn:hover:not([disabled]){border-color:var(--primary);color:var(--primary-d)}
+.navbtn[disabled]{opacity:.4;cursor:not-allowed}
+.navbtn.go{background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;border:none;box-shadow:var(--shadow-s)}
+
+/* ---------- Sim shared ---------- */
+.simwrap{display:grid;gap:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel{background:var(--primary-ll);border:1px solid var(--primary-l);border-radius:18px;padding:16px}
+.panel h4{font-size:14px;font-weight:800;color:var(--primary-d);margin-bottom:12px;text-align:center}
+.vessel{position:relative;width:100%;height:128px;border-radius:14px 14px 16px 16px;overflow:hidden;
+  background:#fff;border:2px solid #cfe2de;box-shadow:inset 0 -8px 18px -10px rgba(0,0,0,.12)}
+.vessel canvas{position:absolute;inset:0;width:100%;height:100%}
+.vtint{position:absolute;inset:0;transition:background .2s linear;pointer-events:none}
+.grf{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px}
+.grf canvas{width:100%;height:130px;display:block}
+.rates{display:flex;gap:10px;margin-top:10px;align-items:flex-end;justify-content:center;height:64px}
+.ratecol{display:flex;flex-direction:column;align-items:center;gap:5px;width:74px}
+.ratebar{width:100%;height:44px;background:#eef3f1;border-radius:8px;position:relative;overflow:hidden;display:flex;align-items:flex-end}
+.ratebar i{display:block;width:100%;border-radius:8px 8px 0 0;transition:height .12s linear}
+.ratecol small{font-size:11px;font-weight:700;color:var(--muted)}
+.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12.5px;font-weight:700;color:var(--muted);margin-top:4px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:13px;height:13px;border-radius:4px}
+.ctrls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.eqflag{text-align:center;font-weight:800;color:var(--ok);font-size:13.5px;height:20px;transition:.3s;opacity:0}
+.eqflag.on{opacity:1}
+
+/* misconception / quiz */
+.oxbox{background:#fff;border:1.6px dashed var(--accent);border-radius:16px;padding:18px;margin-top:16px}
+.oxq{font-weight:800;font-size:15px;margin-bottom:13px;line-height:1.5}
+.oxq .lab{display:inline-block;background:var(--accent);color:#fff;font-size:11.5px;padding:3px 10px;border-radius:8px;margin-right:8px;vertical-align:middle}
+.choices{display:flex;flex-direction:column;gap:9px}
+.choice{text-align:left;width:100%;background:#fbfdfc;border:1.6px solid var(--line);border-radius:12px;padding:13px 16px;
+  font-family:inherit;font-weight:700;font-size:14.5px;color:var(--ink);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:11px}
+.choice:hover:not(.locked){border-color:var(--primary);background:var(--primary-ll)}
+.choice .mk{flex:none;width:24px;height:24px;border-radius:7px;background:#eef3f1;display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--muted)}
+.choice.correct{border-color:var(--ok);background:var(--ok-l)}
+.choice.correct .mk{background:var(--ok);color:#fff}
+.choice.wrong{border-color:var(--no);background:var(--no-l)}
+.choice.wrong .mk{background:var(--no);color:#fff}
+.fb{margin-top:12px;font-size:14px;font-weight:700;line-height:1.6;padding:12px 14px;border-radius:12px;display:none}
+.fb.show{display:block}
+.fb.good{background:var(--ok-l);color:#0c6a4f}
+.fb.bad{background:var(--no-l);color:#a31d36}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;overflow:hidden;border-radius:12px}
+.tbl th,.tbl td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--line)}
+.tbl thead th{background:var(--primary-l);color:var(--primary-d);font-weight:800;font-size:12.5px}
+.tbl tbody tr:nth-child(even){background:#f7faf9}
+.tbl td.res{font-weight:800;color:var(--muted);font-family:Georgia,serif}
+.tbl td.res.filled{color:var(--primary-d)}
+.tbl col.hi,.tbl th.hi{background:var(--ok-l)!important}
+.tbl td.hi{background:var(--ok-l)}
+.fbtns{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
+.fbtn{flex:1;min-width:150px;background:#fff;border:1.6px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;
+  font-family:inherit;transition:.15s;text-align:center}
+.fbtn:hover{border-color:var(--primary);background:var(--primary-ll)}
+.fbtn.sel{border-color:var(--primary);background:var(--primary-ll);box-shadow:var(--shadow-s)}
+.fbtn .fl{font-weight:800;color:var(--primary-d);font-size:15px;margin-bottom:5px}
+.fbtn .fe{font-size:15px}
+.proc{background:#0f201d;color:#d9f3ee;border-radius:14px;padding:14px 16px;margin-top:14px;font-size:13.5px;
+  min-height:54px;font-family:'Pretendard',monospace;line-height:1.85;display:none}
+.proc.show{display:block}
+.proc .pl{opacity:0;animation:pl .35s forwards}
+@keyframes pl{to{opacity:1}}
+.proc .num{color:#f3c46b;font-family:Georgia,serif}
+
+/* K builder */
+.kbuild{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:center;background:var(--primary-ll);
+  border:1px solid var(--primary-l);border-radius:16px;padding:20px}
+.rxn{display:flex;align-items:center;gap:7px;font-size:19px;font-weight:700;flex-wrap:wrap;justify-content:center}
+.coef{display:inline-flex;flex-direction:column;border:1.6px solid var(--primary-l);border-radius:10px;overflow:hidden;background:#fff}
+.coef button{border:none;background:#fff;color:var(--primary-d);font-weight:800;cursor:pointer;font-size:11px;padding:1px 8px;line-height:1.3}
+.coef button:hover{background:var(--primary-l)}
+.coef span{text-align:center;font-weight:800;font-size:15px;padding:1px 0;border-top:1px solid var(--primary-l);border-bottom:1px solid var(--primary-l);font-family:Georgia,serif;color:var(--primary-d)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;text-align:center}
+.frac .top,.frac .bot{padding:3px 12px;font-size:20px;font-weight:700}
+.frac .bar{height:2.5px;background:var(--ink);width:100%;border-radius:2px}
+.keq{display:flex;align-items:center;gap:14px;justify-content:center;margin-top:20px;font-size:24px;font-weight:700}
+.toggle{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:14px;user-select:none}
+.tg{width:46px;height:26px;border-radius:999px;background:#cdddd9;position:relative;transition:.2s;flex:none}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.toggle.on .tg{background:var(--primary)}
+.toggle.on .tg::after{left:23px}
+.calcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:800;color:var(--primary-d)}
+.field input{font-family:Georgia,serif;font-size:16px;font-weight:700;padding:11px 12px;border:1.6px solid var(--line);
+  border-radius:11px;text-align:center;color:var(--ink);width:100%}
+.field input:focus{outline:none;border-color:var(--primary);background:var(--primary-ll)}
+.result{margin-top:16px;background:var(--ok-l);border-radius:14px;padding:16px 18px;text-align:center;font-size:18px;font-weight:800;color:#0c6a4f}
+.result .var{color:#0c6a4f}
+.note{font-size:13px;color:var(--muted);font-weight:600;line-height:1.6;margin-top:10px;background:#f7faf9;border-radius:12px;padding:12px 14px;border-left:3px solid var(--primary-l)}
+
+/* K meaning */
+.kmeter{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:center;margin-top:6px}
+.balloon{height:230px;background:#fff;border:1px solid var(--line);border-radius:16px;position:relative;overflow:hidden;display:grid;place-items:center}
+.balloon .lbl{position:absolute;top:12px;left:0;right:0;text-align:center;font-weight:800;font-size:13.5px;color:var(--muted)}
+.circ{border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;transition:width .25s,height .25s;text-align:center;line-height:1.2}
+.circ.react{background:radial-gradient(circle at 35% 30%,#f08aa0,var(--no))}
+.circ.prod{background:radial-gradient(circle at 35% 30%,#4fcfa6,var(--ok))}
+.kreadout{text-align:center;margin-top:18px;font-size:20px;font-weight:800}
+.kreadout .var{color:var(--primary-d)}
+.kverdict{text-align:center;font-size:15px;font-weight:700;color:var(--muted);margin-top:6px;min-height:22px}
+.slider{-webkit-appearance:none;width:100%;height:8px;border-radius:999px;margin-top:22px;
+  background:linear-gradient(90deg,var(--no) 0%,#e7ecea 50%,var(--ok) 100%);outline:none}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;
+  border:3px solid var(--primary);cursor:pointer;box-shadow:var(--shadow-s)}
+.slider::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--primary);cursor:pointer}
+.scaleLbl{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);margin-top:8px}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;justify-content:center}
+.chip{background:#fff;border:1.6px solid var(--line);border-radius:12px;padding:11px 15px;cursor:pointer;font-family:inherit;
+  font-weight:700;font-size:13.5px;transition:.15s;text-align:left;line-height:1.4}
+.chip:hover{border-color:var(--accent);background:var(--accent-l)}
+.chip small{display:block;color:var(--muted);font-weight:700;font-size:11.5px}
+
+/* Q bars */
+.qkstage{display:flex;gap:26px;align-items:flex-end;justify-content:center;height:230px;background:#fff;
+  border:1px solid var(--line);border-radius:16px;padding:24px 18px 18px;position:relative}
+.qkbase{position:absolute;left:18px;right:18px;bottom:46px;border-bottom:2px dashed #c9d8d4}
+.bargrp{display:flex;flex-direction:column;align-items:center;gap:0;width:90px;height:100%;justify-content:flex-end;z-index:1}
+.bar3d{width:64px;border-radius:9px 9px 0 0;transition:height .15s;position:relative;display:flex;align-items:flex-start;justify-content:center;color:#fff;font-weight:800;padding-top:6px;font-size:14px}
+.bar3d.q{background:linear-gradient(180deg,#f3b24c,var(--accent))}
+.bar3d.k{background:linear-gradient(180deg,#7d6fd6,#5c4fb3)}
+.barcap{margin-top:8px;font-weight:800;font-size:15px}
+.barcap.q{color:#b06a10}.barcap.k{color:#4a3da0}
+.arrowzone{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:140px}
+.bigarrow{font-size:38px;font-weight:800;transition:.2s}
+.dirtext{font-weight:800;font-size:15px;text-align:center;margin-top:4px}
+.qkverdict{margin-top:18px;text-align:center;font-size:17px;font-weight:800;padding:14px;border-radius:14px;transition:.2s}
+
+/* step reveal */
+.steps{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.step{background:#fbfdfc;border:1.6px solid var(--line);border-radius:14px;padding:0;overflow:hidden;transition:.2s}
+.step .sh{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;font-weight:800;font-size:14.5px}
+.step .sh .sn{flex:none;width:26px;height:26px;border-radius:8px;background:var(--primary-l);color:var(--primary-d);display:grid;place-items:center;font-size:13px}
+.step .sb{max-height:0;overflow:hidden;transition:max-height .3s;padding:0 16px;font-size:14.5px;line-height:1.7;font-weight:600}
+.step.open{border-color:var(--primary-l);box-shadow:var(--shadow-s)}
+.step.open .sb{max-height:240px;padding:0 16px 16px 54px}
+.eqn{font-family:Georgia,serif;font-size:17px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:inline-block;margin:6px 0}
+.scoreband{display:flex;align-items:center;gap:14px;background:var(--primary-ll);border-radius:14px;padding:14px 18px;margin-top:18px}
+.scoreband .sc{font-size:22px;font-weight:800;color:var(--primary-d)}
+.scoreband span{font-weight:700;color:var(--muted);font-size:14px}
+
+.endhero{text-align:center;padding:18px 10px}
+.endhero h2{font-size:24px;font-weight:800;margin-bottom:8px}
+.recap{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;text-align:left}
+.recap .rc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.recap .rc b{color:var(--primary-d);font-size:14px}
+.recap .rc p{font-size:14px;font-weight:600;color:var(--muted);margin-top:7px;line-height:1.6}
+
+@media(max-width:780px){
+  .two{grid-template-columns:1fr}
+  .recap{grid-template-columns:1fr}
+  .calcgrid{grid-template-columns:1fr}
+  h1.title{font-size:25px}
+  main{padding:20px 14px 120px}
+  .qkstage{gap:12px}
+  .arrowzone{min-width:90px}
+}
+
+
+/* ===== 16:9 landscape deck overrides ===== */
+html,body{height:100%;overflow:hidden;background:#0b1a18}
+body{padding:0}
+header,.navbar{display:none!important}
+.viewport{position:fixed;inset:0;display:grid;place-items:center;
+  background:
+    radial-gradient(1200px 700px at 20% -10%, #14302c 0%, rgba(0,0,0,0) 60%),
+    radial-gradient(900px 700px at 110% 120%, #0f2a26 0%, rgba(0,0,0,0) 55%),
+    #0b1a18;}
+.deck{width:1280px;height:720px;flex:none;transform-origin:center center;
+  border-radius:22px;overflow:hidden;display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 500px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 55%),
+    radial-gradient(700px 600px at 105% 8%, var(--primary-ll) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(160deg,var(--bg) 0%, var(--bg2) 100%);
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.05);}
+.topbar{height:54px;flex:none;display:flex;align-items:center;gap:16px;padding:0 24px;
+  background:rgba(255,255,255,.62);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+.topbar .brand{display:flex;align-items:center;gap:11px;flex:1;min-width:0}
+.topbar .logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(145deg,var(--primary),var(--primary-d));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px;flex:none;box-shadow:var(--shadow-s)}
+.topbar b{font-size:14px;font-weight:800}
+.topbar .brand span{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.stage{position:relative;flex:1;overflow:hidden}
+.slide{position:absolute;inset:0;padding:18px 26px;display:none;margin:0}
+.slide.active{display:grid;grid-template-columns:minmax(340px,400px) 1fr;gap:22px;animation:rise .4s cubic-bezier(.2,.7,.2,1)}
+.slide.single{padding:26px 30px}
+.slide.single.active{display:block;overflow:auto}
+.col-l,.col-r{overflow:auto;min-height:0;height:100%;padding-right:8px}
+.col-l>*:first-child,.col-r>*:first-child{margin-top:0}
+.col-l::-webkit-scrollbar,.col-r::-webkit-scrollbar,.slide.single::-webkit-scrollbar{width:9px;height:9px}
+.col-l::-webkit-scrollbar-thumb,.col-r::-webkit-scrollbar-thumb,.slide.single::-webkit-scrollbar-thumb{background:#c2d6d2;border-radius:9px}
+.botbar{height:56px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;
+  background:rgba(255,255,255,.7);border-top:1px solid var(--line);backdrop-filter:blur(6px)}
+.botbar .navlabel{flex:1;font-size:13px;font-weight:700;color:var(--muted)}
+.botbar .navlabel b{color:var(--ink)}
+
+/* compact typography for slides */
+.kicker{font-size:11.5px;padding:6px 12px}
+.kicker .n{width:18px;height:18px;font-size:10px}
+h1.title{font-size:22px;margin:9px 0 4px;line-height:1.25}
+.sub{font-size:13px;line-height:1.55}
+.card{padding:17px 18px;border-radius:18px;margin-top:12px;box-shadow:var(--shadow-s)}
+.card.tight{padding:15px 17px}
+.tag{margin-bottom:9px;font-size:11.5px;padding:5px 11px}
+.ask{font-size:15px;line-height:1.55}
+.helper{font-size:12.5px;margin-top:8px}
+.sumlist{gap:8px}
+.sumlist li{font-size:13px;line-height:1.45}
+.sumlist .b{width:21px;height:21px;font-size:12px;border-radius:7px}
+.note{font-size:12px;padding:10px 12px;margin-top:9px}
+
+/* compact simulation pieces */
+.vessel{height:104px}
+.grf canvas{height:104px}
+.grf{padding:6px;margin-top:9px}
+.rates{height:50px;margin-top:8px}
+.ratebar{height:36px}
+.panel{padding:13px}
+.panel h4{margin-bottom:9px;font-size:13px}
+.oxbox{padding:15px;margin-top:13px}
+.oxq{font-size:13.5px;margin-bottom:11px}
+.choice{padding:11px 13px;font-size:13.5px}
+.fb{font-size:13px;padding:10px 12px;margin-top:10px}
+.two{gap:14px}
+.legend{font-size:11.5px;margin-top:8px;gap:12px}
+.tbl th,.tbl td{padding:8px 6px;font-size:12.5px}
+.fbtn{padding:11px;min-width:130px}
+.fbtn .fl{font-size:14px}.fbtn .fe{font-size:13.5px}
+.proc{font-size:12.5px;padding:12px 14px;line-height:1.7}
+.keq{font-size:21px;margin-top:15px}.frac .top,.frac .bot{font-size:18px}
+.kbuild{padding:16px}.rxn{font-size:17px}
+.calcgrid{gap:10px}.field input{font-size:15px;padding:9px}
+.field label{font-size:12px}
+.result{font-size:16px;padding:13px 15px;margin-top:13px}
+.kmeter{gap:12px}.balloon{height:188px}
+.kreadout{font-size:18px;margin-top:14px}.kverdict{font-size:13.5px}
+.slider{margin-top:16px}
+.chips{margin-top:14px;gap:8px}.chip{padding:9px 12px;font-size:12.5px}
+.qkstage{height:188px;padding:18px 16px 14px}.qkbase{bottom:42px}
+.bar3d{width:56px}.barcap{font-size:14px;margin-top:6px}
+.bigarrow{font-size:32px}.dirtext{font-size:14px}
+.qkverdict{font-size:15px;padding:12px;margin-top:14px}
+.steps{gap:9px}.step .sh{padding:12px 14px;font-size:13.5px}
+.step.open .sb{font-size:13.5px}
+.scoreband{padding:12px 16px;margin-top:14px}.scoreband .sc{font-size:20px}
+.endhero h2{font-size:21px}
+.recap{gap:12px;margin-top:14px}.recap .rc{padding:15px}
+.recap .rc p{font-size:13px}
+.btn.primary{padding:11px 20px;font-size:14px}
+.btn.ghost{padding:9px 15px;font-size:13px}
+
+@media (max-width:560px){
+  .slide.active{grid-template-columns:1fr;grid-auto-rows:min-content;overflow:auto}
+  .col-l,.col-r{overflow:visible;height:auto}
+}
+
+/* ===== gated 핵심 정리 (reveal after activity) ===== */
+.card.summary{display:none}
+.card.summary.show{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.revealwrap{margin-top:12px}
+.revealbtn{width:100%;border:1.7px dashed var(--ok);background:var(--ok-l);color:#0c6a4f;
+  font-family:inherit;font-weight:800;font-size:13px;padding:13px;border-radius:16px;cursor:pointer;
+  transition:.15s;display:flex;align-items:center;justify-content:center;gap:9px}
+.revealbtn:hover{background:#cdeee0;transform:translateY(-1px)}
+.revealbtn .rdot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none}
+.revealbtn .ra{font-weight:900;font-size:14px;line-height:1}
+.revealbtn.open{background:#cdeee0}
+/* 토글 버튼(흡열/발열) 선택 표시 */
+.btn.ghost.done{background-color:var(--primary);color:#fff;border-color:var(--primary-d);box-shadow:0 4px 12px -3px rgba(15,118,110,.55);transform:translateY(-1px)}
+.btn.ghost.done:hover{background-color:var(--primary-d);border-color:var(--primary-d)}
+.cnts{display:flex;justify-content:center;gap:14px;margin-top:9px;font-size:12px;font-weight:700;color:var(--muted)}
+.cnts span{display:inline-flex;align-items:center;gap:5px}
+.cnts b{font-family:Georgia,serif;font-size:16px;color:var(--ink);min-width:20px;text-align:right;display:inline-block}
+.cdot{width:11px;height:11px;border-radius:50%;flex:none}
+.fbtn.done{border-color:var(--ok);background:var(--ok-l)}
+.fbtn.done .fl::after{content:" ✓";color:var(--ok);font-size:13px}
+.mindmap{display:flex;flex-direction:column;align-items:center;gap:14px}
+.mm-center{background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;padding:13px 30px;border-radius:16px;font-weight:800;font-size:20px;box-shadow:var(--shadow-s);position:relative}
+.mm-center::after{content:"";position:absolute;left:50%;bottom:-14px;width:2px;height:14px;background:#c2d6d2;transform:translateX(-50%)}
+.mm-center span{display:block;font-size:12px;font-weight:600;opacity:.9;margin-top:3px}
+.mm-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%}
+.mm-branch{display:flex;flex-direction:column;gap:9px}
+.mm-h{font-weight:800;font-size:13.5px;padding:9px 12px;border-radius:11px;text-align:center;color:#fff}
+.mm-h.b02{background:var(--primary)}
+.mm-h.b03{background:#5c4fb3}
+.mm-node{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;font-weight:700;text-align:left;line-height:1.45}
+.mm-node b{color:var(--ink)}
+.mm-node span{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:3px}
+.mm-node.ok{border-color:var(--ok);background:var(--ok-l);color:#0c6a4f}
+.mm-node.mid{border-color:#c9d8d4;background:#eef3f1;color:var(--muted)}
+.mm-node.no{border-color:var(--no);background:var(--no-l);color:#a31d36}
+.eqnote{display:none;margin-top:10px;background:var(--ok-l);color:#0c6a4f;border-radius:12px;padding:11px 13px;font-size:12.5px;font-weight:700;line-height:1.5}
+.eqnote.show{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+@media(max-width:560px){.mm-cols{grid-template-columns:1fr}}
+
+/* ===== compaction: keep activities within one screen ===== */
+.topbar{height:48px}
+.botbar{height:50px}
+.slide{padding:14px 24px}
+.slide.single{padding:18px 24px}
+.card{padding:14px 16px;margin-top:10px}
+.card.tight{padding:12px 14px}
+h1.title{font-size:21px;margin:7px 0 3px}
+.sub{font-size:12.5px}
+.tag{margin-bottom:7px;font-size:11px;padding:5px 10px}
+.ask{font-size:14.5px;line-height:1.5}
+.helper{font-size:12px;margin-top:6px}
+.sumlist{gap:7px}.sumlist li{font-size:12.5px}
+.sumlist .b{width:20px;height:20px;font-size:11.5px}
+.keq{margin-top:10px;font-size:20px}
+.oxbox{padding:12px;margin-top:10px}
+.oxq{margin-bottom:9px;font-size:13px}
+.choice{padding:9px 12px;font-size:13px}
+.choice .mk{width:22px;height:22px}
+.fb{font-size:12.5px;padding:9px 11px;margin-top:9px}
+.vessel{height:96px}.grf canvas{height:90px}.grf{margin-top:8px;padding:6px}
+.rates{height:42px;margin-top:7px}.ratebar{height:30px}
+.ratecol small{font-size:10.5px}
+.panel{padding:11px}.panel h4{margin-bottom:8px;font-size:12.5px}
+.cnts{margin-top:7px}.cnts b{font-size:14px}
+.legend{margin-top:7px;font-size:11px;gap:10px}
+.eqflag{font-size:12.5px;height:18px}
+.proc{font-size:11.5px;padding:10px 12px;line-height:1.5;max-height:108px;overflow:auto}
+.tbl th,.tbl td{padding:7px 5px;font-size:12px}
+.fbtns{margin:12px 0 6px}.fbtn{padding:10px}
+.calcgrid{gap:9px}.field input{padding:8px;font-size:14px}.field label{font-size:11.5px}
+.result{padding:11px 13px;margin-top:11px;font-size:15px}
+.note{padding:9px 11px;margin-top:8px;font-size:11.5px}
+.kmeter{gap:10px}.balloon{height:170px}
+.kreadout{font-size:17px;margin-top:12px}
+.slider{margin-top:13px}
+.chips{margin-top:12px}.chip{padding:8px 11px;font-size:12px}
+.qkstage{height:170px;padding:16px 14px 12px}.qkbase{bottom:40px}
+.bar3d{width:52px}
+.steps{gap:8px}.step .sh{padding:11px 13px;font-size:13px}
+.scoreband{padding:11px 14px;margin-top:11px}.scoreband .sc{font-size:18px}
+.revealwrap{margin-top:10px}.revealbtn{padding:11px;font-size:12.5px}
+.eqnote{margin-top:8px;padding:10px 12px;font-size:12px}
+.mindmap{gap:12px}
+.mm-center{padding:11px 26px;font-size:18px}
+.mm-cols{gap:13px}.mm-branch{gap:8px}
+.mm-h{padding:8px 12px;font-size:12.5px}
+.mm-node{padding:9px 12px;font-size:12.5px}
+.mm-node span{font-size:11.5px}
+.recap{gap:11px}.recap .rc{padding:13px}.recap .rc p{font-size:12.5px}
+
+/* ===== per-slide vertical balance: center content, even out whitespace ===== */
+.slide.active{align-content:safe center}
+.col-l,.col-r{height:auto;max-height:100%}
+.slide.single.active{display:flex;flex-direction:column;justify-content:safe center;align-items:center;overflow:auto}
+
+/* Q vs K fraction-arrow visual */
+.qfrac{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;margin-bottom:12px;flex-wrap:wrap}
+.qfrac .qlead{font-size:19px;font-weight:800}
+.qfrac .qval{font-size:19px;font-weight:800}
+.qfrac .qval b{font-family:Georgia,serif;color:#b06a10;font-size:22px}
+.qfracbody{display:flex;flex-direction:column;align-items:stretch;text-align:center}
+.qnum,.qden{font-family:Georgia,serif;font-size:15px;font-weight:700;padding:3px 12px;display:flex;align-items:center;gap:7px;justify-content:center}
+.qnum small,.qden small{font-family:'Pretendard',sans-serif;font-size:10.5px;color:var(--muted);font-weight:700}
+.qbar2{height:2.5px;background:var(--ink);border-radius:2px;margin:1px 0}
+.qarrow{font-size:17px;font-weight:800;min-width:16px;display:inline-block;text-align:center}
+.slide.single>div{width:100%}
+
+/* ===== free zoom / pan ===== */
+.viewport{overflow:auto;place-content:safe center}
+.sizer{flex:none}
+.deck{transform-origin:top left}
+.zoomctl{position:fixed;top:7px;left:50%;transform:translateX(-50%);z-index:60;display:flex;gap:5px;align-items:center;
+  background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:11px;padding:4px;box-shadow:0 8px 20px -8px rgba(0,0,0,.45)}
+.zoomctl button{border:none;background:#fff;color:var(--ink);font-family:inherit;font-weight:800;font-size:14px;height:30px;min-width:34px;border-radius:8px;cursor:pointer;line-height:1}
+.zoomctl button:hover{background:var(--primary-ll);color:var(--primary-d)}
+.zoomctl #zoomLbl{min-width:52px;font-size:12px;color:var(--primary-d)}
+
+/* ===== 투사 가독성 타이포 (개정) — 본문 글자 키움 ===== */
+h1.title{font-size:27px;margin:9px 0 5px}
+.sub{font-size:15.5px}
+.ask{font-size:17.5px;line-height:1.55}
+.helper{font-size:14px;margin-top:8px}
+.sumlist{gap:9px}.sumlist li{font-size:15px}.sumlist .b{width:24px;height:24px;font-size:13px}
+.note{padding:11px 13px;margin-top:9px;font-size:13.5px;line-height:1.65}
+.recap{gap:14px}.recap .rc{padding:18px 20px}.recap .rc p{font-size:15.5px;line-height:1.75}.recap .rc b{font-size:16.5px}
+.tbl th,.tbl td{padding:11px 8px;font-size:14.5px}
+.oxq{margin-bottom:10px;font-size:15px;line-height:1.5}.choice{padding:11px 14px;font-size:14.5px}.choice .mk{width:24px;height:24px}.fb{font-size:13.5px;padding:11px 13px;margin-top:10px}
+.steps .step .sh{font-size:14.5px}
+.scoreband .sc{font-size:21px}.scoreband span{font-size:14px}
+.mm-center{font-size:23px;padding:14px 32px}.mm-h{font-size:15px;padding:10px 14px}.mm-node{font-size:15px;padding:12px 15px}.mm-node span{font-size:13.5px}
+.btn.primary{font-size:15.5px;padding:13px 26px}.btn.ghost{font-size:14px;padding:10px 17px}
+/* 한국어 줄바꿈: 단어 중간에서 끊겨 외톨이 글자 생기는 것 방지 */
+.qkverdict{word-break:keep-all;line-height:1.45}
+/* 한국어 본문: 글자 단위가 아닌 어절(단어/의미) 단위로 줄바꿈 */
+.ask,.helper,.note,.sub,.sumlist li,.tbl td,.scaleLbl,.glabel,.glegend{word-break:keep-all}
+
+/* ===== 단일(single) 슬라이드: 여백 많으니 글자·여백을 더 크게 (투사 가독성) ===== */
+.slide.single h1.title{font-size:32px;margin:10px 0 9px}
+.slide.single .sub{font-size:17.5px;line-height:1.6}
+.slide.single .card{padding:24px 28px;margin-top:16px}
+.slide.single .recap{gap:18px}
+.slide.single .recap .rc{padding:24px 26px}
+.slide.single .recap .rc b{font-size:19px}
+.slide.single .recap .rc p{font-size:17.5px;line-height:1.9}
+.slide.single .note{font-size:15px;padding:13px 15px;line-height:1.65}
+.slide.single .tbl th,.slide.single .tbl td{font-size:15px;padding:9px 9px;line-height:1.4}
+.slide.single .mindmap{gap:11px}
+.slide.single .mm-center{font-size:23px;padding:12px 30px}
+.slide.single .mm-h{font-size:14.5px;padding:9px 13px}
+.slide.single .mm-node{font-size:14.5px;padding:10px 13px}
+.slide.single .mm-node span{font-size:13px}
+.slide.single .btn.primary{font-size:17px;padding:15px 32px}
+.slide.single .btn.ghost{font-size:15px;padding:12px 22px}
+
+/* ===== 시뮬레이션 컨트롤(속도/일시정지/초기화) + 수치 칩 + 시간 그래프 ===== */
+.simrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:10px}
+.simrow .slabel{font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.slider.spd{width:auto;flex:1;min-width:88px;height:7px;margin-top:0;
+  background:linear-gradient(90deg,#bfe3db 0%,var(--primary) 100%)}
+.slider.spd::-webkit-slider-thumb{width:20px;height:20px;border-width:3px}
+.slider.spd::-moz-range-thumb{width:20px;height:20px;border-width:3px}
+.simval{font-family:Georgia,serif;font-weight:800;color:var(--primary-d);font-size:13px;min-width:42px;text-align:right}
+.readout{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.rdchip{display:inline-flex;align-items:center;gap:6px;background:#f3f8f6;border:1px solid var(--line);
+  border-radius:9px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--muted)}
+.rdchip .cdot{width:10px;height:10px;border-radius:50%;flex:none}
+.rdchip b{font-family:Georgia,serif;font-size:14px;color:var(--ink);min-width:18px;text-align:right}
+.graphbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 8px 2px;position:relative}
+.graphbox .glabel{position:absolute;top:5px;left:9px;font-size:10px;font-weight:800;color:var(--muted)}
+.graphbox canvas{width:100%;display:block}
+.glegend{display:flex;gap:12px;justify-content:center;font-size:10.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.glegend span{display:inline-flex;align-items:center;gap:5px}
+.glegend i{width:12px;height:3px;border-radius:2px;display:inline-block}
+
+/* ===== 실제 사진/그림 (figure) ===== */
+.figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow-s)}
+.figure img{display:block;width:100%;height:auto;border-radius:9px;object-fit:cover}
+.figure.contain img{object-fit:contain;background:#f3f8f6}
+.figcap{font-size:12px;color:var(--muted);font-weight:600;margin-top:7px;line-height:1.5;text-align:center}
+.figcap .src{display:block;font-size:10.5px;color:#9bb0ab;margin-top:2px}      /* 출처 표기 */
+.photogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}                 /* 사진 2장 비교 */
+.photogrid.three{grid-template-columns:1fr 1fr 1fr}
+.imgband{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* ===== 핵심 정리·마무리 "칩 흐름" (서술식 대신 아이콘→화살표→색칩) =====
+   사용: <div class="flowrow red"><span class="fbadge">❄️ 냉각</span><span class="farr">→</span>발열·역반응<span class="farr">→</span><span class="fchip">붉은색</span></div>
+   .red=흡열/냉각/붉은 계열, .blue=발열/가열/파란 계열. 결과 색칩은 .fchip(.red/.blue 상속). */
+.qchip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:var(--primary-d);background:#fff;border:1px solid #cfe3db;border-radius:999px;padding:4px 11px;white-space:nowrap}
+.hgroup{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:13px;padding:6px 12px;background:#fbfdfc}
+.hgroup.fx{background:var(--primary-ll);border-color:#bfdccf}
+.hgroup .glabel2{font-size:11px;font-weight:800;letter-spacing:.02em;text-transform:none}
+.hbadge{font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.mlegend{display:inline-flex;gap:13px;font-size:11px;font-weight:700;color:#5c6660;align-items:center}
+.mlegend>span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.mlegend .md{width:9px;height:9px;border-radius:50%;display:inline-block}
+.mlegend .md.b{background:#7fb0d8;border:1px solid #235f93}
+.mlegend .md.w{background:#f4f7fa;border:1px solid #aebccb}
+.mlegend>span .md+.md{margin-left:-2px}
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;margin-top:10px;padding:0 4px}
+.meter{text-align:center}
+.meter .mhead{font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.meter .mhead .mval{font-family:Georgia,serif;font-weight:800;font-size:13.5px;color:var(--ink);margin-left:3px}
+.meter.eff .mhead .mval{color:var(--primary-d)}
+.meter .mtrack{position:relative;height:9px;border-radius:6px;background:#e8efec;margin-top:6px}
+.meter .mfill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;transition:width .25s,background .25s}
+.meter .mmax{position:absolute;right:0;top:11px;font-size:9px;color:#9bb0ab;font-weight:700}
+.mnote{grid-column:1 / -1;font-size:11px;color:var(--muted);font-weight:700;text-align:center;margin-top:7px;line-height:1.4}
+.flowrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-radius:12px;padding:8px 11px;font-size:12.5px;font-weight:700;border:1px solid}
+.flowrow.red{background:#fde7ec;border-color:#f3c2cd}
+.flowrow.blue{background:#e6f0f7;border-color:#c2dbec}
+.flowrow .fbadge{font-weight:800}
+.flowrow.red .fbadge{color:#a31d36}
+.flowrow.blue .fbadge{color:#2b7fb8}
+.flowrow .farr{font-weight:900}
+.flowrow.red .farr{color:#cf94a1}
+.flowrow.blue .farr{color:#94b8d0}
+.flowrow .fchip{color:#fff;border-radius:7px;padding:2px 10px}
+.flowrow.red .fchip{background:#d6435f}
+.flowrow.blue .fchip{background:#2b7fb8}
+.flowrow.grn{background:#e3f1ea;border-color:#bfdccf}
+.flowrow.grn .fbadge{color:#0c6a4f}
+.flowrow.grn .farr{color:#8fc3ab}
+.flowrow.grn .fchip{background:#2f9e6e}
+.sumconc{margin-top:9px;font-size:12px;font-weight:700;color:#0c6a4f;background:var(--ok-l);border:1px solid #bfe0d0;border-radius:10px;padding:9px 12px;line-height:1.55}
+/* 정리표 답 칸 잠금(탐구하면 채워짐): <td class="lkcell"><span class="ans">…</span></td>, 행에 .lcopen 부여 시 공개 */
+.lkcell{position:relative}
+.lkcell .ans{display:inline-block;filter:blur(5px);opacity:.25;transition:filter .45s,opacity .45s}
+tr.lcopen .lkcell .ans{filter:none;opacity:1}
+.lkcell::after{content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#c2b89b;font-weight:800;font-size:17px;pointer-events:none}
+tr.lcopen .lkcell::after{content:none}
+@keyframes lcpulse{0%{transform:scale(.65)}55%{transform:scale(1.28)}100%{transform:scale(1)}}  /* 화살표 펄스: inline 요소 + 고정높이 overflow:hidden 컨테이너에 적용 */
+
+</style>
+</head>
+<body>
+<div class="viewport" id="viewport"><div class="sizer" id="sizer"><div class="deck" id="deck">
+  <div class="topbar">
+    <div class="brand"><div class="logo">화학</div>
+      <div><b>III. 화학 평형 — 2. 화학 평형 이동</b><span>03. 일상생활 속의 화학 평형 이동</span></div></div>
+    <div class="dots" id="dots"></div>
+  </div>
+  <div class="stage" id="main">
+
+  <!-- ===== 1. 도입 ===== -->
+  <section class="slide single active" data-title="일상생활 속의 화학 평형 이동">
+    <div>
+      <h1 class="title" style="font-size:36px;margin:0 0 12px">일상생활 속의 화학 평형 이동</h1>
+      <p class="sub" style="margin:0 0 14px">조건이 바뀌면 평형은 <b>그 변화를 줄이는 방향</b>으로 이동한다(르샤틀리에). 이 원리는 <b>산업·생명·환경·건강</b> 곳곳에서 작동한다.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch">
+        <div class="card" style="margin-top:0">
+          <span class="tag q"><i class="dotmark"></i> 잠깐 복습</span>
+          <ul class="sumlist">
+            <li><span class="b">1</span><div><b>르샤틀리에 원리</b>: 농도·압력·온도를 바꾸면 그 변화를 <b>줄이는 방향</b>으로 평형 이동.</div></li>
+            <li><span class="b">2</span><div><b>Q와 K 비교</b>: Q&lt;K → 정반응, Q&gt;K → 역반응, Q=K → 평형.</div></li>
+            <li><span class="b">3</span><div><b>K를 바꾸는 것은 온도뿐</b> (농도·압력은 K 불변).</div></li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top:0">
+          <span class="tag sum"><i class="dotmark"></i> 오늘 학습 내용</span>
+          <ul class="sumlist">
+            <li><span class="b" style="background:#e3eef6;color:#2b7fb8">산업</span><div><b>암모니아 합성(하버법)</b> — 온도·압력으로 수득률 조절.</div></li>
+            <li><span class="b" style="background:#fde7ec;color:#a31d36">생명</span><div><b>헤모글로빈·고산병</b> — 산소 분압과 산소포화도.</div></li>
+            <li><span class="b" style="background:#e7f3ea;color:#0c6a4f">생활</span><div><b>탄산음료</b>(용해 평형) · <b>치아 충치</b>(법랑질 평형).</div></li>
+            <li><span class="b" style="background:#eef0f7;color:#5c4fb3">환경</span><div><b>해양 산성화</b> — 대기 CO<sub>2</sub>와 바다의 pH.</div></li>
+          </ul>
+        </div>
+      </div>
+      <div class="note" style="margin-top:16px">각 사례에서 <b>무엇이 변했고(조건)</b> → <b>평형이 어디로 이동했으며</b> → <b>그 결과가 무엇인지</b>를 르샤틀리에 원리로 설명해 보자.</div>
+    </div>
+  </section>
+
+  <!-- ===== 2. 산업 — 암모니아 합성(하버법): 공정 + 수득률 곡선(통합, 좌우 2분할) ===== -->
+  <section class="slide single" data-title="산업 · 암모니아 합성(하버법)" data-init="initNH3">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:7px">
+        <span class="kicker"><span class="n">1</span> 산업 활용</span>
+        <h1 class="title" style="font-size:22px;margin:0">암모니아 합성 — 하버법</h1>
+        <span class="hgroup" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:16.5px;color:var(--ink);font-weight:800;white-space:nowrap">N<sub>2</sub>(g)+3H<sub>2</sub>(g) ⇌ 2NH<sub>3</sub>(g)</span>
+          <span class="hbadge" style="color:#a31d36;background:#fde7ec">🔥 발열</span>
+          <span class="hbadge" style="color:#2b6ca3;background:#e6f0f7">기체 분자 수 4→2</span>
+        </span>
+        <span class="hgroup fx" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:13.5px;color:var(--primary-d);font-weight:800;white-space:nowrap">수득률 ↑ 요인</span>
+          <span class="qchip">🗜 압력 ↑</span>
+          <span class="qchip">💧 생성물 제거</span>
+          <span class="qchip">⚗️ 촉매</span>
+          <span class="qchip">🌡 온도</span>
+        </span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch">
+        <!-- 왼쪽: 공정 시뮬 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <span class="tag sim"><i class="dotmark"></i> 공정 도식 (압축기·반응기·냉각기·재순환)</span>
+            <canvas id="nh3Legend" style="width:190px;height:24px;display:block"></canvas>
+          </div>
+          <div style="position:relative;height:238px;background:#f7faf9;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px"><canvas id="nh3Canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas></div>
+          <div class="meters">
+            <div class="meter"><div class="mhead">평형 수득률 <span class="mval"><span id="nh3Y">29</span>%</span></div><div class="mtrack"><div class="mfill" id="nh3Yfill" style="background:#2f9e6e"></div><span class="mmax">100</span></div></div>
+            <div class="meter"><div class="mhead">반응 속도 <span class="mval"><span id="nh3Rate">52</span></span></div><div class="mtrack"><div class="mfill" id="nh3Rfill" style="background:#e07b39"></div><span class="mmax">100</span></div></div>
+            <div class="meter eff"><div class="mhead">실효 생산 <span class="mval"><span id="nh3Eff">—</span></span></div><div class="mtrack"><div class="mfill" id="nh3Efill" style="background:var(--primary-d)"></div><span class="mmax">100</span></div></div>
+            <div class="mnote">💡 <b>실효 생산</b> = 평형 수득률 × 반응 속도 — 실제로 <b>빨리·많이</b> 얻는 정도</div>
+          </div>
+          <div class="qkverdict" id="nh3Verdict" style="margin-top:8px;font-size:12.5px;padding:9px"></div>
+        </div>
+        <!-- 오른쪽: 수득률 곡선 + 공유 컨트롤 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <span class="tag sim"><i class="dotmark"></i> 수득률 곡선 — 압력·온도</span>
+          <div class="graphbox" style="height:210px;min-height:210px;margin-top:8px"><span class="glabel">수득률(%) – 압력(atm)</span><canvas id="nh3gCanvas" style="width:100%;height:100%"></canvas></div>
+          <div style="margin-top:10px">
+            <div class="scaleLbl"><span>🌡 온도 <span style="font-weight:600;color:var(--muted)">(곡선 선택)</span></span><span id="nh3Tval">400 ℃</span></div>
+            <div id="nh3Tbtns" style="display:flex;gap:6px;margin-top:6px"></div>
+            <div class="scaleLbl" style="margin-top:10px"><span>🗜 압력(압축기)</span><span id="nh3Pval">250 atm</span></div>
+            <input class="slider" id="nh3P" type="range" min="0" max="1000" step="10" value="250" oninput="nh3Set()" style="margin-top:5px;background:linear-gradient(90deg,#e7ecea,var(--primary))">
+          </div>
+          <div class="simrow" style="margin-top:11px;flex-wrap:wrap;gap:8px">
+            <label class="rdchip" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="nh3Cat" checked onchange="nh3Set()"> <span style="font-weight:700">촉매</span></label>
+            <span class="rdchip" style="background:#fff;border-style:dashed;color:var(--muted)">❄️ 냉각기 상시</span>
+            <span style="flex:1;min-width:0"></span>
+            <span style="font-size:11px;font-weight:700;color:var(--muted)">⏩ 속도</span>
+            <input class="slider spd" id="nh3Speed" type="range" min="5" max="200" value="40" oninput="nh3SpeedSet()" title="재생 속도" style="max-width:64px">
+            <button class="btn ghost sm" onclick="nh3Toggle()" id="nh3Play" title="재생/일시정지">⏸</button>
+            <button class="btn primary sm" onclick="nh3Reset()" title="산업 최적 조건으로 초기화">↺</button>
+          </div>
+        </div>
+      </div>
+      <div class="revealwrap" style="margin-top:6px"><button class="revealbtn" onclick="reveal(this)" data-reveal="sumNH3"><span class="rdot"></span> 핵심 정리 보기 <span class="ra">↓</span></button></div>
+      <div class="card tight summary" id="sumNH3">
+        <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+          <div class="flowrow blue"><span class="fbadge">🗜 압력 ↑</span><span class="farr">→</span>기체 분자 수 적은 쪽(정반응)<span class="farr">→</span><span class="fchip">수득률 ↑</span></div>
+          <div class="flowrow red"><span class="fbadge">❄️ 온도 ↓</span><span class="farr">→</span>발열인 정반응 우세<span class="farr">→</span><span class="fchip">수득률 ↑</span></div>
+          <div class="flowrow grn"><span class="fbadge">💧 생성물 제거</span><span class="farr">→</span>정반응이 계속 진행<span class="farr">→</span><span class="fchip">수득률 ↑</span></div>
+        </div>
+        <div class="sumconc">🎯 <b>종합</b> — 셋 다 수득률을 높이지만 <b>저온은 반응이 너무 느림</b>. 그래서 실제 하버법은 <b>온도·압력·촉매</b>로 타협한다 (약 <b>400~500℃ · 200~300 atm · 철 촉매</b>).</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-align:center;margin-top:6px">반응이 한 번에 다 일어나진 않으므로, 남은 N₂·H₂는 다시 넣어 <b>재사용(재순환)</b>합니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 3. 생명 — 헤모글로빈: 산소 운반 시뮬 + 해리 곡선(통합) ===== -->
+  <section class="slide single" data-title="생명 · 헤모글로빈과 고산병" data-init="initHb">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:7px">
+        <span class="kicker"><span class="n">2</span> 생명·건강</span>
+        <h1 class="title" style="font-size:22px;margin:0">헤모글로빈 — 산소 운반</h1>
+        <span class="hgroup" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:16.5px;color:var(--ink);font-weight:800;white-space:nowrap">Hb + O<sub>2</sub> ⇌ HbO<sub>2</sub></span>
+          <span class="hbadge" style="color:#a31d36;background:#fde7ec">산화 헤모글로빈</span>
+          <span class="hbadge" style="color:#2b6ca3;background:#e6f0f7">가역 반응</span>
+        </span>
+        <span class="hgroup fx" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:13px;color:var(--primary-d);font-weight:800;white-space:nowrap">산소 분압(pO₂)이 평형 좌우</span>
+          <span class="qchip">🫁 폐 pO₂↑ → 결합</span>
+          <span class="qchip">💪 조직 pO₂↓ → 방출</span>
+        </span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch">
+        <!-- 왼쪽: 산소 운반 시뮬 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <span class="tag sim"><i class="dotmark"></i> 산소 운반 (폐 → 조직)</span>
+            <canvas id="hbLegend" style="width:158px;height:24px;display:block"></canvas>
+          </div>
+          <div style="position:relative;height:200px;background:#fbf7f7;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px"><canvas id="hbCanvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas></div>
+          <div class="meters">
+            <div class="meter"><div class="mhead">폐 포화도 <span class="mval"><span id="hbLungS">98</span>%</span></div><div class="mtrack"><div class="mfill" id="hbLungFill" style="background:#2f9e6e"></div><span class="mmax">100</span></div></div>
+            <div class="meter"><div class="mhead">조직 포화도 <span class="mval"><span id="hbTisS">75</span>%</span></div><div class="mtrack"><div class="mfill" id="hbTisFill" style="background:#e07b39"></div><span class="mmax">100</span></div></div>
+            <div class="meter eff"><div class="mhead">방출 O₂ <span class="mval"><span id="hbDeliv">23</span>%</span></div><div class="mtrack"><div class="mfill" id="hbDelivFill" style="background:var(--primary-d)"></div><span class="mmax">100</span></div></div>
+            <div class="mnote">💡 <b>방출 O₂</b> = 폐 포화도 − 조직 포화도 — 조직에 <b>공급되는 산소량</b></div>
+          </div>
+          <div class="qkverdict" id="hbVerdict" style="margin-top:8px;font-size:12.5px;padding:9px"></div>
+        </div>
+        <!-- 오른쪽: 해리 곡선 + 공유 컨트롤 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <span class="tag sim"><i class="dotmark"></i> 산소–헤모글로빈 해리 곡선</span>
+          <div class="graphbox" style="height:192px;min-height:192px;margin-top:8px"><span class="glabel">산소포화도(%) – 산소분압 pO₂(mmHg)</span><canvas id="hbGraph" style="width:100%;height:100%"></canvas></div>
+          <div style="font-size:10px;color:#9bb0ab;font-weight:700;text-align:right;margin-top:4px">곡선: Hill 식(P<sub>50</sub>≈26.6 mmHg·n≈2.7) · 실제 산소해리곡선</div>
+          <div style="margin-top:9px">
+            <div class="scaleLbl"><span>💪 조직 상태</span><span id="hbTisV">안정 (40 mmHg)</span></div>
+            <div id="hbTisBtns" style="display:flex;gap:6px;margin-top:6px"></div>
+            <div class="simrow" style="margin-top:10px;flex-wrap:nowrap;gap:10px;align-items:flex-end">
+              <div style="flex:1;min-width:0">
+                <div class="scaleLbl"><span>⛰️ 고도 (폐 pO₂)</span><span id="hbAltV">해수면 · 100 mmHg</span></div>
+                <input class="slider" id="hbAlt" type="range" min="0" max="6000" step="50" value="0" oninput="hbSet()" style="width:100%;margin-top:6px;display:block;background:linear-gradient(90deg,#37c0a0,#e7a23c,#d6435f)">
+              </div>
+              <div style="flex:0 0 auto">
+                <div class="scaleLbl" style="justify-content:center"><span style="white-space:nowrap">⏩ 속도</span></div>
+                <input class="slider spd" id="hbSpeed" type="range" min="5" max="100" value="40" oninput="hbSpeedSet()" title="재생 속도" style="width:64px;margin-top:6px;display:block">
+              </div>
+              <button class="btn ghost" onclick="hbToggle()" id="hbPlay" title="재생/일시정지" style="padding:0;width:34px;height:34px;font-size:13px;border-radius:9px;flex:none">⏸</button>
+              <button class="btn primary" onclick="hbReset()" title="해수면·안정으로 초기화" style="padding:0;width:34px;height:34px;font-size:13px;border-radius:9px;flex:none">↺</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="revealwrap" style="margin-top:6px"><button class="revealbtn" onclick="reveal(this)" data-reveal="sumHb"><span class="rdot"></span> 핵심 정리 보기 <span class="ra">↓</span></button></div>
+      <div class="card tight summary" id="sumHb">
+        <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+          <div class="flowrow blue"><span class="fbadge">🫁 폐 (pO₂ 높음)</span><span class="farr">→</span>정반응(결합)<span class="farr">→</span><span class="fchip">산소 싣기</span></div>
+          <div class="flowrow red"><span class="fbadge">💪 조직 (pO₂ 낮음)</span><span class="farr">→</span>역반응(방출)<span class="farr">→</span><span class="fchip">산소 내리기</span></div>
+          <div class="flowrow grn"><span class="fbadge">🏃 운동 (pO₂ 더 낮음)</span><span class="farr">→</span>방출 더 많이<span class="farr">→</span><span class="fchip">산소 공급 ↑</span></div>
+        </div>
+        <div class="sumconc">🎯 <b>종합</b> — 산소 분압 차이로 <b>폐에서 싣고 조직에서 내린다</b>(르샤틀리에). <b>고도 ↑ → 폐 pO₂ ↓ → 결합 부족 → 산소 공급 ↓ → 고산병</b> (적응: 적혈구·헤모글로빈 증가로 보완).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 4. 생활 — 탄산음료: CO₂ 용해 평형 시뮬 + 용해도 곡선(통합) ===== -->
+  <section class="slide single" data-title="생활 · 탄산음료의 용해 평형" data-init="initFizz">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:7px">
+        <span class="kicker"><span class="n">3</span> 생활 속</span>
+        <h1 class="title" style="font-size:22px;margin:0">탄산음료 — CO₂ 용해 평형</h1>
+        <span class="hgroup" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:16.5px;color:var(--ink);font-weight:800;white-space:nowrap">CO<sub>2</sub>(g) ⇌ CO<sub>2</sub>(aq)</span>
+          <span class="hbadge" style="color:#5c6660;background:#eceff1">기체 CO₂ ⇌ 용존 CO₂</span>
+          <span class="hbadge" style="color:#a31d36;background:#fde7ec">🔥 발열(용해)</span>
+        </span>
+        <span class="hgroup fx" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:13px;color:var(--primary-d);font-weight:800;white-space:nowrap">용해도 ↑ 요인</span>
+          <span class="qchip">🗜 압력 ↑</span>
+          <span class="qchip">❄️ 저온</span>
+        </span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch">
+        <!-- 왼쪽: 용해 평형 시뮬 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <span class="tag sim"><i class="dotmark"></i> 병 속 CO₂ 용해 평형</span>
+            <span style="display:inline-flex;gap:11px;font-size:11px;font-weight:700;color:#5c6660;align-items:center">
+              <span style="display:inline-flex;align-items:center;gap:4px"><i style="width:9px;height:9px;border-radius:50%;background:#9aa7b0;display:inline-block"></i>기체 CO₂</span>
+              <span style="display:inline-flex;align-items:center;gap:4px"><i style="width:9px;height:9px;border-radius:50%;background:#2f9e6e;display:inline-block"></i>용존 CO₂</span>
+              <span style="display:inline-flex;align-items:center;gap:4px"><i style="width:9px;height:9px;border-radius:50%;background:#fff;border:1px solid #8fbfd8;display:inline-block"></i>기포</span>
+            </span>
+          </div>
+          <div style="position:relative;height:206px;background:#f4fafc;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px"><canvas id="fizzCanvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas></div>
+          <div class="meters">
+            <div class="meter"><div class="mhead">용존 CO₂ <span class="mval"><span id="fizzDis">90</span>%</span></div><div class="mtrack"><div class="mfill" id="fizzDisFill" style="background:#2f9e6e"></div><span class="mmax">100</span></div></div>
+            <div class="meter"><div class="mhead">평형값(목표) <span class="mval"><span id="fizzEq">90</span>%</span></div><div class="mtrack"><div class="mfill" id="fizzEqFill" style="background:#9aa7b0"></div><span class="mmax">100</span></div></div>
+            <div class="meter eff"><div class="mhead">기포 방출 <span class="mval"><span id="fizzBubM">0</span></span></div><div class="mtrack"><div class="mfill" id="fizzBubFill" style="background:var(--primary-d)"></div><span class="mmax">100</span></div></div>
+            <div class="mnote">💡 <b>용존 CO₂</b>(=CO₂(aq))가 <b>평형값보다 많으면</b> → 기포로 빠져나감(개봉·가열 시)</div>
+          </div>
+          <div class="qkverdict" id="fizzVerdict" style="margin-top:8px;font-size:12.5px;padding:9px"></div>
+        </div>
+        <!-- 오른쪽: 용해도 곡선 + 공유 컨트롤 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <span class="tag sim"><i class="dotmark"></i> 용존 CO₂(용해도) — 압력·온도</span>
+          <div class="graphbox" style="height:192px;min-height:192px;margin-top:8px"><span class="glabel">용존 CO₂(%) – 압력(atm)</span><canvas id="fizzGraph" style="width:100%;height:100%"></canvas></div>
+          <div style="font-size:10px;color:#9bb0ab;font-weight:700;text-align:right;margin-top:4px">용해는 발열 → 저온·고압일수록 용존 CO₂↑ (대표 근사)</div>
+          <div style="margin-top:9px">
+            <div class="scaleLbl"><span>🌡 온도</span><span id="fizzTv">냉장 (5 ℃)</span></div>
+            <div id="fizzTbtns" style="display:flex;gap:6px;margin-top:6px"></div>
+            <div class="simrow" style="margin-top:10px;flex-wrap:nowrap;gap:10px;align-items:flex-end">
+              <div style="flex:1;min-width:0">
+                <div class="scaleLbl"><span>🗜 압력 <span style="font-weight:600;color:var(--muted)">(개봉=낮춤만)</span></span><span id="fizzPv">4.0 atm</span></div>
+                <input class="slider" id="fizzP" type="range" min="1" max="4" step="0.1" value="4" oninput="fizzSet()" style="width:100%;margin-top:6px;display:block;background:linear-gradient(90deg,#e7ecea,var(--primary))">
+              </div>
+              <div style="flex:0 0 auto">
+                <div class="scaleLbl" style="justify-content:center"><span style="white-space:nowrap">⏩ 속도</span></div>
+                <input class="slider spd" id="fizzSpeed" type="range" min="5" max="100" value="40" oninput="fizzSpeedSet()" title="재생 속도" style="width:64px;margin-top:6px;display:block">
+              </div>
+              <button class="btn ghost" onclick="fizzToggle()" id="fizzPlay" title="재생/일시정지" style="padding:0;width:34px;height:34px;font-size:13px;border-radius:9px;flex:none">⏸</button>
+              <button class="btn primary" onclick="fizzReset()" title="밀폐·냉장으로 초기화" style="padding:0;width:34px;height:34px;font-size:13px;border-radius:9px;flex:none">↺</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="revealwrap" style="margin-top:6px"><button class="revealbtn" onclick="reveal(this)" data-reveal="sumFizz"><span class="rdot"></span> 핵심 정리 보기 <span class="ra">↓</span></button></div>
+      <div class="card tight summary" id="sumFizz">
+        <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+          <div class="flowrow blue"><span class="fbadge">🗜 압력 ↑</span><span class="farr">→</span>용해(정반응) 우세<span class="farr">→</span><span class="fchip">용존 CO₂ ↑</span></div>
+          <div class="flowrow red"><span class="fbadge">❄️ 온도 ↓</span><span class="farr">→</span>발열인 용해 우세<span class="farr">→</span><span class="fchip">용존 CO₂ ↑</span></div>
+          <div class="flowrow grn"><span class="fbadge">🔓 개봉·🔥 가열</span><span class="farr">→</span>역반응(기체화)<span class="farr">→</span><span class="fchip">CO₂ 방출(기포)</span></div>
+        </div>
+        <div class="sumconc">🎯 <b>종합</b> — 탄산음료는 <b>고압·저온</b>으로 CO₂를 많이 녹여 충전. <b>개봉(압력↓)</b>·<b>가열(온도↑)</b>하면 평형이 <b>기체 쪽(역반응)</b>으로 이동해 기포로 빠져나간다(용해는 발열이라 온도↑에 약해짐).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 5. 환경 — 해양 산성화: 바다 단면 시뮬 + pH 곡선(통합) ===== -->
+  <section class="slide single" data-title="환경 · 해양 산성화" data-init="initOA">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:7px">
+        <span class="kicker"><span class="n">4</span> 환경</span>
+        <h1 class="title" style="font-size:21px;margin:0">해양 산성화 — pH와 탄산칼슘</h1>
+        <span class="hgroup" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:12.5px;color:var(--ink);font-weight:800;white-space:nowrap">CO<sub>2</sub>(aq)+H<sub>2</sub>O(l) ⇌ H<sup>+</sup>(aq)+HCO<sub>3</sub><sup>−</sup>(aq)</span>
+          <span class="hbadge" style="color:#a31d36;background:#fde7ec">해양 산성화</span>
+        </span>
+        <span class="hgroup" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:12.5px;color:var(--ink);font-weight:800;white-space:nowrap">CaCO<sub>3</sub>(s) ⇌ Ca<sup>2+</sup>(aq)+CO<sub>3</sub><sup>2−</sup>(aq)</span>
+          <span class="hbadge" style="color:#2b6ca3;background:#e6f0f7">골격(석회질) 용해 평형</span>
+        </span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch">
+        <!-- 왼쪽: 바다 단면 시뮬 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <span class="tag sim"><i class="dotmark"></i> 바다 단면 — 대기 CO₂와 산성화</span>
+            <span style="display:inline-flex;gap:10px;font-size:11px;font-weight:700;color:#5c6660;align-items:center">
+              <span style="display:inline-flex;align-items:center;gap:4px"><i style="width:9px;height:9px;border-radius:50%;background:#9aa7b0;display:inline-block"></i>CO₂</span>
+              <span style="display:inline-flex;align-items:center;gap:4px"><i style="width:9px;height:9px;border-radius:50%;background:#e0556b;display:inline-block"></i>H⁺</span>
+              <span style="display:inline-flex;align-items:center;gap:4px"><i style="width:9px;height:9px;border-radius:50%;background:#7a5fb0;display:inline-block"></i>CO₃²⁻</span>
+            </span>
+          </div>
+          <div style="position:relative;height:198px;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px"><canvas id="oaCanvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas></div>
+          <div class="readout" style="gap:8px;margin-top:9px;justify-content:center;align-items:center">
+            <span style="font-size:12px;color:var(--muted);font-weight:800">해수 pH</span>
+            <span style="font-family:Georgia,serif;font-weight:800;font-size:23px;line-height:1" id="oaPhBig"><span id="oaPh">8.10</span></span>
+            <span class="rdchip">[H⁺] <b id="oaH">+26</b>%</span>
+            <span class="rdchip">CaCO₃ 포화도 Ω <b id="oaOmega">2.9</b></span>
+          </div>
+          <div style="font-size:10px;color:var(--muted);font-weight:600;text-align:center;margin-top:5px;line-height:1.6"><div>※ <b>[H⁺] %</b> = 산업화 이전(pH 8.2)보다 [H⁺]가 <b>몇 % 증가</b>했는지 (+100% = 2배)</div><div><b>포화도 Ω</b> = 해수가 CaCO₃를 녹이려/굳히려는 정도 (<b>Ω&gt;1</b> 형성·유지, <b>Ω&lt;1</b> 용해)</div></div>
+          <div class="qkverdict" id="oaVerdict" style="margin-top:8px;font-size:12.5px;padding:9px"></div>
+        </div>
+        <!-- 오른쪽: pH 곡선 + 공유 컨트롤 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <span class="tag sim"><i class="dotmark"></i> 데이터 — 대기 CO₂와 해수 pH</span>
+          <div class="graphbox" style="height:186px;min-height:186px;margin-top:8px"><span class="glabel">해수 pH – 대기 CO₂(ppm)</span><canvas id="oaGraph" style="width:100%;height:100%"></canvas></div>
+          <div style="font-size:10px;color:#9bb0ab;font-weight:700;text-align:right;margin-top:4px">출처: NOAA — 280→422 ppm, pH 8.2→8.1 (대표값 기반 근사 곡선)</div>
+          <div style="margin-top:9px">
+            <div class="scaleLbl"><span>🏭 대기 CO₂</span><span id="oaCO2V2">420 ppm</span></div>
+            <div id="oaBtns" style="display:flex;gap:6px;margin-top:6px"></div>
+            <div class="simrow" style="margin-top:10px;flex-wrap:nowrap;gap:10px;align-items:flex-end">
+              <div style="flex:1;min-width:0">
+                <div class="scaleLbl"><span>CO₂ 농도</span><span id="oaCO2V">420 ppm</span></div>
+                <input class="slider" id="oaCO2" type="range" min="280" max="1000" step="5" value="420" oninput="oaSet()" style="width:100%;margin-top:6px;display:block;background:linear-gradient(90deg,#37c0a0,#e7a23c,#d6435f)">
+              </div>
+              <div style="flex:0 0 auto">
+                <div class="scaleLbl" style="justify-content:center"><span style="white-space:nowrap">⏩ 속도</span></div>
+                <input class="slider spd" id="oaSpeed" type="range" min="5" max="100" value="40" oninput="oaSpeedSet()" title="재생 속도" style="width:64px;margin-top:6px;display:block">
+              </div>
+              <button class="btn ghost" onclick="oaToggle()" id="oaPlay" title="재생/일시정지" style="padding:0;width:34px;height:34px;font-size:13px;border-radius:9px;flex:none">⏸</button>
+              <button class="btn primary" onclick="oaReset()" title="현재(420ppm)로 초기화" style="padding:0;width:34px;height:34px;font-size:13px;border-radius:9px;flex:none">↺</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="revealwrap" style="margin-top:6px"><button class="revealbtn" onclick="reveal(this)" data-reveal="sumOA"><span class="rdot"></span> 핵심 정리 보기 <span class="ra">↓</span></button></div>
+      <div class="card tight summary" id="sumOA">
+        <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+          <div class="flowrow red"><span class="fbadge">🏭 대기 CO₂ ↑</span><span class="farr">→</span>해수 CO₂↑ → 정반응<span class="farr">→</span><span class="fchip">H⁺ ↑ · pH ↓</span></div>
+          <div class="flowrow grn"><span class="fbadge">🔗 H⁺ + CO₃²⁻</span><span class="farr">→</span>HCO₃⁻ 로 결합<span class="farr">→</span><span class="fchip">CO₃²⁻ 소모(↓)</span></div>
+          <div class="flowrow blue"><span class="fbadge">🐚 CO₃²⁻ ↓</span><span class="farr">→</span>CaCO₃ 재료 부족(Ω↓)<span class="farr">→</span><span class="fchip">골격 형성 곤란</span></div>
+        </div>
+        <div class="sumconc">🎯 <b>종합</b> — 대기 CO₂ 증가가 <b>산성화 평형</b>(H⁺↑·pH↓)과 <b>탄산칼슘 용해 평형</b>(CO₃²⁻↓·Ω↓)을 모두 밀어, 산호·조개·플랑크톤의 <b>석회질 골격</b>이 위협받는다. (산업화 이전 pH 8.2 → 현재 8.1, [H⁺] 약 30%↑)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 6. 건강 — 치아 충치: 법랑질 단면 시뮬 + 탈회 곡선(통합) ===== -->
+  <section class="slide single" data-title="건강 · 치아 법랑질과 충치" data-init="initTooth">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:7px">
+        <span class="kicker"><span class="n">5</span> 건강·생활</span>
+        <h1 class="title" style="font-size:21px;margin:0">치아 충치 — 법랑질 용해 평형</h1>
+        <span class="hgroup" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:12.5px;color:var(--ink);font-weight:800;white-space:nowrap">Ca<sub>5</sub>(PO<sub>4</sub>)<sub>3</sub>OH(s) ⇌ 5Ca<sup>2+</sup>+3PO<sub>4</sub><sup>3−</sup>+OH<sup>−</sup></span>
+          <span class="hbadge" style="color:#a31d36;background:#fde7ec">법랑질 용해 평형</span>
+        </span>
+        <span class="hgroup fx" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:13px;color:var(--primary-d);font-weight:800;white-space:nowrap">탈회 ↔ 재광화</span>
+          <span class="qchip">🦠 산 pH↓ → 탈회</span>
+          <span class="qchip">💧 침·불소 → 재광화</span>
+        </span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch">
+        <!-- 왼쪽: 치아 단면 시뮬 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <span class="tag sim"><i class="dotmark"></i> 치아 단면 — 입속 pH와 탈회/재광화</span>
+            <span style="display:inline-flex;align-items:center;gap:5px"><span style="font-size:9px;font-weight:700;color:#9bb0ab;line-height:1.2;text-align:right">타액 이온<br>상대량(모식)</span><canvas id="thIonBars" style="width:186px;height:46px;display:block"></canvas></span>
+          </div>
+          <div style="position:relative;height:198px;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px"><canvas id="thCanvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas></div>
+          <div class="readout" style="gap:8px;margin-top:9px;justify-content:center;align-items:center">
+            <span style="font-size:12px;color:var(--muted);font-weight:800">입속 pH</span>
+            <span style="font-family:Georgia,serif;font-weight:800;font-size:23px;line-height:1" id="thPhBig"><span id="thPhV">6.8</span></span>
+            <span class="rdchip">임계 pH <b id="thCrit">5.5</b></span>
+            <span class="rdchip">탈회 속도 <b id="thDeminV">0</b></span>
+          </div>
+          <div class="qkverdict" id="thVerdict" style="margin-top:8px;font-size:12.5px;padding:9px"></div>
+        </div>
+        <!-- 오른쪽: 탈회 곡선 + 공유 컨트롤 -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <span class="tag sim"><i class="dotmark"></i> 탈회 속도 — 입속 pH</span>
+          <div class="graphbox" style="height:184px;min-height:184px;margin-top:8px"><span class="glabel">탈회 속도(상대) – 입속 pH</span><canvas id="thGraph" style="width:100%;height:100%"></canvas></div>
+          <div style="font-size:10px;color:#9bb0ab;font-weight:700;text-align:right;margin-top:4px">임계 pH: 법랑질 ≈ 5.5 / 플루오린화인회석(불소) ≈ 4.5</div>
+          <div style="margin-top:9px">
+            <div class="scaleLbl"><span>🦷 입속 상황</span><label style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;color:var(--primary-d)"><input type="checkbox" id="thFl" onchange="toothSet()"> 불소(F⁻) 사용</label></div>
+            <div id="thBtns" style="display:flex;gap:6px;margin-top:6px"></div>
+            <div class="simrow" style="margin-top:10px;flex-wrap:nowrap;gap:10px;align-items:flex-end">
+              <div style="flex:1;min-width:0">
+                <div class="scaleLbl"><span>입속 pH</span><span id="thPhV2">6.8</span></div>
+                <input class="slider" id="thPh" type="range" min="3" max="7.5" step="0.1" value="6.8" oninput="toothSet()" style="width:100%;margin-top:6px;display:block;background:linear-gradient(90deg,#d6435f,#e7a23c,#37c0a0)">
+              </div>
+              <div style="flex:0 0 auto">
+                <div class="scaleLbl" style="justify-content:center"><span style="white-space:nowrap">⏩ 속도</span></div>
+                <input class="slider spd" id="thSpeed" type="range" min="5" max="100" value="40" oninput="toothSpeedSet()" title="재생 속도" style="width:64px;margin-top:6px;display:block">
+              </div>
+              <button class="btn ghost" onclick="toothToggle()" id="thPlay" title="재생/일시정지" style="padding:0;width:34px;height:34px;font-size:13px;border-radius:9px;flex:none">⏸</button>
+              <button class="btn primary" onclick="toothReset()" title="평상시(pH 6.8)로 초기화" style="padding:0;width:34px;height:34px;font-size:13px;border-radius:9px;flex:none">↺</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="revealwrap" style="margin-top:6px"><button class="revealbtn" onclick="reveal(this)" data-reveal="sumTooth"><span class="rdot"></span> 핵심 정리 보기 <span class="ra">↓</span></button></div>
+      <div class="card tight summary" id="sumTooth">
+        <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+          <div class="flowrow red"><span class="fbadge">🦠 세균이 당 분해</span><span class="farr">→</span>산(H⁺) 생성<span class="farr">→</span><span class="fchip">pH ↓</span></div>
+          <div class="flowrow red"><span class="fbadge">🔗 H⁺ + OH⁻·PO₄³⁻</span><span class="farr">→</span>소모 → 평형 정반응<span class="farr">→</span><span class="fchip">법랑질 용해(탈회)</span></div>
+          <div class="flowrow blue"><span class="fbadge">🦷 pH &lt; 임계(5.5)</span><span class="farr">→</span>탈회=충치 / pH 회복<span class="farr">→</span><span class="fchip">재광화</span></div>
+          <div class="flowrow grn"><span class="fbadge">🛡️ 불소(F⁻)</span><span class="farr">→</span>법랑질 OH⁻를 F⁻로 치환 → 플루오린화인회석(Ca₅(PO₄)₃F)<span class="farr">→</span><span class="fchip">임계 pH 4.5·산에 강함</span></div>
+        </div>
+        <div class="sumconc">🎯 <b>종합</b> — 입속 pH가 <b>임계 pH(법랑질 5.5)</b>보다 낮아지면 평형이 <b>탈회(충치)</b> 쪽으로, 침이 pH를 회복하면 <b>재광화</b>로. <b>불소</b>는 법랑질의 <b>OH⁻를 F⁻로 치환</b>해 더 단단하고 잘 녹지 않는 <b>플루오린화인회석</b>으로 바꿔(임계 pH 5.5→4.5), 같은 pH에서도 덜 녹게(산에 강하게) 만든다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 7. 형성평가 (4문항 · 2×2) ===== -->
+  <section class="slide single" data-title="형성평가">
+    <div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="kicker"><span class="n">&#10003;</span> 확인 학습</span>
+        <h1 class="title" style="font-size:23px;margin:0">적용 &amp; 확인</h1>
+        <span style="flex:1;min-width:0"></span>
+        <div class="scoreband" style="margin-top:0;padding:8px 18px"><div class="sc" id="scoreNum">0 / 4</div><span id="scoreMsg">네 문항을 풀어 보세요.</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px 14px">
+        <div class="oxbox" style="margin-top:0;border-style:solid;border-color:var(--line);padding:11px 13px">
+          <div class="oxq" style="font-size:13.5px;margin-bottom:8px"><span class="lab" style="background:var(--primary)">Q1</span> <b>암모니아 합성</b> N<sub>2</sub>(g)+3H<sub>2</sub>(g)⇌2NH<sub>3</sub>(g) (발열·분자 수 4→2)에서 <b>평형 수득률</b>을 높이려면?</div>
+          <div class="choices">
+            <button class="choice" onclick="check(this,true,'q1fb','정답! 발열 → 저온, 기체 분자 수 감소 → 고압이 정반응(수득률↑)에 유리.')"><span class="mk">①</span> 저온·고압</button>
+            <button class="choice" onclick="check(this,false,'q1fb','발열·분자 수 감소라 고온·저압은 수득률↓.')"><span class="mk">②</span> 고온·저압</button>
+            <button class="choice" onclick="check(this,false,'q1fb','촉매는 속도만 ↑, 평형 수득률은 불변.')"><span class="mk">③</span> 촉매만 넣으면 수득률↑</button>
+          </div>
+          <div class="fb" id="q1fb"></div>
+        </div>
+        <div class="oxbox" style="margin-top:0;border-style:solid;border-color:var(--line);padding:11px 13px">
+          <div class="oxq" style="font-size:13.5px;margin-bottom:8px"><span class="lab" style="background:var(--primary)">Q2</span> 높은 산에 오르면 <b>산소포화도</b>가 낮아지는 까닭은?</div>
+          <div class="choices">
+            <button class="choice" onclick="check(this,true,'q2fb','정답! 산소 분압↓ → Hb+O₂⇌HbO₂ 역방향(방출) → 산소포화도↓.')"><span class="mk">①</span> 산소 분압↓ → 평형이 산소 방출 쪽으로</button>
+            <button class="choice" onclick="check(this,false,'q2fb','헤모글로빈 양이 즉시 줄어서가 아니라 분압 변화가 원인.')"><span class="mk">②</span> 헤모글로빈이 사라져서</button>
+            <button class="choice" onclick="check(this,false,'q2fb','기온보다 산소 분압(압력) 저하가 직접 원인.')"><span class="mk">③</span> 기온이 낮아져서</button>
+          </div>
+          <div class="fb" id="q2fb"></div>
+        </div>
+        <div class="oxbox" style="margin-top:0;border-style:solid;border-color:var(--line);padding:11px 13px">
+          <div class="oxq" style="font-size:13.5px;margin-bottom:8px"><span class="lab" style="background:var(--primary)">Q3</span> <b>대기 CO<sub>2</sub></b>가 늘어나면 <b>바다의 pH</b>는?</div>
+          <div class="choices">
+            <button class="choice" onclick="check(this,false,'q3fb','CO₂↑면 H⁺↑ → pH는 낮아진다.')"><span class="mk">①</span> 높아진다(염기성)</button>
+            <button class="choice" onclick="check(this,true,'q3fb','정답! CO₂↑ → H⁺↑ → pH↓(산성화), CaCO₃ 포화도↓로 골격 형성 곤란.')"><span class="mk">②</span> 낮아진다(산성화)</button>
+            <button class="choice" onclick="check(this,false,'q3fb','평형이 정반응으로 이동 → pH는 변한다(낮아진다).')"><span class="mk">③</span> 변하지 않는다</button>
+          </div>
+          <div class="fb" id="q3fb"></div>
+        </div>
+        <div class="oxbox" style="margin-top:0;border-style:solid;border-color:var(--line);padding:11px 13px">
+          <div class="oxq" style="font-size:13.5px;margin-bottom:8px"><span class="lab" style="background:var(--primary)">Q4</span> 입속 pH가 <b>임계 pH(약 5.5)</b> 아래로 떨어지면 <b>법랑질</b>은?</div>
+          <div class="choices">
+            <button class="choice" onclick="check(this,true,'q4fb','정답! H⁺가 OH⁻·PO₄³⁻를 소모 → 용해(탈회)=충치. 침·불소로 재광화.')"><span class="mk">①</span> 탈회(용해)된다 → 충치</button>
+            <button class="choice" onclick="check(this,false,'q4fb','산성에서는 용해가 촉진 — 더 단단해지지 않음.')"><span class="mk">②</span> 더 단단해진다</button>
+            <button class="choice" onclick="check(this,false,'q4fb','임계 pH 아래에서는 평형이 용해 쪽으로 이동.')"><span class="mk">③</span> 변화 없다</button>
+          </div>
+          <div class="fb" id="q4fb"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== 8. 마무리 ===== -->
+  <section class="slide single" data-title="마무리">
+    <div>
+      <span class="kicker"><span class="n">&#10003;</span> 수업 마무리</span>
+      <h1 class="title">일상생활 속의 화학 평형 이동 — 한눈에</h1>
+      <p class="sub">조건이 바뀌면 평형은 <b>변화를 줄이는 방향</b>으로 이동한다 — 산업·생명·생활·환경 어디서나.</p>
+      <div class="card">
+        <div class="mm-cols">
+          <!-- 왼쪽: 오늘 배운 5가지 사례 -->
+          <div class="mm-branch">
+            <div style="background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;font-weight:800;font-size:13.5px;padding:8px 12px;border-radius:11px;text-align:center">오늘 배운 5가지 사례</div>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-top:9px">
+              <div class="mm-node"><b>🏭 암모니아 합성(하버법)</b><span>발열·분자수↓ → 저온·고압 유리, 속도 위해 ~450℃·촉매로 타협</span></div>
+              <div class="mm-node"><b>🫁 헤모글로빈·고산병</b><span>산소 분압 차이 → 폐 결합·조직 방출 / 고산 pO₂↓ → 공급↓</span></div>
+              <div class="mm-node"><b>🥤 탄산음료</b><span>개봉(압력↓)·가열(온도↑) → 용해 평형 역방향 → CO₂ 방출</span></div>
+              <div class="mm-node"><b>🌊 해양 산성화 · 🦷 치아 충치</b><span>H⁺↑ → CO₃²⁻·OH⁻ 소모 → CaCO₃·법랑질 용해(pH↓)</span></div>
+            </div>
+          </div>
+          <!-- 오른쪽: 공통 원리 -->
+          <div class="mm-branch">
+            <div style="background:#eef3f1;color:var(--primary-d);font-weight:800;font-size:13.5px;padding:8px 12px;border-radius:11px;text-align:center;border:1px solid var(--line)">공통 원리 — 르샤틀리에</div>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-top:9px">
+              <div class="flowrow grn"><span class="fbadge">🔧 농도·압력·온도</span><span class="farr">→</span>변화를 줄이는 방향<span class="farr">→</span><span class="fchip">평형 이동</span></div>
+              <div class="flowrow blue"><span class="fbadge">⚖️ Q ≠ K</span><span class="farr">→</span>평형 이동<span class="farr">→</span><span class="fchip">새 평형(Q=K)</span></div>
+              <div class="flowrow red"><span class="fbadge">🌡 온도</span><span class="farr">→</span>흡열/발열 방향<span class="farr">→</span><span class="fchip">K 변화</span></div>
+            </div>
+            <div class="sumconc" style="margin-top:9px">🎯 무엇이 <b>변했고</b>(조건) → 평형이 <b>어디로 이동</b>했으며 → 그 <b>결과</b>가 무엇인지로 일상 현상을 설명할 수 있다. (농도·압력은 K 불변, <b>온도만 K를 바꾼다</b>)</div>
+          </div>
+        </div>
+        <div style="margin-top:13px;display:flex;gap:10px;justify-content:center"><button class="btn ghost" onclick="go(0)">↺ 처음부터</button></div>
+      </div>
+    </div>
+  </section>
+
+
+  </div>
+  <div class="botbar">
+    <button class="navbtn" id="prevBtn" onclick="go(cur-1)">← 이전</button>
+    <div class="navlabel"><b id="navTitle"></b> <span id="navCount"></span></div>
+    <button class="navbtn go" id="nextBtn" onclick="go(cur+1)">다음 →</button>
+  </div>
+</div></div></div>
+<div class="zoomctl"><button onclick="zoomOut()" title="축소 (Ctrl+휠)">&#8722;</button><button onclick="zoomReset()" id="zoomLbl" title="화면 맞춤">100%</button><button onclick="zoomIn()" title="확대 (Ctrl+휠)">&#65291;</button></div>
+
+<script>
+
+/* ===================== 프레임워크 (보통 수정 불필요) ===================== */
+const slides=[...document.querySelectorAll('.slide')];
+const N=slides.length;
+let cur=0;
+const dotsWrap=document.getElementById('dots');
+for(let i=0;i<N;i++){const b=document.createElement('button');b.className='dot'+(i===0?' on':'');b.onclick=()=>go(i);dotsWrap.appendChild(b);}
+const dotEls=[...dotsWrap.children];
+function go(i){
+  if(i<0||i>=N)return;
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  dotEls.forEach((d,k)=>{d.classList.toggle('on',k===cur);d.classList.toggle('done',k<cur);});
+  document.getElementById('navTitle').textContent=slides[cur].dataset.title||'';
+  document.getElementById('navCount').textContent='('+(cur+1)+' / '+N+')';
+  document.getElementById('prevBtn').disabled=cur===0;
+  const nb=document.getElementById('nextBtn'); nb.textContent=cur===N-1?'완료':'다음 →'; nb.disabled=cur===N-1;
+  initFor(cur);
+  const vp=document.getElementById('viewport'); if(vp) vp.scrollTo({top:0,left:0,behavior:'smooth'});
+}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+/* 슬라이드가 처음 열릴 때 data-init="함수이름" 을 1회 실행 */
+const _inited={};
+function initFor(i){ if(_inited[i])return; _inited[i]=true; const fn=slides[i].dataset.init; if(fn&&typeof window[fn]==='function') window[fn](); }
+/* 펼치기(핵심 정리 등): <button class="revealbtn" onclick="reveal(this)" data-reveal="대상id"> */
+function reveal(btn){ const t=document.getElementById(btn.dataset.reveal); if(!t)return; const on=t.classList.toggle('show'); btn.classList.toggle('open',on); const a=btn.querySelector('.ra'); if(a)a.textContent=on?'↑':'↓'; }
+/* 형성평가/오개념 점검: onclick="check(this,true|false,'피드백id','메시지(HTML)')" */
+let _score=0; const _answered={};
+function check(btn,correct,fbId,msg){
+  if(_answered[fbId])return; _answered[fbId]=true;
+  const box=btn.closest('.choices'); [...box.children].forEach(c=>{c.classList.add('locked');c.onclick=null;});
+  btn.classList.add(correct?'correct':'wrong');
+  const fb=document.getElementById(fbId); if(fb){fb.className='fb show '+(correct?'good':'bad'); fb.innerHTML=msg;}
+  if(correct)_score++;
+  const scope=btn.closest('.slide')||document;
+  const total=scope.querySelectorAll('.choices').length;
+  const sn=document.getElementById('scoreNum'); if(sn) sn.textContent=_score+' / '+total;
+  const done=Object.keys(_answered).length;
+  const sm=document.getElementById('scoreMsg'); if(sm&&done>=total) sm.textContent=(_score===total?'완벽합니다! 모두 맞혔어요.':'틀린 문항의 개념을 다시 확인해 보세요.');
+}
+
+/* ===================== 자유 확대/축소 (수정 불필요) ===================== */
+let deckScale=1, userZoom=1;
+function applyZoom(){
+  const fit=Math.min(window.innerWidth/1280, window.innerHeight/720);
+  deckScale=fit*userZoom;
+  document.getElementById('deck').style.transform='scale('+deckScale+')';
+  const s=document.getElementById('sizer'); s.style.width=(1280*deckScale)+'px'; s.style.height=(720*deckScale)+'px';
+  const lbl=document.getElementById('zoomLbl'); if(lbl) lbl.textContent=Math.round(userZoom*100)+'%';
+}
+function setZoom(z){userZoom=Math.min(4,Math.max(0.4,z));applyZoom();}
+function zoomIn(){setZoom(userZoom*1.15);}
+function zoomOut(){setZoom(userZoom/1.15);}
+function zoomReset(){setZoom(1);}
+window.addEventListener('resize',applyZoom);
+(function(){const vp=document.getElementById('viewport'); if(vp)vp.addEventListener('wheel',function(e){if(e.ctrlKey||e.metaKey){e.preventDefault();setZoom(userZoom*(e.deltaY<0?1.1:0.9));}},{passive:false});})();
+/* 캔버스 헬퍼: 확대 배율을 반영해 또렷하게 그림. 사용법: const {ctx,w,h}=fitCanvas(myCanvas); */
+function fitCanvas(cv){
+  const r=cv.getBoundingClientRect();const dpr=window.devicePixelRatio||1;const s=deckScale||1;
+  const w=Math.max(2,r.width/s),h=Math.max(2,r.height/s);
+  cv.width=w*dpr;cv.height=h*dpr; const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+
+/* ===================== 미시 입자 모형 공통 유틸 (재사용) ===================== */
+function rnd(a,b){return a+(b-a)*Math.random();}
+function pSeed(type){return {x:rnd(0.08,0.92),y:rnd(0.10,0.90),a:rnd(0,6.2832),sp:rnd(0.55,1.05),type,sc:0,glow:0,gc:'#fff'};}
+function pMove(p,xmin,xmax){
+  p.x+=Math.cos(p.a)*p.sp*0.0026; p.y+=Math.sin(p.a)*p.sp*0.0026;
+  if(p.x<xmin){p.x=xmin;p.a=Math.PI-p.a;} if(p.x>xmax){p.x=xmax;p.a=Math.PI-p.a;}
+  if(p.y<0.06){p.y=0.06;p.a=-p.a;} if(p.y>0.94){p.y=0.94;p.a=-p.a;}
+  if(Math.random()<0.01)p.a+=rnd(-0.3,0.3);
+  if(p.sc<1)p.sc=Math.min(1,p.sc+0.10); if(p.glow>0)p.glow=Math.max(0,p.glow-0.045);
+}
+function atom(ctx,x,y,r,c){
+  const g=ctx.createRadialGradient(x-r*0.35,y-r*0.35,r*0.2,x,y,r);
+  g.addColorStop(0,'#ffffff'); g.addColorStop(0.25,c); g.addColorStop(1,c);
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.fill();
+}
+function ball(ctx,x,y,r,c1,c2){
+  const g=ctx.createRadialGradient(x-r*0.35,y-r*0.35,r*0.2,x,y,r);
+  g.addColorStop(0,c1); g.addColorStop(1,c2);
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.fill();
+}
+function glowRing(ctx,x,y,r,p){ if(p.glow>0){ ctx.save(); ctx.globalAlpha=p.glow; ctx.strokeStyle=p.gc; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.stroke(); ctx.restore(); } }
+function pickIdx(arr,type){ const idx=[]; for(let i=0;i<arr.length;i++)if(arr[i].type===type)idx.push(i); return idx.length?idx[(Math.random()*idx.length)|0]:-1; }
+function countType(arr,type){ let n=0; for(const q of arr)if(q.type===type)n++; return n; }
+/* 목표 개수에 맞게 입자 추가/제거 */
+function reconcile(arr,type,target,glowColor){
+  let n=countType(arr,type);
+  while(n<target){ const q=pSeed(type); q.glow=glowColor?1:0; q.gc=glowColor||'#fff'; arr.push(q); n++; }
+  while(n>target){ const i=pickIdx(arr,type); if(i<0)break; arr.splice(i,1); n--; }
+}
+/* 분자 그리기 — 새 분자는 여기 분기에 추가 (A/B 일반구, NO2/N2O4/Cr2O7/CrO4/H+ 예시) */
+function drawMolecule(ctx,p,X,Y,s){
+  glowRing(ctx,X,Y,15*s,p);
+  if(p.type==='A'){ ball(ctx,X,Y,8*s,'#9af0d3','#2bb894'); }
+  else if(p.type==='B'){ ball(ctx,X,Y,8*s,'#ffd98a','#e0922a'); }
+  else if(p.type==='NO2'){
+    ctx.save(); ctx.fillStyle='rgba(154,52,18,.18)'; ctx.beginPath(); ctx.arc(X,Y,12*s,0,6.2832); ctx.fill(); ctx.restore();
+    atom(ctx,X-5*s,Y+3*s,3.4*s,'#c0392b'); atom(ctx,X+5*s,Y+3*s,3.4*s,'#c0392b'); atom(ctx,X,Y-2.5*s,4.2*s,'#3a6ea5');
+  } else if(p.type==='N2O4'){
+    ctx.save(); ctx.fillStyle='rgba(138,166,189,.16)'; ctx.beginPath(); ctx.arc(X,Y,14*s,0,6.2832); ctx.fill();
+    ctx.strokeStyle='#8aa6bd'; ctx.lineWidth=1.6*s; ctx.beginPath(); ctx.moveTo(X-4*s,Y-1*s); ctx.lineTo(X+4*s,Y-1*s); ctx.stroke(); ctx.restore();
+    atom(ctx,X-10*s,Y+3*s,3*s,'#c89b9b'); atom(ctx,X-2*s,Y+5*s,3*s,'#c89b9b');
+    atom(ctx,X+10*s,Y+3*s,3*s,'#c89b9b'); atom(ctx,X+2*s,Y+5*s,3*s,'#c89b9b');
+    atom(ctx,X-4*s,Y-1*s,3.8*s,'#6b93b5'); atom(ctx,X+4*s,Y-1*s,3.8*s,'#6b93b5');
+  } else if(p.type==='Di'){ ctx.save(); ctx.strokeStyle='#c85a12'; ctx.lineWidth=2.2*s; ctx.beginPath(); ctx.moveTo(X-4*s,Y); ctx.lineTo(X+4*s,Y); ctx.stroke(); ctx.restore();
+    ball(ctx,X-5*s,Y,5.4*s,'#f5a25a','#d2691e'); ball(ctx,X+5*s,Y,5.4*s,'#f5a25a','#d2691e');
+  } else if(p.type==='Cr'){ ball(ctx,X,Y,5.6*s,'#fbe88a','#e7c200');
+  } else if(p.type==='H'){ ball(ctx,X,Y,2.8*s,'#cfd8e6','#9aa7bd'); }
+}
+/* 시간에 따른 값 변화 꺾은선 그래프: lines=[{data:[...],color}], ymax=세로축 최대 */
+function lineGraph(cv, lines, ymax){
+  if(!cv||cv.offsetParent===null)return;
+  const {ctx,w,h}=fitCanvas(cv); ctx.clearRect(0,0,w,h);
+  const pl=10,pr=10,pt=15,pb=13, x0=pl,x1=w-pr,y0=h-pb,y1=pt;
+  ctx.strokeStyle='#e7efec'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x0,y1); ctx.lineTo(x0,y0); ctx.stroke();
+  const maxLen=Math.max(2,...lines.map(l=>l.data.length));
+  const X=i=>x0+(x1-x0)*(maxLen<=1?0:i/(maxLen-1));
+  const Y=v=>y0-(y0-y1)*Math.max(0,Math.min(1,v/ymax));
+  lines.forEach((l)=>{ if(!l.data.length)return;
+    ctx.strokeStyle=l.color; ctx.lineWidth=2.2; ctx.lineJoin='round'; ctx.beginPath();
+    l.data.forEach((v,i)=>{const xx=X(i),yy=Y(v); i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}); ctx.stroke();
+    const li=l.data.length-1; ctx.fillStyle=l.color; ctx.beginPath(); ctx.arc(X(li),Y(l.data[li]),3.2,0,6.2832); ctx.fill();
+  });
+  const labs=lines.filter(l=>l.data.length).map(l=>({c:l.color,v:l.data[l.data.length-1],y:Y(l.data[l.data.length-1])}));
+  labs.sort((a,b)=>a.y-b.y); const gap=16;
+  for(let i=1;i<labs.length;i++){ if(labs[i].y-labs[i-1].y<gap) labs[i].y=labs[i-1].y+gap; }
+  for(let i=labs.length-1;i>0;i--){ if(labs[i].y>y0-2){ labs[i].y=y0-2; if(labs[i-1].y>labs[i].y-gap) labs[i-1].y=labs[i].y-gap; } }
+  ctx.font='800 14px Georgia,serif'; ctx.textAlign='right';
+  labs.forEach(L=>{ ctx.fillStyle=L.c; const t=(Math.abs(L.v)>=1)?(Math.round(L.v*10)/10):(+L.v.toPrecision(2)); ctx.fillText(t, x1-3, Math.max(y1+11,Math.min(y0-2,L.y))); });
+  ctx.fillStyle='#9bb0ab'; ctx.font='700 9px Pretendard,sans-serif'; ctx.textAlign='right'; ctx.fillText('시간 →', x1, h-3);
+}
+function pushHist(arr,v,cap){ arr.push(v); if(arr.length>(cap||200))arr.shift(); }
+/* 두 색(#rrggbb)을 t(0~1)로 보간 → 'rgb(...)' (용액 색 등) */
+function mix(c1,c2,t){ const a=parseInt(c1.slice(1),16),b=parseInt(c2.slice(1),16);
+  const r=Math.round((a>>16)+(((b>>16)-(a>>16))*t)),g=Math.round(((a>>8)&255)+((((b>>8)&255)-((a>>8)&255))*t)),bl=Math.round((a&255)+(((b&255)-(a&255))*t));
+  return 'rgb('+r+','+g+','+bl+')'; }
+
+/* ===================== 하버법: 공정 도식 + 수득률 곡선 (통합, 온도·압력 공유) =====================
+   미래엔 공정도: 공급+재순환 → 압축기(압력↑) → 촉매 반응기(가열) → 냉각기(NH₃ 액화·제거=❄) → 분리기 → 미반응 N₂·H₂ 재순환.
+   단일 통과 전환율은 낮아(평형 수득률에 연동) 대부분의 N₂·H₂는 변환 안 되고 재순환된다. 온도(교과서 미표기) 추가. */
+const NH3_TT=[200,300,400,500,600], NH3_YMAX=[92,86,74,52,30], NH3_PHALF=[55,130,211,378,550];
+function nh3Interp(x,xs,ys){ if(x<=xs[0])return ys[0]; if(x>=xs[xs.length-1])return ys[ys.length-1]; var i=0; while(i<xs.length-2 && x>xs[i+1])i++; var f=(x-xs[i])/(xs[i+1]-xs[i]); return ys[i]+(ys[i+1]-ys[i])*f; }
+function nh3Yield(P,T){ var ym=nh3Interp(T,NH3_TT,NH3_YMAX), ph=nh3Interp(T,NH3_TT,NH3_PHALF); return ym*P/(P+ph); }  // 평형 수득률 %
+function nh3Rate(T,cat){ return Math.max(0.02,Math.min(1,(T-330)/230))*(cat?1:0.3); }
+function nh3EffRaw(T,P,cat){ return (nh3Yield(P,T)/100)*nh3Rate(T,cat); }
+const NH3_EFFMAX=0.20;
+const NH3G_REF=[200,300,400,500,600];
+const NH3G_COL={200:'#2b7fb8',300:'#1f9e6e',400:'#b06a10',500:'#e07b39',600:'#d6435f'};
+function nh3Col(T){ for(var i=0;i<NH3G_REF.length-1;i++){ if(T<=NH3G_REF[i+1]){ var f=(T-NH3G_REF[i])/(NH3G_REF[i+1]-NH3G_REF[i]); return mix(NH3G_COL[NH3G_REF[i]],NH3G_COL[NH3G_REF[i+1]],Math.max(0,Math.min(1,f))); } } return NH3G_COL[600]; }
+let nh3=null;
+function nh3Meter(fillId,ptrId,val){ val=Math.max(0,Math.min(100,val)); var f=document.getElementById(fillId), p=document.getElementById(ptrId); if(f)f.style.width=val+'%'; if(p)p.style.left=Math.max(4,Math.min(96,val))+'%'; }
+function nh3FeedType(){ return Math.random()<0.25?'N2':'H2'; }
+function nh3Build(){ nh3.p=[]; for(var i=0;i<24;i++){ nh3.p.push({t:i/24, type:Math.random()<0.62?nh3FeedType():'NH3', hl:0}); } nh3.drops=[]; nh3.flashes=[]; nh3.level=0.18; nh3.fr=0; }
+function nh3TButtons(){ var box=document.getElementById('nh3Tbtns'); if(!box)return; box.innerHTML='';
+  NH3G_REF.forEach(function(t){ var b=document.createElement('button'); var on=(t===nh3.T); var col=NH3G_COL[t];
+    b.type='button'; b.textContent=t; b.style.cssText='flex:1;padding:6px 0;border-radius:9px;font-weight:800;font-size:12.5px;cursor:pointer;transition:all .15s;border:1.5px solid '+col+';'+(on?('background:'+col+';color:#fff'):('background:#fff;color:'+col));
+    b.onclick=function(){ nh3SelT(t); }; box.appendChild(b); }); }
+function nh3SelT(t){ if(!nh3)return; nh3.T=t; nh3TButtons(); nh3Set(); }
+function initNH3(){ var s=nh3&&nh3.started; nh3={p:[],drops:[],T:400,P:250,cat:true,run:true,speed:0.4,level:0.18,started:s}; nh3Build();
+  var p=document.getElementById('nh3P'); if(p)p.value=250; var c=document.getElementById('nh3Cat'); if(c)c.checked=true; var sp=document.getElementById('nh3Speed'); if(sp)sp.value=40;
+  nh3TButtons();
+  if(!nh3.started){nh3.started=true; requestAnimationFrame(nh3Loop);} nh3Set(); }
+function nh3Set(){ if(!nh3)return; nh3.P=+document.getElementById('nh3P').value; nh3.cat=document.getElementById('nh3Cat').checked;
+  document.getElementById('nh3Tval').textContent=nh3.T+' ℃'; document.getElementById('nh3Pval').textContent=nh3.P+' atm';
+  var y=nh3Yield(nh3.P,nh3.T), rate=nh3Rate(nh3.T,nh3.cat), eff=nh3EffRaw(nh3.T,nh3.P,nh3.cat)/NH3_EFFMAX;
+  var yv=Math.round(y), rv=Math.round(rate*100), ev=Math.round(Math.min(1,Math.max(0,eff))*100);
+  document.getElementById('nh3Y').textContent=yv; document.getElementById('nh3Rate').textContent=rv; document.getElementById('nh3Eff').textContent=ev;
+  nh3Meter('nh3Yfill','nh3Yptr',yv); nh3Meter('nh3Rfill','nh3Rptr',rv); nh3Meter('nh3Efill','nh3Eptr',ev);
+  nh3Verdict();
+}
+/* 실제 하버법 운전 조건(약 400~500℃·200~300atm·철 촉매)과 현재 선택 비교 → 맞으면 이유, 아니면 왜 산업에서 안 쓰는지 */
+function nh3Verdict(){ var v=document.getElementById('nh3Verdict'); if(!v)return;
+  var issues=[];
+  if(nh3.T<400) issues.push('<b>온도 낮음</b>(반응이 너무 느림)');
+  else if(nh3.T>500) issues.push('<b>온도 높음</b>(수득률 너무 낮음)');
+  if(nh3.P<150) issues.push('<b>압력 낮음</b>(수득률 부족)');
+  else if(nh3.P>350) issues.push('<b>압력 높음</b>(설비·안전 비용↑)');
+  if(!nh3.cat) issues.push('<b>촉매 없음</b>(속도 너무 느림·철 촉매 필수)');
+  var ref='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px">🏭 실제 하버법: <b>약 400~500℃ · 200~300 atm · 철 촉매</b></div>';
+  if(issues.length===0){
+    v.innerHTML=ref+'<div><b>✅ 실제 산업 운전 조건과 일치</b> — 수득률·속도의 <b>경제적 타협점</b></div>';
+    v.style.background='var(--ok-l)'; v.style.color='#0c6a4f';
+  } else {
+    v.innerHTML=ref+'<div><b>⚠️ 산업에선 잘 안 쓰는 조건</b> — '+issues.join(' · ')+'</div>';
+    v.style.background='var(--no-l)'; v.style.color='#a31d36';
+  }
+}
+function nh3Toggle(){ if(!nh3)return; nh3.run=!nh3.run; document.getElementById('nh3Play').textContent=nh3.run?'⏸':'▶'; }
+function nh3SpeedSet(){ if(!nh3)return; nh3.speed=(+document.getElementById('nh3Speed').value)/100; }
+function nh3Reset(){ if(!nh3)return; nh3.T=400; nh3.drops=[]; nh3.flashes=[]; nh3Build(); nh3.run=true; document.getElementById('nh3Play').textContent='⏸';
+  var p=document.getElementById('nh3P'); if(p)p.value=250; var c=document.getElementById('nh3Cat'); if(c)c.checked=true;   // 산업 최적 조건(400℃·250atm·철 촉매)
+  nh3TButtons(); nh3Set(); }
+function nh3Loop(){ var cv=document.getElementById('nh3Canvas'), gv=document.getElementById('nh3gCanvas'); var vis=(cv&&cv.offsetParent!==null)||(gv&&gv.offsetParent!==null);
+  if(nh3&&vis){ if(nh3.run) nh3Step(); if(cv&&cv.offsetParent!==null)drawNH3(cv); if(gv&&gv.offsetParent!==null)drawNH3G(gv); var lg=document.getElementById('nh3Legend'); if(lg&&lg.offsetParent!==null)drawNH3Legend(lg); } requestAnimationFrame(nh3Loop); }
+function drawNH3Legend(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h); var cyy=h/2;
+  ctx.font='700 11px Pretendard,sans-serif'; ctx.textBaseline='middle'; ctx.textAlign='left';
+  nh3Mol(ctx,9,cyy,'N2'); ctx.fillStyle='#5c6660'; ctx.fillText('N₂',18,cyy);
+  nh3Mol(ctx,68,cyy,'H2'); ctx.fillStyle='#5c6660'; ctx.fillText('H₂',76,cyy);
+  nh3Mol(ctx,128,cyy,'NH3'); ctx.fillStyle='#5c6660'; ctx.fillText('NH₃',138,cyy);
+  ctx.textBaseline='alphabetic'; }
+function nh3Step(){ nh3.fr++;
+  var yld=nh3Yield(nh3.P,nh3.T)/100, rate=nh3Rate(nh3.T,nh3.cat);
+  var pConv=Math.max(0.05,Math.min(0.85, yld*(0.35+0.65*rate)));   // 단일 통과 전환율(낮음→재순환)
+  var sp=0.0010*(0.25+nh3.speed*1.4);
+  for(var i=0;i<nh3.p.length;i++){ var q=nh3.p[i]; var prev=q.t; q.t=(q.t+sp)%1; if(q.hl>0) q.hl=Math.max(0,q.hl-0.011);
+    if(q.type!=='NH3' && prev<0.07 && q.t>=0.07){ if(Math.random()<pConv){ q.type='NH3'; q.hl=1; } }          // 반응기 입구: 일부만 N₂·H₂→NH₃(생성 시 하이라이트)
+    if(q.type==='NH3' && prev<0.57 && q.t>=0.57){ if(Math.random()<0.92){ nh3.drops.push({pr:0}); nh3.flashes.push({t:q.t, life:1}); nh3.level=Math.min(0.6,nh3.level+0.05); q.type=nh3FeedType(); q.hl=0; } }  // 냉각기 입구: NH₃ 액화·제거(파란 하이라이트) → 제자리에서 미반응 기체로(간격 유지=겹침 방지)
+  }
+  for(var d=0;d<nh3.drops.length;d++) nh3.drops[d].pr+=0.03; nh3.drops=nh3.drops.filter(function(o){return o.pr<1;});
+  for(var fz=0;fz<nh3.flashes.length;fz++) nh3.flashes[fz].life-=0.035; nh3.flashes=nh3.flashes.filter(function(o){return o.life>0;});
+  nh3.level=Math.max(0.12, nh3.level-0.0007);
+}
+function nh3Pt(t,x0,x1,yT,yB){ if(t<0.25){var f=t/0.25; return [x0, yB+(yT-yB)*f];}
+  else if(t<0.5){var f=(t-0.25)/0.25; return [x0+(x1-x0)*f, yT];}
+  else if(t<0.75){var f=(t-0.5)/0.25; return [x1, yT+(yB-yT)*f];}
+  else {var f=(t-0.75)/0.25; return [x1+(x0-x1)*f, yB];} }
+function nh3Mol(ctx,x,y,type){
+  if(type==='N2'){ ball(ctx,x-2.7,y,3.3,'#7fb0d8','#235f93'); ball(ctx,x+2.7,y,3.3,'#7fb0d8','#235f93'); }
+  else if(type==='H2'){ ball(ctx,x-1.9,y,2.3,'#f4f7fa','#aebccb'); ball(ctx,x+1.9,y,2.3,'#f4f7fa','#aebccb'); }
+  else { ball(ctx,x-3.3,y+2.2,1.9,'#f4f7fa','#aebccb'); ball(ctx,x+3.3,y+2.2,1.9,'#f4f7fa','#aebccb'); ball(ctx,x,y-3.6,1.9,'#f4f7fa','#aebccb'); ball(ctx,x,y,3.6,'#7fb0d8','#235f93'); }
+}
+function nh3Flame(ctx,x,y,s,ph){ var fl=0.85+0.15*Math.sin(ph); ctx.save(); ctx.globalAlpha=0.96;
+  ctx.fillStyle='#f4a23a'; ctx.beginPath(); ctx.moveTo(x,y-9*s*fl); ctx.quadraticCurveTo(x+4*s,y-3*s,x+3*s,y); ctx.quadraticCurveTo(x,y+2*s,x-3*s,y); ctx.quadraticCurveTo(x-4*s,y-3*s,x,y-9*s*fl); ctx.fill();
+  ctx.fillStyle='#e8552b'; ctx.beginPath(); ctx.moveTo(x,y-5.5*s*fl); ctx.quadraticCurveTo(x+2.4*s,y-2*s,x+2*s,y); ctx.quadraticCurveTo(x,y+1.5*s,x-2*s,y); ctx.quadraticCurveTo(x-2.4*s,y-2*s,x,y-5.5*s*fl); ctx.fill();
+  ctx.restore(); }
+function nh3Ice(ctx,x,y,s){ ctx.save(); ctx.fillStyle='rgba(189,219,242,.95)'; ctx.strokeStyle='#6ea8da'; ctx.lineWidth=1.1;
+  ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(x-s,y-s,2*s,2*s,2); else ctx.rect(x-s,y-s,2*s,2*s); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=0.9; ctx.beginPath(); ctx.moveTo(x-s+1.6,y-s+1.6); ctx.lineTo(x-s+1.6,y+s-1.6); ctx.moveTo(x-s+1.6,y-s+1.6); ctx.lineTo(x+s-1.6,y-s+1.6); ctx.stroke(); ctx.restore(); }
+function nh3RR(ctx,x,y,w,h,r){ ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(x,y,w,h,r); else ctx.rect(x,y,w,h); }
+function nh3Arrow(ctx,x,y,t,col){ var a=(t<0.25)?-Math.PI/2:(t<0.5)?0:(t<0.75)?Math.PI/2:Math.PI; ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.fillStyle=col||'#9ec3da'; ctx.beginPath(); ctx.moveTo(-3.2,-3.4); ctx.lineTo(3.4,0); ctx.lineTo(-3.2,3.4); ctx.closePath(); ctx.fill(); ctx.restore(); }
+function drawNH3(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var x0=98, x1=w-74, yT=46, yB=h-60, feedX=x0-50;
+  // --- 파이프(순환 루프 + 신선 공급관) ---
+  ctx.strokeStyle='#cfdcd8'; ctx.lineWidth=12; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(x0,yB); ctx.lineTo(x0,yT); ctx.lineTo(x1,yT); ctx.lineTo(x1,yB); ctx.lineTo(x0,yB); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(feedX,yB); ctx.lineTo(x0,yB); ctx.stroke();
+  ctx.strokeStyle='#eef4f2'; ctx.lineWidth=7;
+  ctx.beginPath(); ctx.moveTo(x0,yB); ctx.lineTo(x0,yT); ctx.lineTo(x1,yT); ctx.lineTo(x1,yB); ctx.lineTo(x0,yB); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(feedX,yB); ctx.lineTo(x0,yB); ctx.stroke();
+  // --- 배경 설비 ---
+  var rTop=yT+2, rBot=yB-15, rate=nh3Rate(nh3.T,nh3.cat);
+  ctx.save(); ctx.globalAlpha=0.5; ctx.fillStyle=mix('#e3efe8','#39a072',Math.min(1,rate*0.9)); nh3RR(ctx,x0-15,rTop,30,rBot-rTop,9); ctx.fill(); ctx.restore();
+  nh3RR(ctx,x0-15,rTop,30,rBot-rTop,9); ctx.strokeStyle='#8cbfa9'; ctx.lineWidth=1.4; ctx.stroke();
+  // 촉매 점
+  ctx.fillStyle='rgba(15,118,79,.5)'; for(var ck=rTop+12; ck<rBot-6; ck+=9){ for(var cj=-1;cj<=1;cj++){ ctx.beginPath(); ctx.arc(x0+cj*6,ck,1.3,0,6.2832); ctx.fill(); } }
+  // 냉각기 코일
+  ctx.strokeStyle='#5b9bd5'; ctx.lineWidth=2.4; ctx.beginPath();
+  for(var cy=yT+12; cy<yB-14; cy+=8){ ctx.moveTo(x1-10,cy); ctx.quadraticCurveTo(x1+12,cy+4,x1-10,cy+8); } ctx.stroke();
+  // 압축기(코너 박스) + 피스톤
+  var pf=nh3.P/1000, pph=Math.sin(nh3.fr*0.16);
+  ctx.fillStyle='#dfe4e8'; ctx.strokeStyle='#9aa7b0'; ctx.lineWidth=1.5; nh3RR(ctx,x0-16,yB-13,32,26,5); ctx.fill(); ctx.stroke();
+  var pistonX=x0-13+pf*9+pph*2.6*(pf+0.3);
+  ctx.fillStyle='#8b97a0'; ctx.fillRect(pistonX,yB-9,5,18);
+  // 분리기 / NH₃(l)
+  var tankX=x1, tankY=yB+9, tw=30, th=22;
+  ctx.fillStyle='#fff'; ctx.strokeStyle='#9bb6d0'; ctx.lineWidth=1.4; nh3RR(ctx,tankX-tw/2,tankY,tw,th,4); ctx.fill();
+  ctx.save(); nh3RR(ctx,tankX-tw/2,tankY,tw,th,4); ctx.clip(); var lh=th*nh3.level; ctx.fillStyle='#bcd6ef'; ctx.fillRect(tankX-tw/2,tankY+th-lh,tw,lh); ctx.restore();
+  nh3RR(ctx,tankX-tw/2,tankY,tw,th,4); ctx.strokeStyle='#9bb6d0'; ctx.lineWidth=1.4; ctx.stroke();
+  // --- 흐름 화살표 ---
+  [0.13,0.37,0.63,0.87].forEach(function(tt){ var pp=nh3Pt(tt,x0,x1,yT,yB); nh3Arrow(ctx,pp[0],pp[1],tt); });   // 루프(재순환 포함, 0.87=하단 좌향)
+  nh3Arrow(ctx, feedX+20, yB, 0.37, '#7aa7c4');   // 신선 공급 → 압축기(우향)
+  // --- 입자(설비 위에 그려 내부 통과가 보임) ---
+  for(var i=0;i<nh3.p.length;i++){ var q=nh3.p[i], pp=nh3Pt(q.t,x0,x1,yT,yB);
+    if(q.hl>0){ var hr=10+3*Math.sin(nh3.fr*0.4); ctx.save(); ctx.globalAlpha=Math.min(1,q.hl);
+      ctx.fillStyle='rgba(255,201,71,.55)'; ctx.beginPath(); ctx.arc(pp[0],pp[1],hr,0,6.2832); ctx.fill();
+      ctx.strokeStyle='#f0a818'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.arc(pp[0],pp[1],hr,0,6.2832); ctx.stroke(); ctx.restore(); }
+    nh3Mol(ctx,pp[0],pp[1],q.type); }
+  // 공급관 위 신선 분자(우향 이동) — 압축기에 다다르면 빨려 들어가듯 부드럽게 페이드(순간이동 느낌 방지)
+  var fspan=x0-16-(feedX+6);
+  for(var ff=0; ff<2; ff++){ var fp=((nh3.fr*0.004)+ff*0.5)%1; var fa=Math.min(1, fp/0.2, (1-fp)/0.2); if(fa<=0)continue;
+    ctx.save(); ctx.globalAlpha=fa; nh3Mol(ctx, feedX+6+fp*fspan, yB, ff?'N2':'H2'); ctx.restore(); }
+  // --- 전경: 가열 불꽃(반응기 왼쪽) / 얼음(냉각기) ---
+  var nFl=Math.max(2,Math.round((nh3.T-200)/110)); var fsc=0.62+(nh3.T-200)/360;
+  for(var fi=0;fi<nFl;fi++){ var fy=rBot-12 - fi*((rBot-rTop-24)/Math.max(1,nFl-1)); nh3Flame(ctx, x0-26, fy, fsc, nh3.fr*0.3+fi); }
+  nh3Ice(ctx,x1+10,yT+18,4.4); nh3Ice(ctx,x1+12,yT+36,3.6); nh3Ice(ctx,x1+9,yT+54,3.2);
+  // 냉각기 액화 하이라이트(파란 링, 생성 하이라이트와 대비 — 액화·제거되는 NH₃)
+  for(var fl2=0;fl2<nh3.flashes.length;fl2++){ var fz2=nh3.flashes[fl2], fpp=nh3Pt(fz2.t,x0,x1,yT,yB), frr=9+(1-fz2.life)*7; ctx.save(); ctx.globalAlpha=Math.min(1,fz2.life);
+    ctx.fillStyle='rgba(120,184,232,.5)'; ctx.beginPath(); ctx.arc(fpp[0],fpp[1],frr,0,6.2832); ctx.fill();
+    ctx.strokeStyle='#2b6ca3'; ctx.lineWidth=1.8; ctx.beginPath(); ctx.arc(fpp[0],fpp[1],frr,0,6.2832); ctx.stroke(); ctx.restore(); }
+  // 액적(냉각기→탱크)
+  for(var dd=0;dd<nh3.drops.length;dd++){ var pr=nh3.drops[dd].pr, dy=yB+2+pr*(tankY-yB-2); ctx.fillStyle='rgba(43,108,163,'+(0.92-pr*0.5)+')'; ctx.beginPath(); ctx.ellipse(x1,dy,2.8,3.8,0,0,6.2832); ctx.fill(); }
+  // --- 라벨 ---
+  ctx.fillStyle='#0c6a4f'; ctx.font='800 10px Pretendard,sans-serif'; ctx.textAlign='center'; ctx.fillText('촉매 반응기', x0, yT-8);
+  ctx.fillStyle='#2b6ca3'; ctx.fillText('냉각기 ❄', x1, yT-8);
+  ctx.fillStyle='#c0531f'; ctx.font='800 9px Pretendard,sans-serif'; ctx.fillText('🔥가열', x0-26, rTop+1);
+  ctx.fillStyle='#5c6660'; ctx.font='800 9px Pretendard,sans-serif'; ctx.fillText('압축기', x0, yB+25);
+  ctx.fillStyle='#2b6ca3'; ctx.font='800 9.5px Pretendard,sans-serif'; ctx.fillText('NH₃(l)', tankX, tankY+th+12);
+  ctx.fillStyle='#7d8896'; ctx.font='700 8.5px Pretendard,sans-serif'; ctx.textAlign='left'; ctx.fillText('N₂+H₂ 공급', feedX-4, yB+16);
+  ctx.fillStyle='#9bb0ab'; ctx.font='700 9px Pretendard,sans-serif'; ctx.textAlign='center'; ctx.fillText('미반응 N₂·H₂ 재순환', (x0+x1)/2+10, yB+16);
+}
+
+function drawNH3G(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var pl=32,pr=38,pt=12,pb=20, x0=pl,x1=w-pr,y0=h-pb,y1=pt, Pmax=1000;
+  var X=function(P){return x0+(x1-x0)*(P/Pmax);}, Y=function(y){return y0-(y0-y1)*(y/100);};
+  ctx.strokeStyle='#eef3f1'; ctx.lineWidth=1;
+  for(var g=20; g<100; g+=20){ ctx.beginPath(); ctx.moveTo(x0,Y(g)); ctx.lineTo(x1,Y(g)); ctx.stroke(); }
+  for(var gp=200; gp<1000; gp+=200){ ctx.beginPath(); ctx.moveTo(X(gp),y0); ctx.lineTo(X(gp),y1); ctx.stroke(); }
+  ctx.strokeStyle='#cfdcd8'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.moveTo(x0,y1); ctx.lineTo(x0,y0); ctx.stroke();
+  ctx.fillStyle='#9bb0ab'; ctx.font='700 9px Pretendard,sans-serif';
+  ctx.textAlign='right'; ctx.fillText('100',x0-3,y1+8); ctx.fillText('50',x0-3,Y(50)); ctx.fillText('0',x0-3,y0);
+  ctx.textAlign='center'; ctx.fillText('0',x0,h-4); ctx.fillText('500',X(500),h-4); ctx.fillText('1000 atm',x1,h-4);
+  var curP=nh3.P, T=nh3.T;
+  // 참고 곡선(온도별, 흐리게 + 라벨)
+  NH3G_REF.forEach(function(t){ ctx.strokeStyle=NH3G_COL[t]; ctx.globalAlpha=0.30; ctx.lineWidth=1.5; ctx.beginPath();
+    for(var P=0;P<=Pmax;P+=20){ var xx=X(P),yy=Y(nh3Yield(P,t)); P?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy); } ctx.stroke();
+    ctx.globalAlpha=(t===T?1:0.8); ctx.fillStyle=NH3G_COL[t]; ctx.font=(t===T?'800 10px':'700 8.5px')+' Pretendard,sans-serif'; ctx.textAlign='left'; ctx.fillText(t+'℃', X(1000)+4, Y(nh3Yield(990,t))-1); ctx.globalAlpha=1; });
+  // 현재 온도 곡선(굵게, 보간색) — 0~현재압력 실선, 이후 점선
+  var col=nh3Col(T);
+  ctx.strokeStyle=col; ctx.lineWidth=1.6; ctx.setLineDash([4,4]); ctx.beginPath();
+  for(var P2=0;P2<=Pmax;P2+=20){ var xx2=X(P2),yy2=Y(nh3Yield(P2,T)); P2?ctx.lineTo(xx2,yy2):ctx.moveTo(xx2,yy2); } ctx.stroke(); ctx.setLineDash([]);
+  ctx.lineWidth=3.4; ctx.lineJoin='round'; ctx.beginPath();
+  for(var P3=0;P3<=curP;P3+=12){ var xx3=X(P3),yy3=Y(nh3Yield(P3,T)); P3?ctx.lineTo(xx3,yy3):ctx.moveTo(xx3,yy3); }
+  ctx.lineTo(X(curP),Y(nh3Yield(curP,T))); ctx.stroke();
+  // 현재 점 + 안내선 + 라벨
+  var px=X(curP), py=Y(nh3Yield(curP,T));
+  ctx.strokeStyle='#c7d3d0'; ctx.setLineDash([3,3]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(px,y0); ctx.lineTo(px,py); ctx.lineTo(x0,py); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(px,py,4.8,0,6.2832); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(px,py,1.9,0,6.2832); ctx.fill();
+  var lbl=T+'℃ · '+Math.round(nh3Yield(curP,T))+'%'; ctx.font='800 9.5px Pretendard,sans-serif'; var lw=ctx.measureText(lbl).width+10; var lx=Math.max(x0,Math.min(x1-lw,px-lw/2)), ly=Math.max(y1,py-21);
+  ctx.fillStyle='rgba(255,255,255,.92)'; ctx.strokeStyle=col; ctx.lineWidth=1; nh3RR(ctx,lx,ly,lw,15,5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=col; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(lbl,lx+5,ly+8); ctx.textBaseline='alphabetic';
+}
+
+/* ===================== 헤모글로빈: 산소 운반 시뮬 + 해리 곡선 (Hill 식, 실측) =====================
+   Hb + O₂ ⇌ HbO₂. 폐(pO₂↑)→정반응(결합), 조직(pO₂↓)→역반응(방출). 고도↑→폐 pO₂↓→결합 부족→고산병. */
+const HB_P50=26.6, HB_N=2.7;
+function hbSat(po2){ var a=Math.pow(Math.max(0,po2),HB_N); return a/(Math.pow(HB_P50,HB_N)+a); }   // 0~1
+function hbPO2(alt){ return 100*Math.exp(-alt/7200); }   // 폐포 산소분압 근사 (해수면 100, 4000m≈58, 6000m≈43 mmHg)
+const HB_TIS=[{label:'안정',po2:40},{label:'운동',po2:20}];
+let hb=null;
+function hbBuild(){ hb.cells=[]; for(var i=0;i<5;i++) hb.cells.push({x:(i+0.5)/5, load:0.75}); hb.fr=0; }
+function hbMeter(id,v){ var f=document.getElementById(id); if(f)f.style.width=Math.max(0,Math.min(100,v))+'%'; }
+function hbTisButtons(){ var box=document.getElementById('hbTisBtns'); if(!box)return; box.innerHTML='';
+  HB_TIS.forEach(function(o){ var on=(o.po2===hb.tissue); var col=(o.po2<=20?'#d6435f':'#e07b39'); var b=document.createElement('button'); b.type='button';
+    b.textContent=o.label+' ('+o.po2+' mmHg)'; b.style.cssText='flex:1;padding:6px 0;border-radius:9px;font-weight:800;font-size:12px;cursor:pointer;border:1.5px solid '+col+';'+(on?('background:'+col+';color:#fff'):('background:#fff;color:'+col));
+    b.onclick=function(){ hb.tissue=o.po2; hbTisButtons(); hbSet(); }; box.appendChild(b); }); }
+function initHb(){ var s=hb&&hb.started; hb={alt:0,tissue:40,cells:[],run:true,speed:0.4,started:s}; hbBuild();
+  var a=document.getElementById('hbAlt'); if(a)a.value=0; var sp=document.getElementById('hbSpeed'); if(sp)sp.value=40; hbTisButtons();
+  if(!hb.started){hb.started=true; requestAnimationFrame(hbLoop);} hbSet(); }
+function hbSet(){ if(!hb)return; hb.alt=+document.getElementById('hbAlt').value;
+  var lp=hbPO2(hb.alt), ls=hbSat(lp)*100, ts=hbSat(hb.tissue)*100, dv=Math.max(0,ls-ts);
+  document.getElementById('hbAltV').textContent=(hb.alt<50?'해수면':Math.round(hb.alt)+' m')+' · '+Math.round(lp)+' mmHg';
+  document.getElementById('hbTisV').textContent=(hb.tissue<=20?'운동':'안정')+' ('+hb.tissue+' mmHg)';
+  document.getElementById('hbLungS').textContent=Math.round(ls); hbMeter('hbLungFill',ls);
+  document.getElementById('hbTisS').textContent=Math.round(ts); hbMeter('hbTisFill',ts);
+  document.getElementById('hbDeliv').textContent=Math.round(dv); hbMeter('hbDelivFill',dv);
+  var v=document.getElementById('hbVerdict');
+  var ref='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px">🩸 폐 pO₂ 높음 → <b>결합</b> · 조직 pO₂ 낮음 → <b>방출</b></div>';
+  if(ls<90){ v.innerHTML=ref+'<div><b>⚠️ 고산: 폐 pO₂↓ → 폐에서도 결합 부족</b> → 산소 공급 감소(<b>고산병</b> 위험)</div>'; v.style.background='var(--no-l)'; v.style.color='#a31d36'; }
+  else if(hb.tissue<=20){ v.innerHTML=ref+'<div><b>🏃 운동: 조직 pO₂↓ → 방출 O₂ ↑</b> ('+Math.round(dv)+'%) — 근육에 산소 더 공급</div>'; v.style.background='var(--primary-ll)'; v.style.color='var(--primary-d)'; }
+  else { v.innerHTML=ref+'<div><b>✅ 정상</b> — 폐에서 충분히 싣고('+Math.round(ls)+'%) 조직에서 <b>'+Math.round(dv)+'%</b> 방출</div>'; v.style.background='var(--ok-l)'; v.style.color='#0c6a4f'; }
+}
+function hbToggle(){ if(!hb)return; hb.run=!hb.run; document.getElementById('hbPlay').textContent=hb.run?'⏸':'▶'; }
+function hbSpeedSet(){ if(!hb)return; hb.speed=(+document.getElementById('hbSpeed').value)/100; }
+function hbReset(){ if(!hb)return; hb.tissue=40; hbBuild(); hb.run=true; document.getElementById('hbPlay').textContent='⏸';
+  var a=document.getElementById('hbAlt'); if(a)a.value=0; hbTisButtons(); hbSet(); }
+function hbLoop(){ var c=document.getElementById('hbCanvas'), g=document.getElementById('hbGraph'), l=document.getElementById('hbLegend');
+  var vis=(c&&c.offsetParent!==null)||(g&&g.offsetParent!==null);
+  if(hb&&vis){ if(hb.run) hbStep(); if(c&&c.offsetParent!==null)drawHbSim(c); if(g&&g.offsetParent!==null)drawHb(g); if(l&&l.offsetParent!==null)drawHbLegend(l); }
+  requestAnimationFrame(hbLoop); }
+const HB_MAXO2=8;                                          // 적혈구 1개에 표시할 최대 O₂ 점 수(=포화도 100%)
+const HB_TOPF=0.40, HB_BOT0=0.50, HB_BOT1=0.90;            // 루프 t 구간: 위(폐)·아래(조직)
+function hbStep(){ hb.fr++; var ls=hbSat(hbPO2(hb.alt)), ts=hbSat(hb.tissue); var sp=0.0013*(0.3+hb.speed*1.4);
+  for(var i=0;i<hb.cells.length;i++){ var c=hb.cells[i]; c.x+=sp; if(c.x>1)c.x-=1;
+    if(c.x<HB_TOPF) c.load+=(ls-c.load)*0.05;                        // 폐(위) 통과: O₂ 결합(점 증가)
+    else if(c.x>=HB_BOT0 && c.x<HB_BOT1) c.load+=(ts-c.load)*0.05;   // 조직(아래) 통과: O₂ 방출(점 감소)
+  } }
+function hbRBC(ctx,x,y,load){ ctx.fillStyle='#d23b4d'; ctx.strokeStyle='#a3263a'; ctx.lineWidth=1; ctx.beginPath(); ctx.ellipse(x,y,12,8,0,0,6.2832); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='rgba(150,30,50,.4)'; ctx.beginPath(); ctx.ellipse(x,y,5,3.2,0,0,6.2832); ctx.fill();
+  var n=Math.round(Math.max(0,Math.min(1,load))*HB_MAXO2), P=[[-7.5,-3],[-2.5,-3.6],[2.5,-3.6],[7.5,-3],[-7.5,3],[-2.5,3.6],[2.5,3.6],[7.5,3]];
+  for(var i=0;i<n;i++){ ctx.fillStyle='#cfe6ff'; ctx.strokeStyle='#6fa8df'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.arc(x+P[i][0],y+P[i][1],1.8,0,6.2832); ctx.fill(); ctx.stroke(); } }
+function hbO2(ctx,x,y){ ctx.fillStyle='#7fb0e8'; ctx.strokeStyle='#4d86c4'; ctx.lineWidth=0.7; ctx.beginPath(); ctx.arc(x-1.6,y,1.9,0,6.2832); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(x+1.6,y,1.9,0,6.2832); ctx.fill(); ctx.stroke(); }
+/* 순환 루프(트랙형) 경로: t∈[0,1) → 좌표. 위 직선=폐, 아래 직선=조직, 좌우 반원=이동. 닫힌 형태(시작·끝 없음) */
+function hbPath(t,Lx,Rx,Ty,By){ var R=(By-Ty)/2, cyy=(Ty+By)/2, W=Rx-Lx;
+  if(t<HB_TOPF) return [Lx+(t/HB_TOPF)*W, Ty];
+  if(t<HB_BOT0){ var a=-Math.PI/2+((t-HB_TOPF)/(HB_BOT0-HB_TOPF))*Math.PI; return [Rx+R*Math.cos(a), cyy+R*Math.sin(a)]; }
+  if(t<HB_BOT1) return [Rx-((t-HB_BOT0)/(HB_BOT1-HB_BOT0))*W, By];
+  var a2=Math.PI/2+((t-HB_BOT1)/(1-HB_BOT1))*Math.PI; return [Lx+R*Math.cos(a2), cyy+R*Math.sin(a2)]; }
+function hbLoopPath(ctx,Lx,Rx,Ty,By){ var R=(By-Ty)/2, cyy=(Ty+By)/2; ctx.beginPath(); ctx.moveTo(Lx,Ty); ctx.lineTo(Rx,Ty); ctx.arc(Rx,cyy,R,-Math.PI/2,Math.PI/2); ctx.lineTo(Lx,By); ctx.arc(Lx,cyy,R,Math.PI/2,3*Math.PI/2); ctx.closePath(); }
+function hbArrow(ctx,t,Lx,Rx,Ty,By){ var p=hbPath(t,Lx,Rx,Ty,By), q=hbPath((t+0.01)%1,Lx,Rx,Ty,By); var an=Math.atan2(q[1]-p[1],q[0]-p[0]); ctx.save(); ctx.translate(p[0],p[1]); ctx.rotate(an); ctx.fillStyle='#c98f97'; ctx.beginPath(); ctx.moveTo(-4,-4); ctx.lineTo(5,0); ctx.lineTo(-4,4); ctx.closePath(); ctx.fill(); ctx.restore(); }
+function hbAlveolus(ctx,x,y){ ctx.fillStyle='#ffe1e9'; ctx.strokeStyle='#eda9ba'; ctx.lineWidth=1.1;
+  var pos=[[0,1],[-7,-1],[7,-1],[-5,7],[5,7],[0,-7]]; for(var i=0;i<pos.length;i++){ ctx.beginPath(); ctx.arc(x+pos[i][0],y+pos[i][1],6,0,6.2832); ctx.fill(); ctx.stroke(); } }
+function hbDrawLungs(ctx,Lx,Rx,Ty){ var n=4, W=Rx-Lx, midx=(Lx+Rx)/2;
+  ctx.strokeStyle='#edb6c4'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(midx, Ty-48); ctx.lineTo(midx, Ty-34); ctx.stroke();   // 세기관지
+  for(var i=0;i<n;i++){ var cxk=Lx+W*(i+0.5)/n; ctx.strokeStyle='#edb6c4'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.moveTo(cxk,Ty-30); ctx.lineTo((cxk+midx)/2, Ty-37); ctx.lineTo(midx,Ty-40); ctx.stroke(); hbAlveolus(ctx,cxk,Ty-20); } }
+function hbDrawTissue(ctx,Lx,Rx,By){ var W=Rx-Lx, cols=7, cw=W/cols;
+  for(var r=0;r<2;r++){ for(var i=0;i<cols;i++){ var x=Lx+cw*(i+0.5)+(r%2?cw*0.5:0); if(x>Rx-2) continue; var y=By+15+r*21;
+    ctx.fillStyle=(r%2?'#f3cad0':'#efc0c8'); ctx.strokeStyle='#d99aa3'; ctx.lineWidth=1; ctx.beginPath(); ctx.ellipse(x,y,cw*0.46,10,0,0,6.2832); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#b56b75'; ctx.beginPath(); ctx.arc(x,y,2.5,0,6.2832); ctx.fill(); } } }
+function drawHbSim(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var Lx=60, Rx=w-60, cy=Math.round(h*0.5)+4, R=23, Ty=cy-R, By=cy+R;
+  hbDrawLungs(ctx,Lx,Rx,Ty);
+  hbDrawTissue(ctx,Lx,Rx,By);
+  // 혈관 루프(닫힌 순환)
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.strokeStyle='#e2b3b3'; ctx.lineWidth=23; hbLoopPath(ctx,Lx,Rx,Ty,By); ctx.stroke();
+  ctx.strokeStyle='#f7e0e0'; ctx.lineWidth=18; hbLoopPath(ctx,Lx,Rx,Ty,By); ctx.stroke();
+  // 흐름 화살표(루프 방향)
+  [0.18,0.45,0.70,0.95].forEach(function(tt){ hbArrow(ctx,tt,Lx,Rx,Ty,By); });
+  // O₂ 교환: 폐포→혈관(결합) / 혈관→조직(방출)
+  for(var a=0;a<3;a++){ var ph=((hb.fr*0.8)+a*14)%38; hbO2(ctx, Lx+(Rx-Lx)*(0.22+a*0.28), Ty-26+ph); }
+  for(var b=0;b<3;b++){ var ph2=((hb.fr*0.8)+b*14)%38; hbO2(ctx, Lx+(Rx-Lx)*(0.30+b*0.22), By+3+ph2*0.7); }
+  // 적혈구(루프를 따라 순환)
+  for(var k=0;k<hb.cells.length;k++){ var c=hb.cells[k]; var p=hbPath(c.x,Lx,Rx,Ty,By); hbRBC(ctx,p[0],p[1],c.load); }
+  // 라벨
+  ctx.textAlign='center'; ctx.fillStyle='#b85a67'; ctx.font='800 11px Pretendard,sans-serif';
+  ctx.fillText('폐 (폐포) — O₂ 결합 ↑',(Lx+Rx)/2, 13);
+  ctx.fillText('조직 — O₂ 방출 ↓',(Lx+Rx)/2, h-5);
+  ctx.fillStyle='#9bb0ab'; ctx.font='700 8.5px Pretendard,sans-serif'; ctx.fillText('혈액 순환',(Lx+Rx)/2, cy+3);
+}
+
+function drawHbLegend(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h); var cy=h/2;
+  ctx.textBaseline='middle'; ctx.textAlign='left'; ctx.font='700 11px Pretendard,sans-serif';
+  hbRBC(ctx,13,cy,0.85); ctx.fillStyle='#5c6660'; ctx.fillText('적혈구',28,cy);
+  hbO2(ctx,86,cy); ctx.fillStyle='#5c6660'; ctx.fillText('산소(O₂)',96,cy); ctx.textBaseline='alphabetic'; }
+function hbChip(ctx,x,yy,txt,col,x0,x1){ ctx.font='800 9.5px Pretendard,sans-serif'; var lw=ctx.measureText(txt).width+9; var lx=Math.max(x0,Math.min(x1-lw,x-lw/2));
+  ctx.fillStyle='rgba(255,255,255,.92)'; ctx.strokeStyle=col; ctx.lineWidth=1; nh3RR(ctx,lx,yy,lw,14,5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=col; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(txt,lx+4,yy+7.5); ctx.textBaseline='alphabetic'; }
+function drawHb(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var pl=34,pr=16,pt=14,pb=20,x0=pl,x1=w-pr,y0=h-pb,y1=pt,Pmax=100;
+  var X=function(p){return x0+(x1-x0)*(p/Pmax);}, Y=function(s){return y0-(y0-y1)*s;};
+  ctx.strokeStyle='#eef3f1'; ctx.lineWidth=1; for(var g=0.25;g<1;g+=0.25){ ctx.beginPath(); ctx.moveTo(x0,Y(g)); ctx.lineTo(x1,Y(g)); ctx.stroke(); }
+  ctx.strokeStyle='#cfdcd8'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.moveTo(x0,y1); ctx.lineTo(x0,y0); ctx.stroke();
+  ctx.fillStyle='#9bb0ab'; ctx.font='700 9px Pretendard,sans-serif'; ctx.textAlign='right'; ctx.fillText('100',x0-3,y1+8); ctx.fillText('50',x0-3,Y(0.5)); ctx.fillText('0',x0-3,y0);
+  ctx.textAlign='center'; ctx.fillText('0',x0,h-4); ctx.fillText('50',X(50),h-4); ctx.fillText('100 mmHg',x1-16,h-4);
+  // 해리 곡선
+  ctx.strokeStyle='#b06a10'; ctx.lineWidth=2.6; ctx.lineJoin='round'; ctx.beginPath(); for(var p=0;p<=Pmax;p+=2){ var xx=X(p),yy=Y(hbSat(p)); p?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);} ctx.stroke();
+  var lp=Math.min(Pmax,hbPO2(hb.alt)), ls=hbSat(lp), tp=hb.tissue, ts=hbSat(tp);
+  // 안내선
+  ctx.strokeStyle='#c7d3d0'; ctx.setLineDash([3,3]); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(X(lp),Y(ls)); ctx.lineTo(x0,Y(ls)); ctx.moveTo(X(lp),Y(ls)); ctx.lineTo(X(lp),y0); ctx.moveTo(X(tp),Y(ts)); ctx.lineTo(x0,Y(ts)); ctx.moveTo(X(tp),Y(ts)); ctx.lineTo(X(tp),y0); ctx.stroke(); ctx.setLineDash([]);
+  // 방출 O₂ 밴드(좌측 y축, ts~ls)
+  ctx.fillStyle='rgba(47,158,110,.18)'; ctx.fillRect(x0,Y(ls),12,Y(ts)-Y(ls));
+  ctx.strokeStyle='#1f9e6e'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(x0+6,Y(ls)); ctx.lineTo(x0+6,Y(ts)); ctx.stroke();
+  ctx.fillStyle='#0c6a4f'; ctx.font='800 9px Pretendard,sans-serif'; ctx.textAlign='left'; ctx.save(); ctx.translate(x0+15,(Y(ls)+Y(ts))/2); ctx.fillText('방출',0,3); ctx.restore();
+  // 폐 마커(초록)
+  ctx.fillStyle='#1f9e6e'; ctx.beginPath(); ctx.arc(X(lp),Y(ls),4.8,0,6.2832); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(X(lp),Y(ls),1.8,0,6.2832); ctx.fill();
+  // 조직 마커(주황)
+  ctx.fillStyle='#e07b39'; ctx.beginPath(); ctx.arc(X(tp),Y(ts),4.8,0,6.2832); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(X(tp),Y(ts),1.8,0,6.2832); ctx.fill();
+  hbChip(ctx, X(lp), Y(ls)-15, '폐 '+Math.round(ls*100)+'%', '#1f9e6e', x0, x1);
+  hbChip(ctx, X(tp), Y(ts)+5, '조직 '+Math.round(ts*100)+'%', '#e07b39', x0, x1);
+}
+
+/* ===================== 탄산음료: CO₂ 용해 평형 시뮬 + 용해도 곡선 =====================
+   CO₂(g) ⇌ CO₂(aq), 용해는 발열. 압력↑→용해(정반응)→용존↑ / 온도↑→발열의 역방향→방출(용해도↓).
+   헨리 법칙은 명시하지 않고 평형(르샤틀리에)로 설명. */
+const FIZZ_TT=[5,20,37], FIZZ_TLAB={5:'냉장',20:'실온',37:'따뜻'}, FIZZ_TCOL={5:'#2b7fb8',20:'#1f9e6e',37:'#d6435f'};
+function fizzSat(P,T){ var tf=Math.max(0.2,1-0.017*(T-5)); return Math.max(0,Math.min(100,100*(P/4)*tf)); }   // 용존 CO₂(상대 용해도 %) · 충전 4atm=100%
+function fizzCol(T){ for(var i=0;i<FIZZ_TT.length-1;i++){ if(T<=FIZZ_TT[i+1]){ var f=(T-FIZZ_TT[i])/(FIZZ_TT[i+1]-FIZZ_TT[i]); return mix(FIZZ_TCOL[FIZZ_TT[i]],FIZZ_TCOL[FIZZ_TT[i+1]],Math.max(0,Math.min(1,f))); } } return FIZZ_TCOL[37]; }
+let fizz=null;
+function fizzBuild(){ fizz.gas=[]; for(var i=0;i<16;i++) fizz.gas.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*0.013,vy:(Math.random()-.5)*0.013});
+  fizz.p=[]; for(var j=0;j<26;j++) fizz.p.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*0.005,vy:(Math.random()-.5)*0.005});
+  fizz.bub=[]; fizz.dis=fizzSat(fizz.P,fizz.T)/100; fizz.rate=0; fizz.fr=0; }
+function fizzMeter(id,v){ var f=document.getElementById(id); if(f)f.style.width=Math.max(0,Math.min(100,v))+'%'; }
+function fizzTButtons(){ var box=document.getElementById('fizzTbtns'); if(!box)return; box.innerHTML='';
+  FIZZ_TT.forEach(function(t){ var on=(t===fizz.T), col=FIZZ_TCOL[t]; var b=document.createElement('button'); b.type='button';
+    b.textContent=FIZZ_TLAB[t]+' '+t+'℃'; b.style.cssText='flex:1;padding:6px 0;border-radius:9px;font-weight:800;font-size:12px;cursor:pointer;border:1.5px solid '+col+';'+(on?('background:'+col+';color:#fff'):('background:#fff;color:'+col));
+    b.onclick=function(){ fizz.T=t; fizzReset(true); }; box.appendChild(b); }); }
+function initFizz(){ var s=fizz&&fizz.started; fizz={P:4,T:5,gas:[],p:[],bub:[],run:true,speed:0.4,dis:1,rate:0,started:s}; fizzBuild();
+  var p=document.getElementById('fizzP'); if(p)p.value=4; var sp=document.getElementById('fizzSpeed'); if(sp)sp.value=40; fizzTButtons();
+  if(!fizz.started){fizz.started=true; requestAnimationFrame(fizzLoop);} fizzSet(); }
+function fizzSet(){ if(!fizz)return; var sl=document.getElementById('fizzP'); var np=+sl.value;
+  if(np>fizz.P){ np=fizz.P; sl.value=fizz.P; }   // 압력은 낮추는 방향(개봉)만 — 빠져나간 CO₂는 다시 녹지 않음
+  fizz.P=np;
+  document.getElementById('fizzPv').textContent=fizz.P.toFixed(1)+' atm';
+  document.getElementById('fizzTv').textContent=FIZZ_TLAB[fizz.T]+' ('+fizz.T+' ℃)';
+}
+/* verdict: 고정 임계값이 아니라 현재 상태(방출 중 / 안정 시 용존량)에 연동 */
+function fizzVerdict(){ var v=document.getElementById('fizzVerdict'); if(!v)return; var d=fizz.dis*100, target=fizzSat(fizz.P,fizz.T);
+  var ref='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px">CO₂(g) ⇌ CO₂(aq) · 압력↓·온도↑ → 기체 쪽(역반응)</div>';
+  if(fizz.rate>0.05){ var cause=(fizz.T>=37?'온도↑(가열)':'압력↓(개봉)'); v.innerHTML=ref+'<div><b>🫧 CO₂ 방출 중</b> — '+cause+'로 평형이 기체 쪽으로 이동(기포)</div>'; v.style.background='var(--no-l)'; v.style.color='#a31d36'; }
+  else if(d>=55){ v.innerHTML=ref+'<div><b>✅ 탄산 풍부</b> — CO₂가 많이 녹아 있음 (용존 '+Math.round(d)+'%)</div>'; v.style.background='var(--ok-l)'; v.style.color='#0c6a4f'; }
+  else if(d>=25){ v.innerHTML=ref+'<div><b>🟡 탄산 보통</b> — 용존 CO₂ '+Math.round(d)+'%</div>'; v.style.background='var(--primary-ll)'; v.style.color='var(--primary-d)'; }
+  else { v.innerHTML=ref+'<div><b>💨 김 빠진 상태</b> — CO₂가 거의 빠져나감 (용존 '+Math.round(d)+'%)</div>'; v.style.background='#efece4'; v.style.color='#7a6f57'; }
+}
+function fizzToggle(){ if(!fizz)return; fizz.run=!fizz.run; document.getElementById('fizzPlay').textContent=fizz.run?'⏸':'▶'; }
+function fizzSpeedSet(){ if(!fizz)return; fizz.speed=(+document.getElementById('fizzSpeed').value)/100; }
+function fizzReset(keepT){ if(!fizz)return; if(!keepT) fizz.T=5; fizz.run=true; document.getElementById('fizzPlay').textContent='⏸';
+  var p=document.getElementById('fizzP'); if(p)p.value=4; fizz.P=4; fizzBuild(); fizzTButtons(); fizzSet(); }
+function fizzLoop(){ var c=document.getElementById('fizzCanvas'), g=document.getElementById('fizzGraph'); var vis=(c&&c.offsetParent!==null)||(g&&g.offsetParent!==null);
+  if(fizz&&vis){ if(fizz.run) fizzStep(); if(c&&c.offsetParent!==null)drawFizz(c); if(g&&g.offsetParent!==null)drawFizzG(g); fizzMeters(); }
+  requestAnimationFrame(fizzLoop); }
+function fizzStep(){ fizz.fr++; var target=fizzSat(fizz.P,fizz.T)/100; var sf=0.25+fizz.speed*1.7;   // 속도 계수(전체 동작에 반영)
+  if(fizz.dis>target) fizz.dis += (target-fizz.dis)*0.03*sf;   // 방출(감소)만 — 빠져나간 CO₂는 다시 녹지 않음 · 속도 비례
+  var excess=Math.max(0,fizz.dis-target);
+  fizz.rate=Math.min(1, excess*4.5);   // 용존이 평형값보다 많을 때(전이 중)만 기포 → 평형 도달 시 기포 0
+  var spawn=fizz.rate*(0.3+fizz.speed*1.7);
+  if(Math.random()<Math.min(0.95,spawn)) fizz.bub.push({x:0.12+Math.random()*0.76, y:1, r:1.6+Math.random()*2.4, v:0.006+Math.random()*0.012});
+  for(var b=0;b<fizz.bub.length;b++) fizz.bub[b].y-=fizz.bub[b].v*(0.4+fizz.speed*1.8);
+  fizz.bub=fizz.bub.filter(function(o){return o.y>-0.05;});
+  for(var i=0;i<fizz.gas.length;i++){ var g=fizz.gas[i]; g.x+=g.vx*sf; g.y+=g.vy*sf; if(g.x<0.05||g.x>0.95)g.vx*=-1; if(g.y<0.05||g.y>0.95)g.vy*=-1; }
+  for(var j=0;j<fizz.p.length;j++){ var p=fizz.p[j]; p.x+=p.vx*sf; p.y+=p.vy*sf; if(p.x<0.05||p.x>0.95)p.vx*=-1; if(p.y<0.05||p.y>0.95)p.vy*=-1; }
+}
+function fizzMeters(){ if(!fizz)return; var target=fizzSat(fizz.P,fizz.T);
+  document.getElementById('fizzDis').textContent=Math.round(fizz.dis*100); fizzMeter('fizzDisFill',fizz.dis*100);
+  document.getElementById('fizzEq').textContent=Math.round(target); fizzMeter('fizzEqFill',target);
+  document.getElementById('fizzBubM').textContent=Math.round(fizz.rate*100); fizzMeter('fizzBubFill',fizz.rate*100);
+  fizzVerdict();
+}
+function drawFizz(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var bw=Math.min(154,w*0.44), bx=w/2, bl=bx-bw/2, top=14, bot=h-26, liqTop=top+(bot-top)*0.30;
+  ctx.fillStyle='#f0f8fb'; ctx.strokeStyle='#c8d8e2'; ctx.lineWidth=1.5; nh3RR(ctx,bl,top,bw,bot-top,12); ctx.fill(); ctx.stroke();
+  ctx.save(); nh3RR(ctx,bl,top,bw,bot-top,12); ctx.clip();
+  ctx.fillStyle='#cbe7f2'; ctx.fillRect(bl,liqTop,bw,bot-liqTop); ctx.fillStyle='#aed8ea'; ctx.fillRect(bl,liqTop-2,bw,3);
+  var ngas=Math.round(fizz.P/5*14); for(var i=0;i<fizz.gas.length && i<ngas;i++){ var g=fizz.gas[i]; var gx=bl+7+g.x*(bw-14), gy=top+7+g.y*(liqTop-top-14); ctx.fillStyle='#9aa7b0'; ctx.beginPath(); ctx.arc(gx,gy,3,0,6.2832); ctx.fill(); }
+  var naq=Math.round(Math.max(0,Math.min(1,fizz.dis))*24); for(var j=0;j<fizz.p.length && j<naq;j++){ var p=fizz.p[j]; var px=bl+7+p.x*(bw-14), py=liqTop+7+p.y*(bot-liqTop-14); ctx.fillStyle='#2f9e6e'; ctx.beginPath(); ctx.arc(px,py,2.7,0,6.2832); ctx.fill(); }
+  for(var k=0;k<fizz.bub.length;k++){ var b=fizz.bub[k]; var by=liqTop+(bot-liqTop)*b.y, bxx=bl+7+b.x*(bw-14); ctx.fillStyle='rgba(255,255,255,.85)'; ctx.strokeStyle='rgba(110,160,190,.7)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(bxx,by,b.r,0,6.2832); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+  ctx.textAlign='center'; ctx.fillStyle='#7a8b99'; ctx.font='800 9.5px Pretendard,sans-serif'; ctx.fillText('기체 CO₂',bx, top+(liqTop-top)/2+3);
+  ctx.fillStyle='#0c6a4f'; ctx.fillText('용존 CO₂ (aq)',bx, bot-7);
+}
+function fizzChip(ctx,x,yy,txt,col,x0,x1){ ctx.font='800 9.5px Pretendard,sans-serif'; var lw=ctx.measureText(txt).width+9; var lx=Math.max(x0,Math.min(x1-lw,x-lw/2));
+  ctx.fillStyle='rgba(255,255,255,.92)'; ctx.strokeStyle=col; ctx.lineWidth=1; nh3RR(ctx,lx,yy,lw,14,5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=col; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(txt,lx+4,yy+7.5); ctx.textBaseline='alphabetic'; }
+function drawFizzG(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var pl=34,pr=40,pt=12,pb=20,x0=pl,x1=w-pr,y0=h-pb,y1=pt,Pmax=4;
+  var X=function(P){return x0+(x1-x0)*(P/Pmax);}, Y=function(s){return y0-(y0-y1)*(s/100);};
+  ctx.strokeStyle='#eef3f1'; ctx.lineWidth=1; for(var gg=0.25;gg<1;gg+=0.25){ ctx.beginPath(); ctx.moveTo(x0,Y(gg*100)); ctx.lineTo(x1,Y(gg*100)); ctx.stroke(); }
+  for(var gp=1;gp<4;gp++){ ctx.beginPath(); ctx.moveTo(X(gp),y0); ctx.lineTo(X(gp),y1); ctx.stroke(); }
+  ctx.strokeStyle='#cfdcd8'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.moveTo(x0,y1); ctx.lineTo(x0,y0); ctx.stroke();
+  ctx.fillStyle='#9bb0ab'; ctx.font='700 9px Pretendard,sans-serif'; ctx.textAlign='right'; ctx.fillText('100',x0-3,y1+8); ctx.fillText('50',x0-3,Y(50)); ctx.fillText('0',x0-3,y0);
+  ctx.textAlign='center'; ctx.fillText('1',X(1),h-4); ctx.fillText('2',X(2),h-4); ctx.fillText('4 atm',X(4),h-4);
+  // 온도별 직선(용존 CO₂ ∝ 압력)
+  FIZZ_TT.forEach(function(t){ var on=(t===fizz.T); ctx.strokeStyle=FIZZ_TCOL[t]; ctx.globalAlpha=on?1:0.32; ctx.lineWidth=on?3:1.6; ctx.beginPath(); ctx.moveTo(X(0),Y(fizzSat(0,t))); ctx.lineTo(X(4),Y(fizzSat(4,t))); ctx.stroke();
+    ctx.globalAlpha=on?1:0.85; ctx.fillStyle=FIZZ_TCOL[t]; ctx.font=(on?'800 10px':'700 8.5px')+' Pretendard,sans-serif'; ctx.textAlign='left'; ctx.fillText(t+'℃', X(4)+4, Y(fizzSat(4,t))); ctx.globalAlpha=1; });
+  // 현재 점
+  var sNow=fizzSat(fizz.P,fizz.T), col=fizzCol(fizz.T), px=X(fizz.P), py=Y(sNow);
+  ctx.strokeStyle='#c7d3d0'; ctx.setLineDash([3,3]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(px,y0); ctx.lineTo(px,py); ctx.lineTo(x0,py); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(px,py,4.8,0,6.2832); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(px,py,1.9,0,6.2832); ctx.fill();
+  fizzChip(ctx, px, Math.max(y1,py-16), '용존 '+Math.round(sNow)+'%', col, x0, x1);
+}
+
+/* ===================== 해양 산성화: 바다 단면 시뮬 + pH 곡선 (대기 CO₂ → 해수 pH·탄산칼슘) =====================
+   CO₂+H₂O ⇌ H⁺+HCO₃⁻ : 대기 CO₂↑ → 해수 CO₂↑ → 정반응 → H⁺↑(pH↓).
+   CaCO₃ ⇌ Ca²⁺+CO₃²⁻ : H⁺↑ → CO₃²⁻↓ → 용해(정반응) → 포화도 Ω↓ → 골격 형성 곤란. */
+function oaPh(co2){ return 8.2 - 0.57*Math.log10(co2/280); }                  // 280→8.20, 420→8.10, 1000→7.89
+function oaOmega(co2){ return Math.max(0.9, 3.4 - 3.0*Math.log10(co2/280)); } // 아라고나이트 포화도(근사): 280→3.4, 420→2.9, 1000→1.7
+function oaHrise(co2){ return (Math.pow(10,8.2-oaPh(co2))-1)*100; }            // [H⁺] 증가 %
+const OA_PRESETS=[{label:'산업화 이전',co2:280,col:'#2f9e6e'},{label:'현재',co2:420,col:'#b06a10'},{label:'2배',co2:560,col:'#e07b39'},{label:'고배출',co2:1000,col:'#d6435f'}];
+let oa=null;
+function oaBuild(){ oa.air=[]; for(var i=0;i<18;i++) oa.air.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*0.012,vy:(Math.random()-.5)*0.012});
+  oa.ions=[]; for(var j=0;j<16;j++) oa.ions.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*0.007,vy:(Math.random()-.5)*0.007});
+  oa.carb=[]; for(var c=0;c<10;c++) oa.carb.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*0.006,vy:(Math.random()-.5)*0.006});
+  oa.diss=[]; oa.fr=0; }
+function oaBtnRender(){ var box=document.getElementById('oaBtns'); if(!box)return; box.innerHTML='';
+  OA_PRESETS.forEach(function(o){ var on=(Math.abs(oa.co2-o.co2)<3); var b=document.createElement('button'); b.type='button';
+    b.innerHTML=o.label+'<br>'+o.co2; b.style.cssText='flex:1;padding:4px 0;border-radius:9px;font-weight:800;font-size:10.5px;line-height:1.25;cursor:pointer;border:1.5px solid '+o.col+';'+(on?('background:'+o.col+';color:#fff'):('background:#fff;color:'+o.col));
+    b.onclick=function(){ var s=document.getElementById('oaCO2'); if(s)s.value=o.co2; oaSet(); }; box.appendChild(b); }); }
+function initOA(){ var s=oa&&oa.started; oa={co2:420,run:true,speed:0.4,air:[],ions:[],diss:[],started:s}; oaBuild();
+  var sl=document.getElementById('oaCO2'); if(sl)sl.value=420; var sp=document.getElementById('oaSpeed'); if(sp)sp.value=40; oaBtnRender();
+  if(!oa.started){oa.started=true; requestAnimationFrame(oaLoop);} oaSet(); }
+function oaSet(){ if(!oa)return; oa.co2=+document.getElementById('oaCO2').value;
+  var ph=oaPh(oa.co2), om=oaOmega(oa.co2), hr=oaHrise(oa.co2);
+  document.getElementById('oaCO2V').textContent=Math.round(oa.co2)+' ppm';
+  document.getElementById('oaCO2V2').textContent=Math.round(oa.co2)+' ppm';
+  document.getElementById('oaPh').textContent=ph.toFixed(2);
+  document.getElementById('oaH').textContent='+'+Math.round(hr);
+  document.getElementById('oaOmega').textContent=om.toFixed(1);
+  var big=document.getElementById('oaPhBig'); if(big) big.style.color = ph>=8.15?'#0c6a4f' : ph>=8.0?'#b06a10' : '#a31d36';
+  oaBtnRender();
+  var v=document.getElementById('oaVerdict');
+  var ref='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px">대기 CO₂↑ → 정반응 → H⁺↑(pH↓) · CO₃²⁻↓ → 골격 용해</div>';
+  if(oa.co2<=300){ v.innerHTML=ref+'<div><b>✅ 산업화 이전(~280 ppm)</b> — pH 안정, 골격 형성 양호</div>'; v.style.background='var(--ok-l)'; v.style.color='#0c6a4f'; }
+  else if(oa.co2<=470){ v.innerHTML=ref+'<div><b>🟡 현재(~420 ppm)</b> — 이미 <b>산성화 진행 중</b>([H⁺] 약 '+Math.round(hr)+'%↑)</div>'; v.style.background='var(--primary-ll)'; v.style.color='var(--primary-d)'; }
+  else { v.innerHTML=ref+'<div><b>⚠️ 고농도</b> — pH '+ph.toFixed(2)+', 포화도 Ω '+om.toFixed(1)+' → 산호·조개 <b>골격 형성 곤란</b></div>'; v.style.background='var(--no-l)'; v.style.color='#a31d36'; }
+}
+function oaToggle(){ if(!oa)return; oa.run=!oa.run; document.getElementById('oaPlay').textContent=oa.run?'⏸':'▶'; }
+function oaSpeedSet(){ if(!oa)return; oa.speed=(+document.getElementById('oaSpeed').value)/100; }
+function oaReset(){ if(!oa)return; oa.run=true; document.getElementById('oaPlay').textContent='⏸'; var sl=document.getElementById('oaCO2'); if(sl)sl.value=420; oa.diss=[]; oaBuild(); oaSet(); }
+function oaLoop(){ var c=document.getElementById('oaCanvas'), g=document.getElementById('oaGraph'); var vis=(c&&c.offsetParent!==null)||(g&&g.offsetParent!==null);
+  if(oa&&vis){ if(oa.run) oaStep(); if(c&&c.offsetParent!==null)drawOA(c); if(g&&g.offsetParent!==null)drawOAG(g); }
+  requestAnimationFrame(oaLoop); }
+function oaStep(){ oa.fr++; var sf=0.3+oa.speed*1.5, om=oaOmega(oa.co2);
+  for(var i=0;i<oa.air.length;i++){ var a=oa.air[i]; a.x+=a.vx*sf; a.y+=a.vy*sf; if(a.x<0.05||a.x>0.95)a.vx*=-1; if(a.y<0.05||a.y>0.95)a.vy*=-1; }
+  for(var j=0;j<oa.ions.length;j++){ var p=oa.ions[j]; p.x+=p.vx*sf; p.y+=p.vy*sf; if(p.x<0.05||p.x>0.95)p.vx*=-1; if(p.y<0.05||p.y>0.95)p.vy*=-1; }
+  for(var q=0;q<oa.carb.length;q++){ var cb=oa.carb[q]; cb.x+=cb.vx*sf; cb.y+=cb.vy*sf; if(cb.x<0.05||cb.x>0.95)cb.vx*=-1; if(cb.y<0.05||cb.y>0.95)cb.vy*=-1; }
+  if(om<2.0 && Math.random()< (2.0-om)*0.05*(0.4+oa.speed)) oa.diss.push({x:0.30+Math.random()*0.16, y:1, kind:(Math.random()<0.5?'ca':'co3'), v:0.006+Math.random()*0.008});
+  for(var d=0;d<oa.diss.length;d++) oa.diss[d].y-=oa.diss[d].v*(0.5+oa.speed); oa.diss=oa.diss.filter(function(o){return o.y>0.04;});
+}
+function drawOA(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var surf=Math.round(h*0.26), ph=oaPh(oa.co2), om=oaOmega(oa.co2), acid=Math.max(0,Math.min(1,(8.2-ph)/(8.2-7.7)));
+  // 대기
+  ctx.fillStyle='#eaf3f7'; ctx.fillRect(0,0,w,surf);
+  // 해수(산성화될수록 약간 탁한 청록)
+  ctx.fillStyle=mix('#bfe3f0','#bcd6c9',acid); ctx.fillRect(0,surf,w,h-surf);
+  // 해수면
+  ctx.strokeStyle='#9cc6d8'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(0,surf); ctx.lineTo(w,surf); ctx.stroke();
+  // 대기 CO₂ (ppm 비례)
+  var nair=Math.round(oa.co2/1000*16); for(var i=0;i<oa.air.length && i<nair;i++){ var a=oa.air[i]; var ax=6+a.x*(w-12), ay=6+a.y*(surf-12); ctx.fillStyle='#9aa7b0'; ctx.beginPath(); ctx.arc(ax,ay,3,0,6.2832); ctx.fill(); }
+  // 용해 화살표(대기→해수)
+  ctx.fillStyle='#8fb6c8'; for(var fx=w*0.2; fx<w*0.85; fx+=w*0.3){ ctx.save(); ctx.translate(fx,surf); ctx.beginPath(); ctx.moveTo(-4,-5); ctx.lineTo(4,-5); ctx.lineTo(0,1); ctx.closePath(); ctx.fill(); ctx.restore(); }
+  // 해수 H⁺ (산도 비례)
+  var rel=Math.pow(10,8.2-ph), nion=Math.round(6*rel); for(var j=0;j<oa.ions.length && j<nion;j++){ var p=oa.ions[j]; var px=8+p.x*(w-16), py=surf+8+p.y*(h-surf-40); ctx.fillStyle='#e0556b'; ctx.beginPath(); ctx.arc(px,py,2.8,0,6.2832); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='700 5px Pretendard'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('+',px,py); ctx.textBaseline='alphabetic'; }
+  // 해수 CO₃²⁻ (Ω 비례 → CO₂↑일수록 감소: H⁺가 소모)
+  var ncarb=Math.round(om/3.4*8); for(var q=0;q<oa.carb.length && q<ncarb;q++){ var cb=oa.carb[q]; var qx=8+cb.x*(w-16), qy=surf+20+cb.y*(h-surf-46); ctx.fillStyle='#7a5fb0'; ctx.beginPath(); ctx.arc(qx,qy,3,0,6.2832); ctx.fill(); }
+  // 연결 반응 캡션
+  ctx.fillStyle='#6b5b95'; ctx.font='800 9px Pretendard,sans-serif'; ctx.textAlign='center'; ctx.fillText('H⁺ + CO₃²⁻ → HCO₃⁻', w/2, surf+30);
+  // 산호·조개 (CaCO₃) — 건강도 = Ω
+  var health=Math.max(0,Math.min(1,(om-1.0)/(3.4-1.0)));
+  drawCoral(ctx, w*0.34, h-10, health); drawShell(ctx, w*0.66, h-12, health);
+  // 용해 입자(Ca²⁺/CO₃²⁻)
+  for(var d=0;d<oa.diss.length;d++){ var ds=oa.diss[d]; var dx=8+ds.x*(w-16), dy=surf+8+ds.y*(h-surf-16); if(ds.kind==='ca'){ ctx.fillStyle='#2f9e6e'; } else { ctx.fillStyle='#7a5fb0'; } ctx.beginPath(); ctx.arc(dx,dy,2.6,0,6.2832); ctx.fill(); }
+  // 라벨
+  ctx.textAlign='center'; ctx.fillStyle='#7d8896'; ctx.font='800 9.5px Pretendard,sans-serif'; ctx.fillText('대기 CO₂',w/2,13);
+  ctx.fillStyle='#2b6ca3'; ctx.fillText('해수 (H⁺↑ → pH↓)',w/2,surf+15);
+  ctx.fillStyle=mix('#0c6a4f','#a31d36',1-health); ctx.font='800 9px Pretendard,sans-serif'; ctx.fillText('산호·조개 (CaCO₃)',w/2,h-3);
+}
+function drawCoral(ctx,cx,baseY,health){ var col=mix('#a7aab0','#e8896b',health), L=14+health*16, nb=Math.round(1+health*4);
+  ctx.strokeStyle=col; ctx.lineWidth=2.4+health*2.6; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(cx,baseY); ctx.lineTo(cx,baseY-L); ctx.stroke();                       // 줄기
+  var br=[[-1,0.55],[1,0.68],[-1,0.84],[1,0.42],[-0.6,0.98]];                                        // 가지(건강할수록 많이)
+  for(var i=0;i<nb && i<br.length;i++){ var a=br[i], sy=baseY-L*a[1]; ctx.beginPath(); ctx.moveTo(cx,sy); ctx.lineTo(cx+a[0]*L*0.5, sy-L*0.4); ctx.stroke(); }
+  if(health<0.72){ ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1; ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(cx-3,baseY-5); ctx.lineTo(cx+3,baseY-L*0.6); ctx.stroke(); ctx.setLineDash([]); }   // 균열
+  if(health<0.55){ ctx.fillStyle='rgba(110,100,92,.4)'; var pit=[[-4,-7],[3,-13],[-1,-20],[5,-24]]; var npit=Math.round((0.55-health)*9); for(var p=0;p<npit && p<pit.length;p++){ ctx.beginPath(); ctx.arc(cx+pit[p][0],baseY+pit[p][1],1.5,0,6.2832); ctx.fill(); } }   // 부식 구멍
+  if(health<0.35){ ctx.fillStyle=col; ctx.beginPath(); ctx.arc(cx-15,baseY-2,2.2,0,6.2832); ctx.fill(); ctx.beginPath(); ctx.arc(cx+13,baseY-1,1.8,0,6.2832); ctx.fill(); ctx.beginPath(); ctx.arc(cx-9,baseY-1,1.6,0,6.2832); ctx.fill(); }   // 부서진 조각
+}
+function drawShell(ctx,cx,baseY,health){ var col=mix('#bbb4a8','#f0c89a',health), edge=mix('#928c80','#d29f6a',health);
+  ctx.fillStyle=col; ctx.strokeStyle=edge; ctx.lineWidth=1.4-(1-health)*0.6;                          // 약화 시 외곽 얇게
+  ctx.beginPath(); ctx.arc(cx,baseY,12,Math.PI,2*Math.PI); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.45)'; ctx.lineWidth=1; for(var k=-2;k<=2;k++){ ctx.beginPath(); ctx.moveTo(cx,baseY); ctx.lineTo(cx+k*5,baseY-11); ctx.stroke(); }
+  if(health<0.6){ ctx.fillStyle='rgba(245,248,250,.85)'; var pit=[[-6,-4],[2,-7],[-1,-3],[6,-5],[-3,-8]]; var n=Math.round((0.6-health)*9); for(var hh=0;hh<n && hh<pit.length;hh++){ ctx.beginPath(); ctx.arc(cx+pit[hh][0],baseY+pit[hh][1],1.4,0,6.2832); ctx.fill(); } }   // 부식 구멍
+}
+function drawOAG(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var pl=34,pr=14,pt=14,pb=20,x0=pl,x1=w-pr,y0=h-pb,y1=pt, c0=280,c1=1000, phMax=8.25, phMin=7.7;
+  var X=function(c){return x0+(x1-x0)*((c-c0)/(c1-c0));}, Y=function(p){return y0-(y0-y1)*((p-phMin)/(phMax-phMin));};
+  ctx.strokeStyle='#eef3f1'; ctx.lineWidth=1; for(var gp=8.0;gp<8.25;gp+=0.1){ ctx.beginPath(); ctx.moveTo(x0,Y(gp)); ctx.lineTo(x1,Y(gp)); ctx.stroke(); }
+  ctx.strokeStyle='#cfdcd8'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.moveTo(x0,y1); ctx.lineTo(x0,y0); ctx.stroke();
+  ctx.fillStyle='#9bb0ab'; ctx.font='700 9px Pretendard,sans-serif'; ctx.textAlign='right'; ctx.fillText('8.2',x0-3,Y(8.2)); ctx.fillText('8.0',x0-3,Y(8.0)); ctx.fillText('7.8',x0-3,Y(7.8));
+  ctx.textAlign='center'; ctx.fillText('280',x0,h-4); ctx.fillText('560',X(560),h-4); ctx.fillText('1000 ppm',x1-22,h-4);
+  // pH 곡선
+  ctx.strokeStyle='#2b7fb8'; ctx.lineWidth=2.6; ctx.lineJoin='round'; ctx.beginPath(); for(var c=c0;c<=c1;c+=10){ var xx=X(c),yy=Y(oaPh(c)); c===c0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy); } ctx.stroke();
+  // 산업화前·현재 보조선
+  ctx.fillStyle='#9bb0ab'; ctx.font='700 8px Pretendard,sans-serif';
+  ctx.strokeStyle='rgba(155,176,171,.5)'; ctx.setLineDash([2,3]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(X(420),y0); ctx.lineTo(X(420),y1); ctx.stroke(); ctx.setLineDash([]); ctx.textAlign='center'; ctx.fillText('현재',X(420),y1+8);
+  // 현재 점
+  var px=X(oa.co2),py=Y(oaPh(oa.co2));
+  ctx.strokeStyle='#c7d3d0'; ctx.setLineDash([3,3]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(px,y0); ctx.lineTo(px,py); ctx.lineTo(x0,py); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='#0f766e'; ctx.beginPath(); ctx.arc(px,py,4.8,0,6.2832); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(px,py,1.9,0,6.2832); ctx.fill();
+  var lbl='pH '+oaPh(oa.co2).toFixed(2); ctx.font='800 9.5px Pretendard,sans-serif'; var lw=ctx.measureText(lbl).width+10; var lx=Math.max(x0,Math.min(x1-lw,px-lw/2)), ly=Math.max(y1,py-21);
+  ctx.fillStyle='rgba(255,255,255,.92)'; ctx.strokeStyle='#0f766e'; ctx.lineWidth=1; nh3RR(ctx,lx,ly,lw,15,5); ctx.fill(); ctx.stroke(); ctx.fillStyle='#0f766e'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(lbl,lx+5,ly+8); ctx.textBaseline='alphabetic';
+}
+
+/* ===================== 치아 법랑질 용해 평형: 치아 단면 시뮬 + 탈회 곡선 (임계 pH) =====================
+   Ca₅(PO₄)₃OH(s) ⇌ 5Ca²⁺+3PO₄³⁻+OH⁻ : 산(H⁺)이 OH⁻·PO₄³⁻를 소모 → 르샤틀리에 → 정반응(용해=탈회).
+   입속 pH < 임계 pH(법랑질 5.5, 불소 4.5)면 탈회(충치), 침이 pH 회복하면 재광화. */
+function toothDemin(ph,crit){ return Math.max(0, Math.min(1, (crit-ph)*0.5)); }   // 상대 탈회 속도(임계 아래에서 증가)
+const TOOTH_PRE=[{label:'탄산음료',ph:3.0,col:'#d6435f'},{label:'식후(당)',ph:4.5,col:'#e07b39'},{label:'평상시',ph:6.8,col:'#2f9e6e'}];
+let tooth=null;
+function toothBuild(){ tooth.h=[]; for(var i=0;i<18;i++) tooth.h.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*0.010,vy:(Math.random()-.5)*0.010});
+  tooth.m=[]; for(var j=0;j<10;j++) tooth.m.push({x:Math.random(),y:0.4+Math.random()*0.5,vx:(Math.random()-.5)*0.006,vy:(Math.random()-.5)*0.004,kind:(j%2?'po4':'ca')});
+  tooth.oh=[]; for(var k=0;k<9;k++) tooth.oh.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*0.009,vy:(Math.random()-.5)*0.009}); tooth.fr=0; }
+function toothCrit(){ return tooth.fl?4.5:5.5; }
+function toothBtnRender(){ var box=document.getElementById('thBtns'); if(!box)return; box.innerHTML='';
+  TOOTH_PRE.forEach(function(o){ var on=(Math.abs(tooth.ph-o.ph)<0.05); var b=document.createElement('button'); b.type='button';
+    b.innerHTML=o.label+' pH'+o.ph.toFixed(1); b.style.cssText='flex:1;padding:5px 0;border-radius:9px;font-weight:800;font-size:11px;cursor:pointer;border:1.5px solid '+o.col+';'+(on?('background:'+o.col+';color:#fff'):('background:#fff;color:'+o.col));
+    b.onclick=function(){ var s=document.getElementById('thPh'); if(s)s.value=o.ph; toothSet(); }; box.appendChild(b); }); }
+function initTooth(){ var s=tooth&&tooth.started; tooth={ph:6.8,fl:false,run:true,speed:0.4,h:[],m:[],started:s}; toothBuild();
+  var sl=document.getElementById('thPh'); if(sl)sl.value=6.8; var fl=document.getElementById('thFl'); if(fl)fl.checked=false; var sp=document.getElementById('thSpeed'); if(sp)sp.value=40; toothBtnRender();
+  if(!tooth.started){tooth.started=true; requestAnimationFrame(toothLoop);} toothSet(); }
+function toothSet(){ if(!tooth)return; tooth.ph=+document.getElementById('thPh').value; tooth.fl=document.getElementById('thFl').checked;
+  var crit=toothCrit(), dem=toothDemin(tooth.ph,crit);
+  document.getElementById('thPhV').textContent=tooth.ph.toFixed(1);
+  document.getElementById('thPhV2').textContent=tooth.ph.toFixed(1);
+  document.getElementById('thCrit').textContent=crit.toFixed(1);
+  document.getElementById('thDeminV').textContent=Math.round(dem*100);
+  var big=document.getElementById('thPhBig'); if(big) big.style.color = tooth.ph>=crit+0.3?'#0c6a4f' : tooth.ph>=crit?'#b06a10' : '#a31d36';
+  toothBtnRender();
+  var v=document.getElementById('thVerdict');
+  var ref='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px">pH &lt; 임계('+crit.toFixed(1)+') → 탈회(용해) · pH 회복 → 재광화</div>';
+  if(tooth.ph>=crit+0.3){ v.innerHTML=ref+'<div><b>✅ 재광화</b> — 평형이 결정(법랑질) 형성 쪽 (안전)</div>'; v.style.background='var(--ok-l)'; v.style.color='#0c6a4f'; }
+  else if(tooth.ph>=crit){ v.innerHTML=ref+'<div><b>🟡 임계 부근</b> — 평형 경계 (주의)</div>'; v.style.background='var(--primary-ll)'; v.style.color='var(--primary-d)'; }
+  else { v.innerHTML=ref+'<div><b>⚠️ 탈회 진행</b> — H⁺가 OH⁻·PO₄³⁻ 소모 → 용해(<b>충치</b>), 탈회 속도 '+Math.round(dem*100)+'</div>'; v.style.background='var(--no-l)'; v.style.color='#a31d36'; }
+}
+function toothToggle(){ if(!tooth)return; tooth.run=!tooth.run; document.getElementById('thPlay').textContent=tooth.run?'⏸':'▶'; }
+function toothSpeedSet(){ if(!tooth)return; tooth.speed=(+document.getElementById('thSpeed').value)/100; }
+function toothReset(){ if(!tooth)return; tooth.run=true; document.getElementById('thPlay').textContent='⏸'; var sl=document.getElementById('thPh'); if(sl)sl.value=6.8; var fl=document.getElementById('thFl'); if(fl)fl.checked=false; toothBuild(); toothSet(); }
+function drawToothBars(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var crit=toothCrit(), dem=toothDemin(tooth.ph,crit);
+  var nH=Math.max(1,Math.min(17,3+(7-tooth.ph)*3.6)), nOH=Math.max(0,Math.min(9,3+(tooth.ph-7)*3.6));
+  var bars=[{lab:'H⁺',c:'#e0556b',v:nH/17},{lab:'OH⁻',c:'#5bbcd6',v:nOH/17},{lab:'Ca²⁺',c:'#2f9e6e',v:Math.min(1,0.10+dem*0.85)},{lab:'PO₄³⁻',c:'#7a5fb0',v:Math.max(0.05,Math.min(0.6,0.08+(tooth.ph-3)*0.11))}];
+  var n=bars.length, slot=w/n, bw=slot*0.46, base=h-11, top=3, H=base-top;
+  ctx.textAlign='center';
+  for(var i=0;i<n;i++){ var cx=slot*(i+0.5);
+    ctx.fillStyle='#e8efec'; ctx.fillRect(cx-bw/2, top, bw, H);
+    var bh=Math.max(1.5, H*bars[i].v); ctx.fillStyle=bars[i].c; ctx.fillRect(cx-bw/2, base-bh, bw, bh);
+    ctx.fillStyle='#5c6660'; ctx.font='700 7.5px Pretendard,sans-serif'; ctx.fillText(bars[i].lab, cx, h-2); }
+}
+function toothLoop(){ var c=document.getElementById('thCanvas'), g=document.getElementById('thGraph'); var vis=(c&&c.offsetParent!==null)||(g&&g.offsetParent!==null);
+  if(tooth&&vis){ if(tooth.run) toothStep(); if(c&&c.offsetParent!==null)drawToothSim(c); if(g&&g.offsetParent!==null)drawTooth(g); var bcv=document.getElementById('thIonBars'); if(bcv&&bcv.offsetParent!==null)drawToothBars(bcv); }
+  requestAnimationFrame(toothLoop); }
+function toothStep(){ tooth.fr++; var crit=toothCrit(), dem=toothDemin(tooth.ph,crit), rem=Math.max(0,Math.min(1,(tooth.ph-crit)*0.5)); var sf=0.3+tooth.speed*1.5;
+  for(var i=0;i<tooth.h.length;i++){ var a=tooth.h[i]; a.x+=a.vx*sf; a.y+=a.vy*sf; if(a.x<0.05||a.x>0.95)a.vx*=-1; if(a.y<0.05||a.y>0.95)a.vy*=-1; }
+  for(var oi=0;oi<tooth.oh.length;oi++){ var oo=tooth.oh[oi]; oo.x+=oo.vx*sf; oo.y+=oo.vy*sf; if(oo.x<0.05||oo.x>0.95)oo.vx*=-1; if(oo.y<0.05||oo.y>0.95)oo.vy*=-1; }
+  var bias=(dem>0? -0.004*dem : 0.004*rem);   // 탈회=위로(빠져나감), 재광화=아래로(돌아감)
+  for(var j=0;j<tooth.m.length;j++){ var m=tooth.m[j]; m.x+=m.vx*sf; m.y+=(m.vy+bias)*sf; if(m.x<0.06||m.x>0.94)m.vx*=-1; if(m.y<0.16){m.y=0.16;m.vy=Math.abs(m.vy);} if(m.y>0.96){m.y=0.96;m.vy=-Math.abs(m.vy);} }
+}
+function drawToothSim(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var crit=toothCrit(), dem=toothDemin(tooth.ph,crit), eTop=Math.round(h*0.60);
+  // 입속(타액)
+  ctx.fillStyle='#eef6f4'; ctx.fillRect(0,0,w,eTop);
+  // 법랑질(흰색) — 표면이 산성일수록 거칠게(부식 노치)
+  ctx.fillStyle=mix('#dfe2e6','#fbfcfd',1-dem*0.7); ctx.strokeStyle='#cdd4da'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,h); ctx.lineTo(0,eTop);
+  var notch=4+dem*9; for(var x=0;x<=w;x+=14){ var jit=(Math.sin(x*0.7)+Math.sin(x*0.31+1))*0.5; ctx.lineTo(x, eTop + (dem>0.02? (Math.abs(jit))*notch : 1)); } ctx.lineTo(w,h); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // 법랑질 결정 격자(은은히)
+  ctx.strokeStyle='rgba(150,160,170,.25)'; ctx.lineWidth=1; for(var gx=10;gx<w;gx+=16){ ctx.beginPath(); ctx.moveTo(gx,eTop+14); ctx.lineTo(gx,h-4); ctx.stroke(); }
+  // H⁺ (산도 비례)
+  var nH=Math.round(Math.max(1,Math.min(17, 3+(7-tooth.ph)*3.6)));
+  var nOH=Math.round(Math.max(0,Math.min(9, 3+(tooth.ph-7)*3.6)));   // 물의 자동 이온화: 산성이면 H⁺>OH⁻, pH7에서 같음
+  for(var i=0;i<tooth.h.length && i<nH;i++){ var a=tooth.h[i]; var ax=8+a.x*(w-16), ay=8+a.y*(eTop-16); ctx.fillStyle='#e0556b'; ctx.beginPath(); ctx.arc(ax,ay,2.8,0,6.2832); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='700 5px Pretendard'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('+',ax,ay); ctx.textBaseline='alphabetic'; }
+  for(var oi=0;oi<tooth.oh.length && oi<nOH;oi++){ var oo=tooth.oh[oi]; var ox=8+oo.x*(w-16), oy=8+oo.y*(eTop-16); ctx.fillStyle='#5bbcd6'; ctx.beginPath(); ctx.arc(ox,oy,2.8,0,6.2832); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='700 5px Pretendard'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('−',ox,oy); ctx.textBaseline='alphabetic'; }
+  // 미네랄 이온(Ca²⁺/PO₄³⁻) — 탈회=위로 빠져나감 / 재광화=아래로
+  var nCa=Math.round(2+dem*5), nPO=Math.round(Math.max(1,1+(tooth.ph-3)*0.9)), dc=0, dp=0;   // Ca²⁺ 방출↑ / PO₄³⁻ 소모↓
+  for(var j=0;j<tooth.m.length;j++){ var m=tooth.m[j]; if(m.kind==='ca'){ if(dc>=nCa)continue; dc++; } else { if(dp>=nPO)continue; dp++; } var mx=8+m.x*(w-16), my=m.y*eTop; ctx.fillStyle=(m.kind==='ca'?'#2f9e6e':'#7a5fb0'); ctx.beginPath(); ctx.arc(mx,my,2.7,0,6.2832); ctx.fill(); }
+  // 라벨 + 탈회/재광화 방향
+  ctx.textAlign='center'; ctx.fillStyle='#7d8896'; ctx.font='800 9.5px Pretendard,sans-serif'; ctx.fillText('입속(타액)',w/2,13);
+  ctx.fillStyle='#5c6660'; ctx.fillText('법랑질 (Ca₅(PO₄)₃OH)', w/2, h-5);
+  if(dem>0.02){ ctx.fillStyle='#a31d36'; ctx.font='800 9.5px Pretendard,sans-serif'; ctx.fillText('↑ 탈회: Ca²⁺ 방출 · H⁺가 OH⁻·PO₄³⁻ 소모', w/2, eTop-6); }
+  else { ctx.fillStyle='#0c6a4f'; ctx.font='800 9.5px Pretendard,sans-serif'; ctx.fillText('↓ 재광화 (이온이 다시 결합)', w/2, eTop-6); }
+}
+function drawTooth(cv){ var o=fitCanvas(cv), ctx=o.ctx, w=o.w, h=o.h; ctx.clearRect(0,0,w,h);
+  var pl=30,pr=14,pt=18,pb=20,x0=pl,x1=w-pr,y0=h-pb,y1=pt, phMin=3, phMax=7.5;
+  var X=function(p){return x0+(x1-x0)*((p-phMin)/(phMax-phMin));}, Y=function(d){return y0-(y0-y1)*d;};
+  ctx.strokeStyle='#eef3f1'; ctx.lineWidth=1; for(var gg=0.25;gg<1;gg+=0.25){ ctx.beginPath(); ctx.moveTo(x0,Y(gg)); ctx.lineTo(x1,Y(gg)); ctx.stroke(); }
+  ctx.strokeStyle='#cfdcd8'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.moveTo(x0,y1); ctx.lineTo(x0,y0); ctx.stroke();
+  ctx.fillStyle='#9bb0ab'; ctx.font='700 9px Pretendard,sans-serif'; ctx.textAlign='right'; ctx.fillText('빠름',x0-3,y1+8); ctx.fillText('0',x0-3,y0);
+  ctx.textAlign='center'; ctx.fillText('pH3',x0,h-4); ctx.fillText('5',X(5),h-4); ctx.fillText('7',X(7),h-4);
+  // 임계선(법랑질 5.5 / 불소 4.5) — 활성 강조
+  [{c:5.5,lab:'법랑질 5.5',on:!tooth.fl},{c:4.5,lab:'불소 4.5',on:tooth.fl}].forEach(function(o2){ var cx=X(o2.c); ctx.strokeStyle=o2.on?'#d6435f':'rgba(214,67,95,.35)'; ctx.lineWidth=o2.on?1.6:1; ctx.setLineDash([5,4]); ctx.beginPath(); ctx.moveTo(cx,y1+10); ctx.lineTo(cx,y0); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle=o2.on?'#a31d36':'rgba(163,29,54,.45)'; ctx.font=(o2.on?'800 9px':'700 8px')+' Pretendard'; ctx.textAlign='center'; ctx.fillText('임계 '+o2.lab.split(' ')[1], cx, y1+6); });
+  // 탈회 곡선(법랑질 5.5 흐리게 + 불소 4.5 흐리게, 활성 굵게)
+  [{c:5.5,col:'#b06a10',on:!tooth.fl},{c:4.5,col:'#2b7fb8',on:tooth.fl}].forEach(function(o3){ ctx.strokeStyle=o3.col; ctx.globalAlpha=o3.on?1:0.30; ctx.lineWidth=o3.on?2.8:1.6; ctx.lineJoin='round'; ctx.beginPath(); for(var p=phMin;p<=phMax+0.001;p+=0.05){ var xx=X(p),yy=Y(toothDemin(p,o3.c)); p===phMin?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy); } ctx.stroke(); ctx.globalAlpha=1; });
+  // 현재 점
+  var crit=toothCrit(), px=X(tooth.ph), py=Y(toothDemin(tooth.ph,crit)), col=tooth.ph>=crit?'#0f766e':'#d6435f';
+  ctx.strokeStyle='#c7d3d0'; ctx.setLineDash([3,3]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(px,y0); ctx.lineTo(px,py); ctx.lineTo(x0,py); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(px,py,4.8,0,6.2832); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(px,py,1.9,0,6.2832); ctx.fill();
+}
+
+/* 시작 */
+go(0);
+applyZoom();
+
+</script>
+</body>
+</html>
