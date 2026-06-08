@@ -487,6 +487,124 @@ h1.title{font-size:21px;margin:7px 0 3px}
 .zoomctl button{border:none;background:#fff;color:var(--ink);font-family:inherit;font-weight:800;font-size:14px;height:30px;min-width:34px;border-radius:8px;cursor:pointer;line-height:1}
 .zoomctl button:hover{background:var(--primary-ll);color:var(--primary-d)}
 .zoomctl #zoomLbl{min-width:52px;font-size:12px;color:var(--primary-d)}
+
+/* ===== 투사 가독성 타이포 (개정) — 본문 글자 키움 ===== */
+h1.title{font-size:27px;margin:9px 0 5px}
+.sub{font-size:15.5px}
+.ask{font-size:17.5px;line-height:1.55}
+.helper{font-size:14px;margin-top:8px}
+.sumlist{gap:9px}.sumlist li{font-size:15px}.sumlist .b{width:24px;height:24px;font-size:13px}
+.note{padding:11px 13px;margin-top:9px;font-size:13.5px;line-height:1.65}
+.recap{gap:14px}.recap .rc{padding:18px 20px}.recap .rc p{font-size:15.5px;line-height:1.75}.recap .rc b{font-size:16.5px}
+.tbl th,.tbl td{padding:11px 8px;font-size:14.5px}
+.oxq{margin-bottom:10px;font-size:15px;line-height:1.5}.choice{padding:11px 14px;font-size:14.5px}.choice .mk{width:24px;height:24px}.fb{font-size:13.5px;padding:11px 13px;margin-top:10px}
+.steps .step .sh{font-size:14.5px}
+.scoreband .sc{font-size:21px}.scoreband span{font-size:14px}
+.mm-center{font-size:23px;padding:14px 32px}.mm-h{font-size:15px;padding:10px 14px}.mm-node{font-size:15px;padding:12px 15px}.mm-node span{font-size:13.5px}
+.btn.primary{font-size:15.5px;padding:13px 26px}.btn.ghost{font-size:14px;padding:10px 17px}
+/* 한국어 줄바꿈: 글자 단위가 아닌 어절(단어/의미) 단위로 줄바꿈 — 본문 전반 적용 */
+.qkverdict{word-break:keep-all;line-height:1.45}
+.ask,.helper,.note,.sub,.sumlist li,.tbl td,.scaleLbl,.glabel,.glegend{word-break:keep-all}
+/* 토글 reveal 버튼 화살표 + 펼침 표시 */
+.revealbtn .ra{font-weight:900;font-size:14px;line-height:1}
+.revealbtn.open{background:#cdeee0}
+/* 선택 토글 버튼(예: 흡열/발열 데이터 전환) 활성 표시.
+   ⚠️ 일부 렌더링 엔진은 background 단축 속성 안의 var()를 무효 처리함 → 반드시 background-color 롱핸드 사용. */
+.btn.ghost.done{background-color:var(--primary);color:#fff;border-color:var(--primary-d);box-shadow:0 4px 12px -3px rgba(15,118,110,.55);transform:translateY(-1px)}
+.btn.ghost.done:hover{background-color:var(--primary-d);border-color:var(--primary-d)}
+/* ===== 핵심 정리·마무리 "칩 흐름" (서술식 대신 아이콘→화살표→색칩) =====
+   사용: <div class="flowrow red"><span class="fbadge">❄️ 냉각</span><span class="farr">→</span>발열·역반응<span class="farr">→</span><span class="fchip">붉은색</span></div>
+   .red=흡열/냉각/붉은 계열, .blue=발열/가열/파란 계열. 결과 색칩은 .fchip(.red/.blue 상속). */
+.flowrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-radius:12px;padding:8px 11px;font-size:12.5px;font-weight:700;border:1px solid}
+.flowrow.red{background:#fde7ec;border-color:#f3c2cd}
+.flowrow.blue{background:#e6f0f7;border-color:#c2dbec}
+.flowrow .fbadge{font-weight:800}
+.flowrow.red .fbadge{color:#a31d36}
+.flowrow.blue .fbadge{color:#2b7fb8}
+.flowrow .farr{font-weight:900}
+.flowrow.red .farr{color:#cf94a1}
+.flowrow.blue .farr{color:#94b8d0}
+.flowrow .fchip{color:#fff;border-radius:7px;padding:2px 10px}
+.flowrow.red .fchip{background:#d6435f}
+.flowrow.blue .fchip{background:#2b7fb8}
+/* 정리표 답 칸 잠금(탐구하면 채워짐): <td class="lkcell"><span class="ans">…</span></td>, 행에 .lcopen 부여 시 공개 */
+.lkcell{position:relative}
+.lkcell .ans{display:inline-block;filter:blur(5px);opacity:.25;transition:filter .45s,opacity .45s}
+tr.lcopen .lkcell .ans{filter:none;opacity:1}
+.lkcell::after{content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#c2b89b;font-weight:800;font-size:17px;pointer-events:none}
+tr.lcopen .lkcell::after{content:none}
+@keyframes lcpulse{0%{transform:scale(.65)}55%{transform:scale(1.28)}100%{transform:scale(1)}}  /* 화살표 펄스: inline 요소 + 고정높이 overflow:hidden 컨테이너에 적용 */
+/* ===== 단일(single) 슬라이드: 여백 많으니 글자·여백을 더 크게 (투사 가독성) ===== */
+.slide.single h1.title{font-size:32px;margin:10px 0 9px}
+.slide.single .sub{font-size:17.5px;line-height:1.6}
+.slide.single .card{padding:24px 28px;margin-top:16px}
+.slide.single .recap{gap:18px}
+.slide.single .recap .rc{padding:24px 26px}
+.slide.single .recap .rc b{font-size:19px}
+.slide.single .recap .rc p{font-size:17.5px;line-height:1.9}
+.slide.single .note{font-size:15px;padding:13px 15px;line-height:1.65}
+.slide.single .tbl th,.slide.single .tbl td{font-size:15.5px;padding:12px 9px}
+.slide.single .mindmap{gap:11px}
+.slide.single .mm-center{font-size:23px;padding:12px 30px}
+.slide.single .mm-h{font-size:14.5px;padding:9px 13px}
+.slide.single .mm-node{font-size:14.5px;padding:10px 13px}
+.slide.single .mm-node span{font-size:13px}
+.slide.single .btn.primary{font-size:17px;padding:15px 32px}
+.slide.single .btn.ghost{font-size:15px;padding:12px 22px}
+
+/* ===== 시뮬레이션 컨트롤(속도/일시정지/초기화) + 수치 칩 + 시간 그래프 ===== */
+.simrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:10px}
+.simrow .slabel{font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.slider.spd{width:auto;flex:1;min-width:88px;height:7px;margin-top:0;
+  background:linear-gradient(90deg,#bfe3db 0%,var(--primary) 100%)}
+.slider.spd::-webkit-slider-thumb{width:20px;height:20px;border-width:3px}
+.slider.spd::-moz-range-thumb{width:20px;height:20px;border-width:3px}
+.simval{font-family:Georgia,serif;font-weight:800;color:var(--primary-d);font-size:13px;min-width:42px;text-align:right}
+.readout{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.rdchip{display:inline-flex;align-items:center;gap:6px;background:#f3f8f6;border:1px solid var(--line);
+  border-radius:9px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--muted)}
+.rdchip .cdot{width:10px;height:10px;border-radius:50%;flex:none}
+.rdchip b{font-family:Georgia,serif;font-size:14px;color:var(--ink);min-width:18px;text-align:right}
+.graphbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 8px 2px;position:relative}
+.graphbox .glabel{position:absolute;top:5px;left:9px;font-size:10px;font-weight:800;color:var(--muted)}
+.graphbox canvas{width:100%;display:block}
+.glegend{display:flex;gap:12px;justify-content:center;font-size:10.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.glegend span{display:inline-flex;align-items:center;gap:5px}
+.glegend i{width:12px;height:3px;border-radius:2px;display:inline-block}
+
+/* ===== 실제 사진/그림 (figure) ===== */
+.figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow-s)}
+.figure img{display:block;width:100%;height:auto;border-radius:9px;object-fit:cover}
+.figure.contain img{object-fit:contain;background:#f3f8f6}
+.figcap{font-size:12px;color:var(--muted);font-weight:600;margin-top:7px;line-height:1.5;text-align:center}
+.figcap .src{display:block;font-size:10.5px;color:#9bb0ab;margin-top:2px}      /* 출처 표기 */
+.photogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}                 /* 사진 2장 비교 */
+.photogrid.three{grid-template-columns:1fr 1fr 1fr}
+.imgband{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* ===== 밀집 슬라이드 국소 압축(투사 타이포 적용 후 한 화면 유지) ===== */
+#kbuildR hr{margin:5px 0}
+#kbuildR .helper{margin-bottom:5px}
+#kbuildR .kbuild{padding:12px}
+#kbuildR .keq{margin-top:6px}
+#kbuildR .calcgrid{gap:8px}
+#quizR{padding:13px 15px}
+#quizR .oxbox{padding:8px 9px;margin-top:5px}
+#quizR .oxq{font-size:12.5px;margin-bottom:5px}
+#quizR .choices{gap:4px}
+#quizR .choice{padding:5px 11px;font-size:12.5px}
+#quizR .choice .mk{width:21px;height:21px}
+#quizR .scoreband{margin-top:8px;padding:9px 13px}
+#mmWrap .title{font-size:26px;margin:6px 0 4px}
+#mmWrap>.sub{font-size:14px}
+#mmCard{padding:12px 16px}
+#mmCard .mindmap{gap:6px}
+#mmCard .mm-cols{gap:11px}
+#mmCard .mm-branch{gap:6px}
+#mmCard .mm-center{padding:7px 24px;font-size:18px}
+#mmCard .mm-h{padding:6px 12px;font-size:12.5px}
+#mmCard .mm-node{padding:6px 11px;font-size:12px}
+#mmCard .mm-node span{font-size:11px;margin-top:1px}
 </style>
 </head>
 <body>
@@ -527,7 +645,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
         </div>
         <div class="fb" id="ox1fb"></div>
       </div>
-    <div class="revealwrap" id="rw1"><button class="revealbtn" onclick="revealSum(1)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="revealwrap"><button class="revealbtn" onclick="reveal(this)" data-reveal="sum1"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 <span class="ra">↓</span></button></div>
     <div class="card tight summary" id="sum1">
       <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
       <ul class="sumlist">
@@ -597,7 +715,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
         </div>
         <div class="fb" id="jfb"></div>
       </div>
-    <div class="revealwrap" id="rw2"><button class="revealbtn" onclick="revealSum(2)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="revealwrap"><button class="revealbtn" onclick="reveal(this)" data-reveal="sum2"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 <span class="ra">↓</span></button></div>
     <div class="card tight summary" id="sum2">
       <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
       <ul class="sumlist">
@@ -637,7 +755,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
     </div>
     
     
-    <div class="revealwrap" id="rw3"><button class="revealbtn" onclick="revealSum(3)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="revealwrap"><button class="revealbtn" onclick="reveal(this)" data-reveal="sum3"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 <span class="ra">↓</span></button></div>
     <div class="card tight summary" id="sum3">
       <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
       <ul class="sumlist">
@@ -648,7 +766,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
     </div>
   </div>
   <div class="col-r">
-    <div class="card">
+    <div class="card" id="kbuildR">
       <span class="tag sim"><i class="dotmark"></i> 시뮬레이션 ① · <span class="var">K</span> 식 만들기</span>
       <div class="kbuild"><div class="rxn" id="rxnLine"></div></div>
       <div class="keq"><span class="var">K</span> <span>=</span>
@@ -672,9 +790,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
         <button class="btn ghost sm" onclick="presetHI()">교과서 값 (0.2 / 0.2 / 1.6)</button>
       </div>
       <div class="result" id="kResult" style="display:none"></div>
-      <div class="note">평형 상수 <span class="var">K</span>는 몰농도로 계산하고 <b>단위는 생략</b>, <b>온도에만</b> 의존합니다.</div>
-    
-      
+
     </div>
   </div>
 </section>
@@ -688,7 +804,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
       <p class="ask"><span class="var">K</span> 값 하나로 평형에서 <span class="hl">반응물·생성물 중 무엇이 더 많은지</span> 알 수 있을까요?</p>
       <p class="helper">슬라이더로 <span class="var">K</span>를 바꿔 원의 크기 변화를 보고, 실제 반응 예시 칩도 눌러 보세요.</p>
     </div>
-    <div class="revealwrap" id="rw4"><button class="revealbtn" onclick="revealSum(4)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="revealwrap"><button class="revealbtn" onclick="reveal(this)" data-reveal="sum4"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 <span class="ra">↓</span></button></div>
     <div class="card tight summary" id="sum4">
       <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
       <ul class="sumlist">
@@ -727,7 +843,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
       <p class="ask"><span class="var">K</span>는 <span class="hl">도달할 목적지</span>, <span class="var">Q</span>는 <span class="hl">지금의 현재 위치</span>! 반응물·생성물을 섞어 넣으면 어디로 갈까요?</p>
       <p class="helper">반응 지수 <span class="var">Q</span> = ‘관찰하는 그 순간의 농도’를 평형 상수식에 넣어 계산한 값.</p>
     </div>
-    <div class="revealwrap" id="rw5"><button class="revealbtn" onclick="revealSum(5)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="revealwrap"><button class="revealbtn" onclick="reveal(this)" data-reveal="sum5"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 <span class="ra">↓</span></button></div>
     <div class="card tight summary" id="sum5">
       <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
       <ul class="sumlist">
@@ -767,7 +883,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
       <p class="ask">현재 위치 <span class="var">Q</span>와 목적지 <span class="var">K</span>를 비교하면 <span class="hl">정·역반응</span> 중 어디로 갈지 알 수 있을까요?</p>
       <p class="helper">N<sub>2</sub> + 3H<sub>2</sub> ⇌ 2NH<sub>3</sub> (<span class="var">K</span> = 200). 슬라이더로 <span class="var">Q</span>를 바꾸면 막대·화살표·분수가 실시간으로 바뀝니다.</p>
     </div>
-    <div class="revealwrap" id="rw6"><button class="revealbtn" onclick="revealSum(6)"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 ↓</button></div>
+    <div class="revealwrap"><button class="revealbtn" onclick="reveal(this)" data-reveal="sum6"><span class="rdot"></span> 시뮬레이션·활동을 마친 뒤 — 핵심 정리 보기 <span class="ra">↓</span></button></div>
     <div class="card tight summary" id="sum6">
       <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
       <ul class="sumlist">
@@ -812,7 +928,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
       </div>
       <p class="helper">각 단계를 클릭해 풀이를 펼쳐 보세요.</p>
     </div>
-    <div class="revealwrap" id="rw7"><button class="revealbtn" onclick="revealSum(7)"><span class="rdot"></span> 형성평가를 마친 뒤 — 오늘의 한 줄 정리 보기 ↓</button></div>
+    <div class="revealwrap"><button class="revealbtn" onclick="reveal(this)" data-reveal="sum7"><span class="rdot"></span> 형성평가를 마친 뒤 — 오늘의 한 줄 정리 보기 <span class="ra">↓</span></button></div>
     <div class="card endhero summary" id="sum7" style="text-align:center">
       <h2>오늘의 한 줄 정리</h2>
       <p class="sub" style="max-width:560px;margin:0 auto">평형에선 <b>농도의 비가 일정</b>(<span class="var">K</span>), 반응은 <b><span class="var">Q</span> 가 <span class="var">K</span> 와 같아지는 방향</b>으로 진행!</p>
@@ -823,7 +939,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
     </div>
   </div>
   <div class="col-r">
-    <div class="card">
+    <div class="card" id="quizR">
       <span class="tag sim" style="background:var(--accent-l);color:#8a5208"><i class="dotmark"></i> 형성평가 · 3문항</span>
       <div class="oxbox" style="border-style:solid;border-color:var(--line)">
         <div class="oxq"><span class="lab" style="background:var(--primary)">Q1</span> A(g) ⇌ B(g), <span class="var">K</span> = 1. 현재 [A]=1, [B]=2 이면?</div>
@@ -838,7 +954,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
         <div class="oxq"><span class="lab" style="background:var(--primary)">Q2</span> 반응 지수 <span class="var">Q</span>에 대한 옳은 설명은?</div>
         <div class="choices">
           <button class="choice" onclick="quiz(this,false,'q2fb','오답')"><span class="mk">①</span> 평형 농도를 넣어 계산한 값</button>
-          <button class="choice" onclick="quiz(this,true,'q2fb','정답! 관찰 시점(현재)의 농도를 평형 상수식에 넣어 계산한 값입니다.')"><span class="mk">②</span> 현재(관찰 시점) 농도를 평형 상수식에 넣은 값</button>
+          <button class="choice" onclick="quiz(this,true,'q2fb','정답! 관찰 시점(현재)의 농도를 평형 상수식에 넣어 계산한 값입니다.')"><span class="mk">②</span> 현재 농도를 평형 상수식에 넣은 값</button>
           <button class="choice" onclick="quiz(this,false,'q2fb','오답')"><span class="mk">③</span> 온도에 따라 정해지는 상수</button>
         </div>
         <div class="fb" id="q2fb"></div>
@@ -857,11 +973,11 @@ h1.title{font-size:21px;margin:7px 0 3px}
   </div>
 </section>
 <section class="slide single">
-  <div style="max-width:1180px;margin:0 auto;text-align:center">
+  <div style="max-width:1180px;margin:0 auto;text-align:center" id="mmWrap">
     <span class="kicker"><span class="n">✓</span> 수업 마무리</span>
     <h1 class="title">수고하셨습니다! 오늘 배운 내용 한눈에 보기</h1>
     <p class="sub">가역 반응의 평형부터 반응의 진행 방향 예측까지, 아래 지도로 정리해 봅시다.</p>
-    <div class="card">
+    <div class="card" id="mmCard">
       <div class="mindmap">
         <div class="mm-center">화학 평형<span>변했다 일정해지는 균형</span></div>
         <div class="mm-cols">
@@ -881,8 +997,7 @@ h1.title{font-size:21px;margin:7px 0 3px}
           </div>
         </div>
       </div>
-      <p class="sub" style="margin-top:14px"><b style="color:var(--primary-d)">핵심 한 줄</b> · 반응은 늘 <b><span class="var">Q</span> 가 <span class="var">K</span> 와 같아지는 방향</b>으로 진행하여 평형에 도달합니다.</p>
-      <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
         <button class="btn ghost" onclick="go(0)">↺ 처음부터</button>
         <button class="btn primary" onclick="go(1)">02단원 다시 보기</button>
       </div>
@@ -1277,10 +1392,8 @@ window.addEventListener('resize',applyZoom);
   if(vp)vp.addEventListener('wheel',function(e){if(e.ctrlKey||e.metaKey){e.preventDefault();setZoom(userZoom*(e.deltaY<0?1.1:0.9));}},{passive:false});})();
 applyZoom();
 
-function revealSum(k){
-  var c=document.getElementById('sum'+k); if(c)c.classList.add('show');
-  var b=document.getElementById('rw'+k); if(b)b.style.display='none';
-}
+/* 토글 reveal(§18): 다시 누르면 접힘 + .ra 화살표 ↓↑ */
+function reveal(btn){ const t=document.getElementById(btn.dataset.reveal); if(!t)return; const on=t.classList.toggle('show'); btn.classList.toggle('open',on); const a=btn.querySelector('.ra'); if(a)a.textContent=on?'↑':'↓'; }
 
 </script>
 </body>
