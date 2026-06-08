@@ -584,6 +584,36 @@ tr.lcopen .lkcell::after{content:none}
 .photogrid.three{grid-template-columns:1fr 1fr 1fr}
 .imgband{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
 
+/* ===== 사례 학습(단일 슬라이드) 포맷 헬퍼 — 좌 시뮬 + 우 그래프 + 2박스 헤더 + 칩 =====
+   구조: <section class="slide single">
+           <div> ① 헤더행(kicker+title+.hgroup 2개)  ② grid 1fr 1fr (좌 시뮬카드 / 우 그래프+컨트롤 카드)
+                 ③ reveal 버튼  ④ 핵심정리 카드(.flowrow 칩 + .sumconc) </div>
+         </section>
+   헤더 2박스: 1번=화학반응식(상태 (g)(aq)(s)(l) 표기) + .hbadge, 2번=요인 칩(.qchip)/또는 2번째 평형식.
+   하단 §41(README) 참고. */
+.flowrow.grn{background:#e3f1ea;border-color:#bfdccf}
+.flowrow.grn .fbadge{color:#0c6a4f}
+.flowrow.grn .farr{color:#8fc3ab}
+.flowrow.grn .fchip{background:#2f9e6e}
+/* 헤더 2박스(반응식/요인) */
+.qchip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:var(--primary-d);background:#fff;border:1px solid #cfe3db;border-radius:999px;padding:4px 11px;white-space:nowrap}
+.hgroup{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:13px;padding:6px 12px;background:#fbfdfc}
+.hgroup.fx{background:var(--primary-ll);border-color:#bfdccf}
+.hgroup .glabel2{font-size:11px;font-weight:800;letter-spacing:.02em}
+.hbadge{font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px;white-space:nowrap}
+/* 3열 미터 바(평형 수득률·속도·실효 등 0~100 가로 막대) */
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;margin-top:10px;padding:0 4px}
+.meter{text-align:center}
+.meter .mhead{font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.meter .mhead .mval{font-family:Georgia,serif;font-weight:800;font-size:13.5px;color:var(--ink);margin-left:3px}
+.meter.eff .mhead .mval{color:var(--primary-d)}
+.meter .mtrack{position:relative;height:9px;border-radius:6px;background:#e8efec;margin-top:6px}
+.meter .mfill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;transition:width .25s,background .25s}
+.meter .mmax{position:absolute;right:0;top:11px;font-size:9px;color:#9bb0ab;font-weight:700}
+.mnote{grid-column:1 / -1;font-size:11px;color:var(--muted);font-weight:700;text-align:center;margin-top:7px;line-height:1.4}
+/* 핵심정리 종합 결론 박스(칩 흐름 아래) */
+.sumconc{margin-top:9px;font-size:12px;font-weight:700;color:#0c6a4f;background:var(--ok-l);border:1px solid #bfe0d0;border-radius:10px;padding:9px 12px;line-height:1.55}
+
 </style>
 </head>
 <body>
@@ -687,6 +717,82 @@ tr.lcopen .lkcell::after{content:none}
       </div>
     </div>
   </section>
+
+  <!-- ===== 골격 · 사례 학습 단일 슬라이드 (좌 시뮬 + 우 그래프 + 공유 컨트롤 + 2박스 헤더 + 칩) =====
+       「일상 속 평형 이동」(chem-3-04)에서 확립한 포맷. 사례마다 이 구조를 복제.
+       data-init="initXxx"에 시뮬/그래프 그리기·컨트롤을 연결(위 initDemo 패턴 + 헬퍼 재사용). README §41.
+
+  <section class="slide single" data-title="사례명" data-init="initXxx">
+    <div>
+      ① 헤더행: kicker + title + 2박스(반응식 / 요인 칩)
+      <div style="display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:7px">
+        <span class="kicker"><span class="n">N</span> 분류</span>
+        <h1 class="title" style="font-size:21px;margin:0">사례 — 핵심 평형</h1>
+        <span class="hgroup" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:12.5px;font-weight:800;white-space:nowrap">A(g)+B(aq) ⇌ C(s)+D(aq)</span>   상태표기(g)(aq)(s)(l) 필수
+          <span class="hbadge" style="color:#a31d36;background:#fde7ec">평형 이름</span>
+        </span>
+        <span class="hgroup fx" style="flex:1;justify-content:center;min-width:0">
+          <span style="font-size:13px;color:var(--primary-d);font-weight:800;white-space:nowrap">요인</span>
+          <span class="qchip">🔺 조건↑ → 정반응</span>
+          <span class="qchip">🔻 조건↓ → 역반응</span>
+        </span>
+      </div>
+      ② 좌 시뮬 / 우 그래프+컨트롤
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch">
+        <div class="card" style="display:flex;flex-direction:column">
+          <span class="tag sim"><i class="dotmark"></i> 시뮬 제목</span>
+          <div style="position:relative;height:198px;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px"><canvas id="xxCanvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas></div>
+          <div class="readout" style="justify-content:center;margin-top:9px"><span class="rdchip">값 <b id="xxV">0</b></span></div>
+          <div class="qkverdict" id="xxVerdict" style="margin-top:8px"></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column">
+          <span class="tag sim"><i class="dotmark"></i> 그래프 제목</span>
+          <div class="graphbox" style="height:184px;min-height:184px;margin-top:8px"><span class="glabel">세로 – 가로</span><canvas id="xxGraph" style="width:100%;height:100%"></canvas></div>
+          <div style="margin-top:9px">
+            <div class="scaleLbl"><span>프리셋/상황</span></div>
+            <div id="xxBtns" style="display:flex;gap:6px;margin-top:6px"></div>   프리셋 버튼은 JS로 렌더(활성 강조)
+            <div class="simrow" style="flex-wrap:nowrap;gap:10px;align-items:flex-end;margin-top:10px">
+              <div style="flex:1;min-width:0"><div class="scaleLbl"><span>변인</span><span id="xxV2">0</span></div>
+                <input class="slider" id="xxSlider" type="range" min="0" max="100" value="50" oninput="xxSet()" style="width:100%;margin-top:6px;display:block"></div>
+              <input class="slider spd" id="xxSpeed" type="range" min="5" max="100" value="40" oninput="xxSpeedSet()" style="width:64px">
+              <button class="btn ghost" id="xxPlay" onclick="xxToggle()" style="width:34px;height:34px;padding:0;flex:none">⏸</button>
+              <button class="btn primary" onclick="xxReset()" style="width:34px;height:34px;padding:0;flex:none">↺</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      ③ 핵심정리: 칩 흐름(red/grn/blue) + 종합
+      <div class="revealwrap" style="margin-top:6px"><button class="revealbtn" onclick="reveal(this)" data-reveal="sumXx"><span class="rdot"></span> 핵심 정리 보기 <span class="ra">↓</span></button></div>
+      <div class="card tight summary" id="sumXx">
+        <span class="tag sum"><i class="dotmark"></i> 핵심 정리</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+          <div class="flowrow red"><span class="fbadge">조건</span><span class="farr">→</span>과정<span class="farr">→</span><span class="fchip">결과</span></div>
+          <div class="flowrow grn"><span class="fbadge">연결</span><span class="farr">→</span>중간 반응<span class="farr">→</span><span class="fchip">소모/생성</span></div>
+          <div class="flowrow blue"><span class="fbadge">귀결</span><span class="farr">→</span>현상<span class="farr">→</span><span class="fchip">의미</span></div>
+        </div>
+        <div class="sumconc">🎯 <b>종합</b> — 무엇이 변했고 → 어디로 이동했으며 → 결과가 무엇인지.</div>
+      </div>
+    </div>
+  </section>
+  ===== 골격 끝 ===== -->
+
+  <!-- ===== 골격 · 형성평가 4문항 2×2 그리드 + 상단 점수판 (chem-3-04) =====
+       check(btn,correct,'fbid',msg)는 슬라이드 내 .choices 수를 total로 자동 집계 → scoreNum/scoreMsg 갱신.
+  <section class="slide single" data-title="형성평가">
+    <div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="kicker"><span class="n">&#10003;</span> 확인 학습</span>
+        <h1 class="title" style="font-size:23px;margin:0">적용 &amp; 확인</h1>
+        <span style="flex:1;min-width:0"></span>
+        <div class="scoreband" style="margin-top:0;padding:8px 18px"><div class="sc" id="scoreNum">0 / 4</div><span id="scoreMsg">네 문항을 풀어 보세요.</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px 14px">
+        (oxbox 4개: <div class="oxbox" style="margin-top:0;padding:11px 13px"><div class="oxq" style="font-size:13.5px;margin-bottom:8px"><span class="lab">Q1</span> …</div><div class="choices">버튼 3개 check(...)</div><div class="fb" id="q1fb"></div></div> …)
+      </div>
+    </div>
+  </section>
+  ===== 골격 끝 ===== -->
 
   <!-- ===== 형성평가 / 예제 슬라이드 ===== -->
   <section class="slide" data-title="예시 · 형성평가">
