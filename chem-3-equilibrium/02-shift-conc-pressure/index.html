@@ -789,24 +789,47 @@ tr.lcopen .lkcell::after{content:none}
     </div>
   </section>
 
-  <!-- ===== 종합 정리: 르샤틀리에 원리 ===== -->
-  <section class="slide single" data-title="정리 · 르샤틀리에 원리">
-    <div>
+  <!-- ===== 종합 정리: 르샤틀리에 원리 (인터랙티브 예측 + 잠금표) ===== -->
+  <section class="slide" data-title="정리 · 르샤틀리에 원리" data-init="initLC">
+    <div class="col-l">
       <span class="kicker"><span class="n">4</span> 종합 정리</span>
-      <h1 class="title">르샤틀리에 원리 — 변화를 줄이는 쪽으로</h1>
-      <p class="sub">평형 상태에서 조건을 바꾸면, 그 <b>변화를 감소시키는 방향</b>으로 평형이 이동해 새 평형에 도달합니다. (농도·압력 변화에서는 <span class="var">K</span>가 변하지 않아요 — 온도는 다음 차시!)</p>
+      <h1 class="title">르샤틀리에 — 직접 예측</h1>
       <div class="card">
-        <table class="tbl">
-          <thead><tr><th>조건 변화</th><th>평형 이동 방향</th><th>이번 시간 예시</th></tr></thead>
+        <span class="tag sim"><i class="dotmark"></i> 조건을 바꿔 보자</span>
+        <p class="ask" style="font-size:15px;margin-top:2px;text-align:center">예시: <b>2A(g) ⇌ B(g)</b> <span style="font-size:12px;color:var(--muted);font-weight:700">(정반응 시 기체 분자 수 2→1)</span></p>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:800;color:var(--muted)"><span>◀ 반응물(A) 쪽</span><span>생성물(B) 쪽 ▶</span></div>
+          <div style="position:relative;height:26px;border-radius:13px;background:linear-gradient(90deg,#f1c9ad,#cfe2de);border:1px solid var(--line);margin-top:5px">
+            <div id="lcMarker" style="position:absolute;top:-4px;left:50%;width:5px;height:34px;background:var(--ink);border-radius:3px;transition:left .6s cubic-bezier(.3,.8,.3,1);transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>
+          </div>
+        </div>
+        <div style="height:46px;display:flex;align-items:center;justify-content:center;margin-top:6px;overflow:hidden"><span id="lcArrow" style="display:inline-block;font-size:34px;font-weight:900;color:var(--muted);line-height:1;transform-origin:center">⇌</span></div>
+        <div id="lcResult" class="qkverdict" style="margin-top:4px;font-size:13px;padding:9px">조건 버튼을 눌러 평형 이동을 예측해 보세요.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px">
+          <button class="btn ghost sm" onclick="lc('rc')">A 농도 ↑</button>
+          <button class="btn ghost sm" onclick="lc('pc')">B 농도 ↑</button>
+          <button class="btn ghost sm" onclick="lc('press')">압력 ↑ (부피↓)</button>
+          <button class="btn ghost sm" onclick="lc('vol')">부피 ↑ (압력↓)</button>
+        </div>
+        <div style="text-align:center;margin-top:9px"><button class="btn primary sm" onclick="lcReset()">↺ 초기화</button></div>
+      </div>
+    </div>
+    <div class="col-r" style="display:flex;flex-direction:column;padding-top:84px">
+      <div class="card" style="margin-top:0;flex:1;display:flex;flex-direction:column">
+        <div id="lcProgress" class="qkverdict" style="font-size:12.5px;padding:8px;margin-bottom:8px;background:#fff6e6;color:#8a5208">왼쪽 조건을 시도하면 표가 채워집니다 · <b>0 / 4</b></div>
+        <div style="flex:1;min-height:0;display:flex"><table class="tbl" id="lcTable" style="width:100%;height:100%">
+          <thead><tr><th>조건 변화</th><th>평형 이동 방향</th><th>평형 상수 <span class="var">K</span></th></tr></thead>
           <tbody>
-            <tr><td>반응물 농도 <b>증가</b></td><td>정반응(→) · 반응물 소모</td><td class="res">Q&lt;K</td></tr>
-            <tr><td>생성물 농도 <b>증가</b></td><td>역반응(←) · 생성물 소모</td><td>HCl → Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup>↑ (주황)</td></tr>
-            <tr><td>생성물 농도 <b>감소</b></td><td>정반응(→) · 생성물 보충</td><td>NaOH → CrO<sub>4</sub><sup>2−</sup>↑ (노랑)</td></tr>
-            <tr><td>압력 <b>증가</b> (부피↓)</td><td>기체 분자 수 <b>적은</b> 쪽</td><td>2NO<sub>2</sub> → N<sub>2</sub>O<sub>4</sub></td></tr>
-            <tr><td>압력 <b>감소</b> (부피↑)</td><td>기체 분자 수 <b>많은</b> 쪽</td><td>N<sub>2</sub>O<sub>4</sub> → 2NO<sub>2</sub></td></tr>
+            <tr data-cat="conc-a"><td>반응물(A) 농도 <b>증가</b></td><td class="lkcell"><span class="ans">정반응(→) · A 소모</span></td><td class="res lkcell"><span class="ans">불변</span></td></tr>
+            <tr data-cat="conc-b"><td>생성물(B) 농도 <b>증가</b></td><td class="lkcell"><span class="ans">역반응(←) · B 소모</span></td><td class="res lkcell"><span class="ans">불변</span></td></tr>
+            <tr data-cat="press"><td>압력 <b>증가</b>(부피↓)</td><td class="lkcell"><span class="ans">기체 분자 수 <b>적은</b> 쪽(→)</span></td><td class="res lkcell"><span class="ans">불변</span></td></tr>
+            <tr data-cat="vol"><td>부피 <b>증가</b>(압력↓)</td><td class="lkcell"><span class="ans">기체 분자 수 <b>많은</b> 쪽(←)</span></td><td class="res lkcell"><span class="ans">불변</span></td></tr>
           </tbody>
-        </table>
-        <div class="note" style="margin-top:12px">반응 지수 <span class="var">Q</span>로 보면: 조건이 바뀌어 <span class="var">Q</span>≠<span class="var">K</span>가 되면, <span class="var">Q</span>가 다시 <span class="var">K</span>와 같아질 때까지 정반응(<span class="var">Q</span>&lt;<span class="var">K</span>) 또는 역반응(<span class="var">Q</span>&gt;<span class="var">K</span>)이 우세하게 진행됩니다. — 도입의 물통 비유 그대로!</div>
+        </table></div>
+        <div style="font-size:11.5px;color:var(--muted);font-weight:700;text-align:right;margin-top:6px">※ 농도·압력 변화는 <b><span class="var">K</span> 불변</b> · 예: NaOH→노랑 / HCl→주황 · 2NO<sub>2</sub>⇌N<sub>2</sub>O<sub>4</sub></div>
+        <div id="lcNotes" style="display:none">
+          <div class="note" style="margin-top:8px;background:var(--no-l)"><b>오개념 주의</b> ① 압력을 바꿔도 <b>반응 전후 분자 수가 같으면</b>(H<sub>2</sub>+I<sub>2</sub>⇌2HI) 이동 없음. ② 농도·압력으로 <span class="var">K</span>가 변하지 않음 — <span class="var">K</span>를 바꾸는 건 <b>온도</b>뿐(다음 차시).</div>
+        </div>
       </div>
     </div>
   </section>
@@ -1326,6 +1349,43 @@ function drawPres(cv){
   // 입자(기체 영역 안쪽으로 매핑)
   const s=Math.min(w/300,h/180);
   for(const p of pres.p){ if(pres.run)pMove(p,0.04,0.96); const X=pad+p.x*(gasR-pad-2)+1, Y=pad+p.y*(h-2*pad); drawMolecule(ctx,p,X,Y,s); }
+}
+
+/* ===================== 르샤틀리에 예측기 (정리 슬라이드) =====================
+   예시: 2A(g) ⇌ B(g) (정반응 시 기체 분자 수 2→1). 온도 일정 → K 불변(온도는 다음 차시).
+   조건을 시도하면 오른쪽 표의 해당 행이 채워지고, 4가지 모두 시도하면 오개념 주의가 나타남. */
+let lcs={pos:0.5, found:{}};
+function lcUI(){ var m=document.getElementById('lcMarker'); if(m)m.style.left=(lcs.pos*100)+'%'; }
+function lcReveal(){
+  var rows=document.querySelectorAll('#lcTable tr[data-cat]'); var n=0, total=rows.length||4;
+  rows.forEach(function(tr){ if(lcs.found[tr.dataset.cat]){ tr.classList.add('lcopen'); n++; } });
+  var p=document.getElementById('lcProgress');
+  if(p){ if(n>=total){ p.innerHTML='✓ 정리 완성! 아래 <b>오개념 주의</b>도 확인하세요'; p.style.background='var(--ok-l)'; p.style.color='#0c6a4f'; }
+    else { p.innerHTML='왼쪽 조건을 시도하면 표가 채워집니다 · <b>'+n+' / '+total+'</b>'; p.style.background='#fff6e6'; p.style.color='#8a5208'; } }
+  var notes=document.getElementById('lcNotes'); if(notes) notes.style.display=(n>=total)?'block':'none';
+}
+function lcResetView(){ lcs.pos=0.5; lcUI();
+  var a=document.getElementById('lcArrow'); if(a){a.textContent='⇌'; a.style.color='var(--muted)';}
+  var r=document.getElementById('lcResult'); if(r){ r.innerHTML='조건 버튼을 눌러 평형 이동을 예측해 보세요.'; r.style.background='var(--primary-ll)'; r.style.color='var(--primary-d)'; } }
+function lcReset(){ lcResetView(); }                 // "초기화": 예측 화면만 리셋(탐구 진행은 유지)
+function initLC(){ lcs={pos:0.5,found:{}};
+  document.querySelectorAll('#lcTable tr[data-cat]').forEach(function(tr){ tr.classList.remove('lcopen'); });
+  lcReveal(); lcResetView(); }
+function lc(type){
+  var dir=1, label='', cat=type, ex='';
+  if(type==='rc'){ dir=1; label='A 농도 ↑'; cat='conc-a'; ex='반응물을 더 넣으면 그것을 소모하는 정반응'; }
+  else if(type==='pc'){ dir=-1; label='B 농도 ↑'; cat='conc-b'; ex='예: HCl로 생성물 H⁺↑ → 역반응 → 주황'; }
+  else if(type==='press'){ dir=1; label='압력 ↑ (부피↓)'; cat='press'; ex='예: 2NO₂ → N₂O₄ (분자 수 2→1)'; }
+  else if(type==='vol'){ dir=-1; label='부피 ↑ (압력↓)'; cat='vol'; ex='예: N₂O₄ → 2NO₂'; }
+  lcs.pos=Math.max(0.12, Math.min(0.88, lcs.pos+dir*0.2)); lcUI();
+  var a=document.getElementById('lcArrow');
+  a.textContent = dir>0?'→':'←'; a.style.color = dir>0?'var(--primary-d)':'#a31d36';
+  a.style.animation='none'; void a.offsetWidth; a.style.animation='lcpulse .5s';
+  var dirTxt = dir>0?'<b>정반응(→)</b>':'<b>역반응(←)</b>';
+  var r=document.getElementById('lcResult');
+  r.innerHTML = label+' → '+dirTxt+' · <b><span class="var">K</span> 불변</b><br><span style="font-size:11.5px;color:var(--muted);font-weight:700">'+ex+'</span>';
+  r.style.background = dir>0?'var(--primary-ll)':'var(--no-l)'; r.style.color = dir>0?'var(--primary-d)':'#a31d36';
+  lcs.found[cat]=true; lcReveal();
 }
 
 /* 시작 */
