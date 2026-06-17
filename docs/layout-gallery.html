@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>슬라이드 레이아웃 갤러리</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+:root{
+  --bg:#f4f8f7;--surface:#ffffff;--ink:#0a211d;--muted:#4a5f5b;
+  --primary:#0f766e;--primary-d:#0b4f48;--primary-l:#cdeee8;--line:#c5d6d2;--accent:#d97706;
+  --wire:#bfe6da;--wire-d:#a6dccd;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard','Pretendard Variable',-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+.var{font-family:Georgia,'Times New Roman',serif;font-style:italic}
+.wrap{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+header h1{font-size:28px;font-weight:800;letter-spacing:-.5px}
+header p{color:var(--muted);font-weight:600;margin-top:8px;font-size:15px}
+code{font-family:'SF Mono',Consolas,'D2Coding',monospace;background:var(--primary-l);color:var(--primary-d);padding:1px 7px;border-radius:6px;font-size:.86em;font-weight:700}
+.guide{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:18px 22px;margin:24px 0 32px}
+.guide h2{font-size:15px;font-weight:800;color:var(--primary-d);margin-bottom:10px}
+.guide ol{margin:0 0 0 18px;font-size:14px;font-weight:600}
+.guide li{margin:5px 0}
+.guide .alt{margin-top:11px;font-size:13.5px;color:var(--muted);font-weight:600;border-top:1px solid var(--line);padding-top:11px}
+.guide .alt b{color:var(--primary-d)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.lay{background:var(--surface);border:1.5px solid var(--line);border-radius:18px;padding:16px}
+.wire{aspect-ratio:16/9;background:#eef5f3;border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;gap:6px;margin-bottom:14px}
+.wire>div{background:var(--wire);border-radius:5px}
+.wire .col{flex:1}
+.wire.c2>div:first-child{flex:36}.wire.c2>div:last-child{flex:64}
+.wire.c3>div{flex:1}
+.wire.c2w>div:first-child{flex:63}.wire.c2w>div:last-child{flex:37}
+.wire.v{flex-direction:column}
+.wire.v>div:first-child{flex:42}.wire.v>div:last-child{flex:58}
+.wire.hc{flex-direction:column}
+.wire.hc>.head{flex:26;background:var(--wire-d)}
+.wire.hc>.r{flex:74;display:flex;gap:6px;background:transparent}
+.wire.hc>.r>div{flex:1;background:var(--wire);border-radius:5px}
+.wire.hc>.r>div:first-child{flex:36}.wire.hc>.r>div:last-child{flex:64}
+.lay h3{font-size:17px;font-weight:800;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.lay .when,.lay .ex{font-size:13.5px;font-weight:600;color:var(--muted);margin-top:7px;line-height:1.55}
+.lay .when b,.lay .ex b{color:var(--ink);font-weight:800}
+footer{margin-top:36px;font-size:13px;color:var(--muted);font-weight:600;text-align:center;border-top:1px solid var(--line);padding-top:20px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>슬라이드 레이아웃 갤러리</h1>
+  <p>수업 슬라이드를 만들 때 상황에 맞는 레이아웃을 먼저 고르세요. 실물 견본은 <code>docs/lesson_template.html</code>에 같은 이름으로 들어 있습니다.</p>
+</header>
+
+<div class="guide">
+  <h2>＋ 새 레이아웃·예시 추가하는 법</h2>
+  <ol>
+    <li><code>docs/lesson_template.html</code>에 <code>&lt;section class="slide …"&gt;</code> 한 장을 추가합니다 (CSS 클래스는 아래 각 카드의 코드 참고).</li>
+    <li>이 페이지의 레이아웃 카드(<code>.lay</code>) 블록 하나를 복사해 와이어프레임과 설명을 채웁니다.</li>
+  </ol>
+  <p class="alt">또는 Claude Code에 <b>“이 레이아웃을 이런 예시로 갤러리에 추가해줘”</b>라고 요청하면 등재됩니다. 새 레이아웃이면 CSS(<code>lesson_template.html</code> + <code>deck-shell.html</code>)까지 함께 추가합니다.</p>
+</div>
+
+<div class="grid">
+
+  <div class="lay">
+    <div class="wire"><div class="col"></div></div>
+    <h3>1단 <code>.single</code></h3>
+    <p class="when"><b>적합</b> — 전체 폭을 쓰는 단일 메시지</p>
+    <p class="ex"><b>예시</b> — 도입 동기, 마무리 마인드맵</p>
+  </div>
+
+  <div class="lay">
+    <div class="wire c2"><div></div><div></div></div>
+    <h3>2단 <code>(기본)</code></h3>
+    <p class="when"><b>적합</b> — 발문 + 탐구(개념 학습, 가장 흔함)</p>
+    <p class="ex"><b>예시</b> — 좌 질문/정리 + 우 입자 시뮬</p>
+  </div>
+
+  <div class="lay">
+    <div class="wire c3"><div></div><div></div><div></div></div>
+    <h3>3단 <code>.cols3</code></h3>
+    <p class="when"><b>적합</b> — 셋을 나란히 비교 · 3단계 과정 · 세 사례</p>
+    <p class="ex"><b>예시</b> — 흡열 / 발열 / 촉매, 반응물 · 정반응 · 생성물</p>
+  </div>
+
+  <div class="lay">
+    <div class="wire v"><div></div><div></div></div>
+    <h3>상하 분할 <code>.split</code></h3>
+    <p class="when"><b>적합</b> — 위 제시 → 아래로 가로로 넓게 전개</p>
+    <p class="ex"><b>예시</b> — 위 큰 그래프 + 아래 데이터 표</p>
+  </div>
+
+  <div class="lay">
+    <div class="wire hc"><div class="head"></div><div class="r"><div></div><div></div></div></div>
+    <h3>헤더+2단 <code>.headcols</code></h3>
+    <p class="when"><b>적합</b> — 공통 맥락을 위에 고정 + 좌우 활동</p>
+    <p class="ex"><b>예시</b> — 상단 반응식(<span class="var">N</span><sub>2</sub><span class="var">O</span><sub>4</sub> ⇌ 2<span class="var">NO</span><sub>2</sub>) + 좌 시뮬 / 우 그래프</p>
+  </div>
+
+  <div class="lay">
+    <div class="wire c2w"><div></div><div></div></div>
+    <h3>2단 역비율 <code>.cols2wide</code></h3>
+    <p class="when"><b>적합</b> — 시뮬·그림이 주인공, 설명은 보조</p>
+    <p class="ex"><b>예시</b> — 좌 큰 입자 시뮬 + 우 짧은 관찰 포인트</p>
+  </div>
+
+</div>
+
+<footer>흡열 = 빨강 · 발열 = 파랑 색 언어와 정답/오답 색은 모든 레이아웃 공통입니다 · 토큰은 lesson_template.html 기준</footer>
+</div>
+</body>
+</html>

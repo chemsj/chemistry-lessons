@@ -14,7 +14,7 @@ description: 사용 시점 — blueprint의 슬라이드를 실제로 만들 때
 ## 결정 순서 (슬라이드 i)
 1. **의도** — 이 슬라이드가 학생에게 남길 한 가지(blueprint i번 칸). 없으면 먼저 정한다.
 2. **이전 슬라이드 연결** — 무엇을 이어받고 무엇을 새로 던지나(흐름 일관성). 직전 슬라이드를 다시 본다.
-3. **레이아웃** — [[lesson-slide-2col]](질문+시뮬, 가장 흔함) / [[lesson-slide-single]](도입·마무리·사례·형성평가4) 중 선택.
+3. **레이아웃** — 상황에 맞게 고른다(견본·적합한 경우 한눈에: `docs/layout-gallery.html`): [[lesson-slide-2col]](질문+시뮬, 가장 흔함) · [[lesson-slide-single]](도입·마무리·사례·형성평가4) · [[lesson-slide-layouts]](3단 `.cols3` · 상하분할 `.split` · 헤더+2단 `.headcols` · 2단 역비율 `.cols2wide`).
 4. **요소 선택** — [[lesson-activity-types]]에서 이 슬라이드에 넣을 요소를 고른다: 발문 · 입자 시뮬([[lesson-simulator-particle]]) · 그래프([[lesson-graph]]) · 핵심요약 칩 · 이해도 체크([[lesson-comprehension-check]]) · 실험사진 · 슬라이더/계산기 · POE.
 5. **배치** — 각 요소를 어디에: **시뮬·그래프는 col-r**, **질문·확인·정리는 col-l**(README §2). 핵심 정리는 [[lesson-reveal-gate]]로 활동 뒤 펼침. single이면 사례 학습 포맷(헤더 2박스→좌시뮬/우그래프→reveal→칩 정리).
 6. **내용 작성** — 각 요소의 실제 텍스트·수치. 표기는 학생이 배운 것만, 실측 앵커, 흡열=빨강·발열=파랑. 시뮬 표시값=입자수=그래프=Q 일치(연속값).
@@ -26,5 +26,6 @@ description: 사용 시점 — blueprint의 슬라이드를 실제로 만들 때
 - 한 슬라이드 = 한 핵심. 안 들어가면 줄인다(과설계 금지).
 - 정답을 먼저 보여주지 않는다: 발문 → 시뮬/관찰 → (버튼) 정리.
 - `data-reveal` 값=카드 id, 형성평가 `fb` id는 슬라이드마다 **중복 금지**(lint가 잡음).
+- 재사용할 만한 레이아웃·예시가 나오면 `docs/layout-gallery.html`에 카드로 등재한다(새 레이아웃이면 `lesson_template.html`·`deck-shell.html`에 CSS·견본도 함께).
 
 다음: [[flow-check]] · 되돌아가기 [[lesson-blueprint]]
