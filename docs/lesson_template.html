@@ -9,22 +9,22 @@
 
 
 :root{
-  --bg:#eef4f3;
-  --bg2:#e3eeec;
+  --bg:#f4f8f7;
+  --bg2:#e9f2ef;
   --surface:#ffffff;
-  --ink:#15302c;
-  --muted:#5d7470;
+  --ink:#0a211d;
+  --muted:#4a5f5b;
   --primary:#0f766e;
-  --primary-d:#0b5650;
-  --primary-l:#d6efeb;
-  --primary-ll:#eafaf7;
-  --accent:#e08a1e;
-  --accent-l:#fcefda;
-  --ok:#10936b;
-  --ok-l:#dcf3ea;
-  --no:#d6435f;
-  --no-l:#fbe2e8;
-  --line:#dbe7e4;
+  --primary-d:#0b4f48;
+  --primary-l:#cdeee8;
+  --primary-ll:#e4f3f0;
+  --accent:#d97706;
+  --accent-l:#fbeccd;
+  --ok:#0f7a52;
+  --ok-l:#d4efe2;
+  --no:#c81e4a;
+  --no-l:#f9dde4;
+  --line:#c5d6d2;
   --no2:#9a3412;     /* NO2 적갈색 */
   --atomN:#2f6fb0;   /* 질소 파랑 */
   --atomO:#c0392b;   /* 산소 빨강 */
@@ -462,8 +462,8 @@ h1.title{font-size:21px;margin:7px 0 3px}
 .mm-node span{font-size:11.5px}
 .recap{gap:11px}.recap .rc{padding:13px}.recap .rc p{font-size:12.5px}
 
-/* ===== per-slide vertical balance: center content, even out whitespace ===== */
-.slide.active{align-content:safe center}
+/* ===== per-slide vertical balance: 2-col content top-aligns so leftover space pools at the bottom (no top+bottom split gaps) ===== */
+.slide.active{align-content:safe start}
 .col-l,.col-r{height:auto;max-height:100%}
 .slide.single.active{display:flex;flex-direction:column;justify-content:safe center;align-items:center;overflow:auto}
 
@@ -646,7 +646,6 @@ tr.lcopen .lkcell::after{content:none}
           <div class="rc"><b>소단원 B</b><p>① 개념 1<br>② 개념 2</p></div>
         </div>
         <div class="note" style="margin-top:14px">학습 방법 · 각자 기기에서 <b>버튼·슬라이더를 직접 조작</b>하고 질문에 답하며 따라오세요. 위쪽 점 또는 아래 버튼(← →)으로 이동합니다.</div>
-        <div style="text-align:center;margin-top:16px"><button class="btn primary" onclick="go(1)">수업 시작하기 →</button></div>
       </div>
     </div>
   </section>
