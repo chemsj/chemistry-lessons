@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수업 자료는 이렇게 만들어집니다 — 제작 흐름 안내</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --primary:#0f766e; --primary-d:#0b5650; --primary-l:#d6efeb; --primary-ll:#eafaf7;
+    --accent:#e08a1e; --accent-l:#fcefda;
+    --ok:#10936b; --ok-l:#dcf3ea;
+    --no:#d6435f; --no-l:#fbe2e8;
+    --ink:#15302c; --muted:#5d7470; --line:#dbe7e4;
+    --bg:#eef4f3; --bg2:#e3eeec; --surface:#fff;
+    --blue:#2b7fb8; --blue-l:#e6f0f7;
+    --red:#a31d36;  --red-l:#fde7ec;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;
+    word-break:keep-all;
+    background-image:radial-gradient(circle at 10% 8%,rgba(15,118,110,.05),transparent 40%),radial-gradient(circle at 92% 96%,rgba(224,138,30,.05),transparent 44%);}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px;}
+
+  /* ===== 헤더 ===== */
+  header{background:linear-gradient(135deg,var(--primary-d),var(--primary));color:#fff;padding:54px 0 46px;}
+  header .eyebrow{font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--accent-l);opacity:.95;}
+  header h1{font-size:clamp(1.8rem,4.4vw,2.7rem);font-weight:800;line-height:1.2;margin:12px 0 14px;}
+  header p{font-size:1.04rem;max-width:660px;color:#eafaf7;opacity:.96;}
+  header .pill{display:inline-block;margin-top:18px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);
+    border-radius:999px;padding:7px 16px;font-size:.86rem;font-weight:600;}
+
+  /* ===== 공통 섹션 ===== */
+  main{padding:50px 0 30px;}
+  section{margin-bottom:54px;}
+  .sechead{display:flex;align-items:baseline;gap:12px;margin-bottom:8px;}
+  .sechead .num{font-size:.92rem;font-weight:800;color:var(--accent);letter-spacing:.06em;}
+  .sechead h2{font-size:1.5rem;font-weight:800;color:var(--primary-d);}
+  .seclead{color:var(--muted);font-size:.98rem;margin-bottom:24px;max-width:760px;}
+
+  /* ===== 큰 그림 3카드 ===== */
+  .bigidea{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .bi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 20px;}
+  .bi .ic{font-size:1.7rem;}
+  .bi h3{font-size:1.06rem;font-weight:800;margin:8px 0 6px;color:var(--primary-d);}
+  .bi p{font-size:.92rem;color:var(--muted);}
+
+  /* ===== 흐름도 ===== */
+  .flow{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:30px 26px 34px;position:relative;}
+  .loopnote{display:flex;align-items:center;gap:8px;background:var(--accent-l);border:1px dashed var(--accent);
+    color:#9a6212;border-radius:10px;padding:9px 14px;font-size:.86rem;font-weight:600;margin-bottom:22px;}
+  .node{display:flex;gap:16px;align-items:stretch;position:relative;}
+  .node + .arrow{height:26px;margin-left:23px;border-left:2.5px solid var(--primary-l);}
+  .arrow .tip{display:block;width:0;height:0;margin-left:-7px;margin-top:18px;
+    border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--primary-l);}
+  .badge{flex:0 0 48px;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:1.15rem;color:#fff;background:var(--primary);box-shadow:0 4px 10px -4px rgba(15,118,110,.6);}
+  .badge.macro{background:var(--primary);}
+  .badge.micro{background:var(--accent);}
+  .badge.verify{background:var(--ok);}
+  .badge.start{background:var(--primary-d);}
+  .ncard{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 18px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;}
+  .ncard .t{font-weight:800;font-size:1.04rem;}
+  .ncard .who{font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px;}
+  .who.sys{background:var(--primary-l);color:var(--primary-d);}
+  .who.usr{background:var(--accent-l);color:#9a6212;}
+  .who.both{background:#e9e2f5;color:#5b3fa0;}
+  .ncard .sk{font-size:.78rem;font-family:ui-monospace,Menlo,monospace;color:var(--muted);
+    background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 8px;}
+  .ncard .desc{flex-basis:100%;font-size:.9rem;color:var(--muted);margin-top:2px;}
+
+  /* 루프 묶음 */
+  .loopwrap{border:2px dashed var(--accent);border-radius:16px;padding:18px 16px 14px;margin:4px 0;position:relative;background:rgba(224,138,30,.035);}
+  .loopwrap .looplabel{position:absolute;top:-12px;left:18px;background:var(--accent);color:#fff;font-size:.78rem;font-weight:800;
+    padding:3px 12px;border-radius:999px;}
+  .loopback{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:12px;font-size:.84rem;font-weight:700;color:#9a6212;}
+
+  /* ===== 단계별 상세 ===== */
+  .stage{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:0;overflow:hidden;margin-bottom:18px;}
+  .stage > .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);
+    background:linear-gradient(90deg,var(--primary-ll),transparent);}
+  .stage .snum{flex:0 0 34px;width:34px;height:34px;border-radius:9px;background:var(--primary);color:#fff;
+    font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .stage.micro .snum{background:var(--accent);}
+  .stage.verify .snum{background:var(--ok);}
+  .stage .sh h3{font-size:1.16rem;font-weight:800;}
+  .stage .sh .easy{font-size:.88rem;color:var(--muted);font-weight:500;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;}
+  .cols > div{padding:18px 22px;}
+  .cols > div:first-child{border-right:1px solid var(--line);}
+  .colh{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:800;letter-spacing:.02em;margin-bottom:10px;
+    text-transform:uppercase;}
+  .colh.sys{color:var(--primary-d);}
+  .colh.usr{color:#9a6212;}
+  .colh .dot{width:9px;height:9px;border-radius:50%;}
+  .colh.sys .dot{background:var(--primary);}
+  .colh.usr .dot{background:var(--accent);}
+  .ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+  .ul li{font-size:.92rem;padding-left:18px;position:relative;}
+  .ul li::before{content:"";position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:2px;background:var(--primary-l);}
+  .cols .usr .ul li::before{background:var(--accent-l);border:1px solid var(--accent);}
+  .skchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .skchip{font-size:.74rem;font-family:ui-monospace,Menlo,monospace;background:var(--primary-ll);color:var(--primary-d);
+    border:1px solid var(--primary-l);border-radius:6px;padding:2px 8px;}
+  .skchip.file{background:var(--bg2);color:var(--muted);border-color:var(--line);}
+
+  /* ===== 바탕 규약 ===== */
+  .guards{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .guard{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--primary);border-radius:12px;padding:20px 22px;}
+  .guard.amber{border-left-color:var(--accent);}
+  .guard h3{font-size:1.08rem;font-weight:800;margin-bottom:4px;}
+  .guard .sub{font-size:.82rem;color:var(--muted);font-family:ui-monospace,Menlo,monospace;margin-bottom:12px;}
+  .guard ul{list-style:none;display:flex;flex-direction:column;gap:7px;}
+  .guard li{font-size:.9rem;padding-left:20px;position:relative;}
+  .guard li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:800;}
+  .colortag{display:inline-flex;gap:6px;margin-top:10px;}
+  .colortag span{font-size:.76rem;font-weight:700;border-radius:6px;padding:3px 9px;}
+  .ct-red{background:var(--red-l);color:var(--red);}
+  .ct-blue{background:var(--blue-l);color:var(--blue);}
+
+  /* ===== 역할 요약 표 ===== */
+  .rolewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;}
+  table{border-collapse:collapse;width:100%;background:var(--surface);font-size:.9rem;}
+  thead th{background:var(--primary-d);color:#fff;text-align:left;padding:13px 16px;font-weight:700;font-size:.86rem;}
+  tbody td{padding:12px 16px;border-top:1px solid var(--line);vertical-align:top;}
+  tbody td:first-child{font-weight:700;color:var(--primary-d);white-space:nowrap;}
+  tbody tr:nth-child(even){background:var(--bg2);}
+  .yes{color:var(--ok);font-weight:800;}
+  .small{color:var(--muted);font-size:.84rem;}
+
+  /* ===== 스킬 사전 ===== */
+  .dict{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  .di{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 15px;display:flex;gap:12px;align-items:baseline;}
+  .di code{font-family:ui-monospace,Menlo,monospace;font-size:.82rem;color:var(--primary-d);font-weight:700;white-space:nowrap;}
+  .di span{font-size:.86rem;color:var(--muted);}
+
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:26px 0 60px;text-align:center;color:var(--muted);font-size:.84rem;line-height:1.9;}
+  footer .meta{font-weight:700;color:var(--ink);}
+
+  @media(max-width:760px){
+    .bigidea,.guards,.dict{grid-template-columns:1fr;}
+    .cols{grid-template-columns:1fr;}
+    .cols > div:first-child{border-right:none;border-bottom:1px solid var(--line);}
+  }
+  @media print{
+    body{background:#fff;}
+    header{background:var(--primary-d) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    section{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">교사 연수 · 시스템 안내</div>
+    <h1>수업 자료는 이렇게 만들어집니다</h1>
+    <p>코드 한 줄 쓰지 않고, <b>말로 요청</b>하면 AI가 인터랙티브 화학 수업을 만듭니다.
+       이 문서는 그 <b>제작 흐름</b>과, 각 단계에서 <b>시스템이 무엇을 하고</b> <b>선생님이 무엇을 정해야 하는지</b>를 한눈에 정리한 안내입니다.</p>
+    <span class="pill">📌 핵심 한 줄 — 선생님은 “무엇을 가르칠지”만 정하고, “어떻게 코드로 만들지”는 시스템이 맡습니다.</span>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+  <!-- ===== 큰 그림 ===== -->
+  <section>
+    <div class="sechead"><span class="num">한눈에</span><h2>이 시스템의 작동 원리</h2></div>
+    <p class="seclead">세 가지만 기억하면 됩니다.</p>
+    <div class="bigidea">
+      <div class="bi">
+        <div class="ic">💬</div>
+        <h3>말로 요청합니다</h3>
+        <p>“르 샤틀리에 원리 1차시 만들어 줘”처럼 평소 말로 지시합니다. 선생님은 <b>코드를 몰라도</b> 됩니다.</p>
+      </div>
+      <div class="bi">
+        <div class="ic">🔁</div>
+        <h3>거시 ↔ 미시를 오갑니다</h3>
+        <p>먼저 <b>전체 설계도(거시)</b>를 그리고, <b>슬라이드 한 장씩(미시)</b> 만들며, 매번 전체 흐름으로 되돌아와 점검합니다.</p>
+      </div>
+      <div class="bi">
+        <div class="ic">📐</div>
+        <h3>규칙이 품질을 지킵니다</h3>
+        <p>교육 원칙·색 언어·디자인 규약·자동 점검이 항상 켜져 있어, 만드는 사람이 달라도 <b>일관된 품질</b>이 나옵니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 전체 흐름도 ===== -->
+  <section>
+    <div class="sechead"><span class="num">흐름도</span><h2>전체 제작 흐름</h2></div>
+    <p class="seclead">위에서 아래로 흐릅니다. 가운데 <b>주황색 구간</b>은 슬라이드 수만큼 <b>반복</b>되는 핵심 루프입니다.
+       각 칸의 <span style="color:var(--primary-d);font-weight:700">파랑 = 시스템</span>,
+       <span style="color:#9a6212;font-weight:700">주황 = 선생님</span>,
+       <span style="color:#5b3fa0;font-weight:700">보라 = 함께</span>가 주로 움직이는 주체입니다.</p>
+
+    <div class="flow">
+
+      <!-- 0 -->
+      <div class="node">
+        <div class="badge start">0</div>
+        <div class="ncard">
+          <span class="t">주제·범위 정하기</span>
+          <span class="who usr">선생님</span>
+          <span class="desc">무엇을·누구에게·몇 차시로 가르칠지 말로 알려 줍니다. 시스템이 핵심만 하나씩 되물어 좁힙니다.</span>
+        </div>
+      </div>
+      <div class="arrow"><span class="tip"></span></div>
+
+      <!-- 1 -->
+      <div class="node">
+        <div class="badge macro">1</div>
+        <div class="ncard">
+          <span class="t">설계도 그리기 <span style="font-weight:600;color:var(--muted);font-size:.85rem">(거시)</span></span>
+          <span class="who both">함께</span>
+          <span class="sk">lesson-blueprint</span>
+          <span class="desc">학습목표·오개념·이야기 흐름·슬라이드 개요표를 먼저 만들어 설계 문서로 저장합니다. — 슬라이드는 아직 안 만듭니다.</span>
+        </div>
+      </div>
+      <div class="arrow"><span class="tip"></span></div>
+
+      <!-- 2 -->
+      <div class="node">
+        <div class="badge macro">2</div>
+        <div class="ncard">
+          <span class="t">빈 발표판 깔기</span>
+          <span class="who sys">시스템</span>
+          <span class="sk">lesson-deck-shell</span>
+          <span class="desc">16:9 빈 덱을 수업 폴더에 깝니다. 상단바·네비·줌·발표 기능은 이미 완성되어 자동으로 동작합니다.</span>
+        </div>
+      </div>
+      <div class="arrow"><span class="tip"></span></div>
+
+      <!-- 루프 -->
+      <div class="loopwrap">
+        <span class="looplabel">🔁 슬라이드 수만큼 반복</span>
+
+        <div class="node">
+          <div class="badge micro">3</div>
+          <div class="ncard">
+            <span class="t">슬라이드 한 장 짓기 <span style="font-weight:600;color:var(--muted);font-size:.85rem">(미시)</span></span>
+            <span class="who both">함께</span>
+            <span class="sk">slide-compose</span>
+            <span class="desc">의도→연결→레이아웃→활동 요소→배치→내용 순으로 <b>하나씩 결정</b>해 슬라이드 1장을 추가합니다.</span>
+          </div>
+        </div>
+        <div class="arrow"><span class="tip"></span></div>
+
+        <div class="node">
+          <div class="badge macro">4</div>
+          <div class="ncard">
+            <span class="t">전체 흐름 점검 <span style="font-weight:600;color:var(--muted);font-size:.85rem">(거시 복귀)</span></span>
+            <span class="who sys">시스템</span>
+            <span class="sk">flow-check</span>
+            <span class="desc">방금 만든 장이 전체 이야기에서 제자리인지 되돌아봅니다. 어긋나면 설계도를 고쳐 다음 장에 반영합니다.</span>
+          </div>
+        </div>
+
+        <div class="loopback">↻ 다음 슬라이드가 남았으면 <b>3번으로</b> 돌아갑니다</div>
+      </div>
+      <div class="arrow"><span class="tip"></span></div>
+
+      <!-- 5 -->
+      <div class="node">
+        <div class="badge verify">5</div>
+        <div class="ncard">
+          <span class="t">완료 전 검증</span>
+          <span class="who sys">시스템</span>
+          <span class="sk">lesson-verify</span>
+          <span class="desc">“된다”고 말하기 전에 자동 점검·미리보기로 오류 0, 화면 넘침 0, 수치 일치를 확인합니다.</span>
+        </div>
+      </div>
+      <div class="arrow"><span class="tip"></span></div>
+
+      <!-- 완성 -->
+      <div class="node">
+        <div class="badge" style="background:var(--ok)">✓</div>
+        <div class="ncard" style="background:var(--ok-l);border-color:#bfe6d5">
+          <span class="t" style="color:var(--ok)">완성 — 학생에게 바로 사용</span>
+          <span class="who usr">선생님</span>
+          <span class="desc">자료실 목록에 추가하고 수업에서 엽니다. 인터넷 없이 파일 하나로 동작합니다.</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== 단계별 상세 ===== -->
+  <section>
+    <div class="sechead"><span class="num">단계별</span><h2>각 단계 — 시스템과 선생님의 역할</h2></div>
+    <p class="seclead">단계마다 <b>시스템이 알아서 하는 일</b>과 <b>선생님이 정해야 하는 일</b>을 나란히 정리했습니다.</p>
+
+    <!-- 0 -->
+    <div class="stage">
+      <div class="sh"><div class="snum">0</div><div><h3>주제·범위 정하기</h3>
+        <div class="easy">쉽게 — “무엇을, 누구에게, 얼마나” 말로 알려 주는 단계</div></div></div>
+      <div class="cols">
+        <div class="sys">
+          <div class="colh sys"><span class="dot"></span>시스템이 하는 일</div>
+          <ul class="ul">
+            <li>한꺼번에 묻지 않고 <b>핵심부터 하나씩</b> 되물어 범위를 좁힙니다.</li>
+            <li>기존 단원·자료와 겹치는지 확인하고 알려 줍니다.</li>
+          </ul>
+        </div>
+        <div class="usr">
+          <div class="colh usr"><span class="dot"></span>선생님이 정하는 것</div>
+          <ul class="ul">
+            <li><b>입력</b> — 단원/차시, 대상 학년·과목, 수업 시간(분).</li>
+            <li><b>입력</b> — 꼭 다루고 싶은 개념·실험·맥락.</li>
+            <li><b>선택</b> — 시스템이 제시한 보기 중 고르기(예: 앵커 실험).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <div class="stage">
+      <div class="sh"><div class="snum">1</div><div><h3>설계도 그리기 <span class="small">(거시)</span></h3>
+        <div class="easy">쉽게 — 슬라이드를 바로 안 만들고, 단원 전체 ‘밑그림’부터 그리는 단계</div></div></div>
+      <div class="cols">
+        <div class="sys">
+          <div class="colh sys"><span class="dot"></span>시스템이 하는 일</div>
+          <ul class="ul">
+            <li>학습목표·대상 오개념·이야기 흐름(도입→탐구→정리→평가)을 초안으로 정리.</li>
+            <li>슬라이드 개요표(장마다 의도·활동유형·레이아웃)를 짭니다.</li>
+            <li>설계 문서로 저장해 이후 제작·점검의 기준으로 삼습니다.</li>
+          </ul>
+          <div class="skchips">
+            <span class="skchip">lesson-blueprint</span>
+            <span class="skchip">lesson-activity-types</span>
+            <span class="skchip file">docs/specs/…-blueprint.md</span>
+          </div>
+        </div>
+        <div class="usr">
+          <div class="colh usr"><span class="dot"></span>선생님이 정하는 것</div>
+          <ul class="ul">
+            <li><b>확인·수정</b> — 학습목표가 의도와 맞는지.</li>
+            <li><b>선택</b> — 겨냥할 오개념, 중심 앵커 반응.</li>
+            <li><b>승인</b> — 슬라이드 구성(개수·순서)을 이대로 갈지.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="stage">
+      <div class="sh"><div class="snum">2</div><div><h3>빈 발표판 깔기</h3>
+        <div class="easy">쉽게 — 내용 없는 빈 발표 틀(16:9)을 준비하는 단계</div></div></div>
+      <div class="cols">
+        <div class="sys">
+          <div class="colh sys"><span class="dot"></span>시스템이 하는 일</div>
+          <ul class="ul">
+            <li>완성된 빈 덱을 수업 폴더에 복사하고 제목·과목·단원명을 채웁니다.</li>
+            <li>상단바·이전/다음·키보드 이동·줌·화면 맞춤은 <b>이미 완성</b>되어 자동 동작(건드리지 않음).</li>
+          </ul>
+          <div class="skchips">
+            <span class="skchip">lesson-deck-shell</span>
+            <span class="skchip file">수업폴더/index.html</span>
+          </div>
+        </div>
+        <div class="usr">
+          <div class="colh usr"><span class="dot"></span>선생님이 정하는 것</div>
+          <ul class="ul">
+            <li><b>거의 없음</b> — 단원·소단원 이름만 확인하면 됩니다.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="stage micro">
+      <div class="sh"><div class="snum">3</div><div><h3>슬라이드 한 장 짓기 <span class="small">(미시 · 반복)</span></h3>
+        <div class="easy">쉽게 — 한 장을, 결정 요소를 하나하나 정해 가며 완성하는 단계</div></div></div>
+      <div class="cols">
+        <div class="sys">
+          <div class="colh sys"><span class="dot"></span>시스템이 하는 일</div>
+          <ul class="ul">
+            <li>정해진 순서로 결정: ①이 장의 의도 → ②앞 장과 연결 → ③레이아웃(2단/단일) → ④활동 요소 → ⑤배치 → ⑥실제 내용.</li>
+            <li>탐구 흐름을 지킴: <b>발문 → 시뮬/관찰 → (버튼) 정리</b>. 정답을 먼저 안 보여 줍니다.</li>
+            <li>섹션 <b>한 개만</b> 외과적으로 추가하고 자동 점검(린트)을 돌립니다.</li>
+          </ul>
+          <div class="skchips">
+            <span class="skchip">slide-compose</span>
+            <span class="skchip">lesson-slide-2col / single</span>
+            <span class="skchip">lesson-simulator-particle</span>
+            <span class="skchip">lesson-graph</span>
+            <span class="skchip">lesson-comprehension-check</span>
+            <span class="skchip">lesson-reveal-gate</span>
+          </div>
+        </div>
+        <div class="usr">
+          <div class="colh usr"><span class="dot"></span>선생님이 정하는 것</div>
+          <ul class="ul">
+            <li><b>선택</b> — 레이아웃, 어떤 활동(입자 시뮬·그래프·O/X 체크·사진 등).</li>
+            <li><b>확인</b> — 발문 문구, 수치·반응식 계수, 실측 앵커가 맞는지.</li>
+            <li><b>지시</b> — “이 장은 슬라이더를 넣자”처럼 요소를 더하거나 빼기.</li>
+            <li><b>확인</b> — 완성된 한 장을 보고 다음으로 넘어갈지.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="stage">
+      <div class="sh"><div class="snum">4</div><div><h3>전체 흐름 점검 <span class="small">(거시 복귀 · 반복)</span></h3>
+        <div class="easy">쉽게 — 한 장 만들 때마다 ‘전체적으로’ 자연스러운지 되돌아보는 단계</div></div></div>
+      <div class="cols">
+        <div class="sys">
+          <div class="colh sys"><span class="dot"></span>시스템이 하는 일</div>
+          <ul class="ul">
+            <li>이야기 흐름·앞뒤 연결·중복/공백·난이도 곡선·시각 언어 일관성을 점검.</li>
+            <li>어긋나면 짧게 제안하고, 합의되면 <b>설계도를 고쳐</b> 해당 장만 다시 만듭니다.</li>
+          </ul>
+          <div class="skchips"><span class="skchip">flow-check</span></div>
+        </div>
+        <div class="usr">
+          <div class="colh usr"><span class="dot"></span>선생님이 정하는 것</div>
+          <ul class="ul">
+            <li><b>판단</b> — 제안(장 추가·교체·순서 변경)에 동의할지.</li>
+            <li>이후 <b>3번으로 돌아가</b> 다음 슬라이드를 만듭니다(루프).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="stage verify">
+      <div class="sh"><div class="snum">5</div><div><h3>완료 전 검증</h3>
+        <div class="easy">쉽게 — “다 됐다”고 말하기 전에 실제로 확인하는 단계</div></div></div>
+      <div class="cols">
+        <div class="sys">
+          <div class="colh sys"><span class="dot"></span>시스템이 하는 일</div>
+          <ul class="ul">
+            <li>자동 점검 <b>오류 0</b>, 화면 <b>세로 넘침 0</b>, 콘솔 오류 0 확인.</li>
+            <li>시뮬 표시값 = 입자 수 = 그래프 = 계산값이 <b>일치</b>하는지 대조.</li>
+            <li>글자 대비·반응식 계수·표기까지 확인한 뒤에야 완료로 보고.</li>
+          </ul>
+          <div class="skchips">
+            <span class="skchip">lesson-verify</span>
+            <span class="skchip file">scripts/lint-lesson.mjs</span>
+          </div>
+        </div>
+        <div class="usr">
+          <div class="colh usr"><span class="dot"></span>선생님이 정하는 것</div>
+          <ul class="ul">
+            <li><b>확인</b> — 미리보기로 직접 보고 최종 승인.</li>
+            <li><b>지시</b> — 고칠 곳이 있으면 그 장만 다시 요청.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== 바탕 규약 ===== -->
+  <section>
+    <div class="sechead"><span class="num">바탕</span><h2>모든 단계에 항상 켜져 있는 규약</h2></div>
+    <p class="seclead">아래 두 가지는 특정 단계가 아니라 <b>처음부터 끝까지 바탕에 깔려</b> 품질과 일관성을 지킵니다.</p>
+    <div class="guards">
+      <div class="guard amber">
+        <h3>① 교육 원칙</h3>
+        <div class="sub">chem-pedagogy-guidelines</div>
+        <ul>
+          <li><b>탐구 우선</b> — 정답을 먼저 보여주지 않고, 관찰 뒤 버튼으로 정리.</li>
+          <li><b>실측 앵커</b> — 시뮬 수치를 실제 측정값에 맞춰 “안 맞는다” 오개념 차단.</li>
+          <li><b>학생이 배운 표기만</b> — 농도는 대괄호 [ ], 미학습 명칭은 이름 없이 설명.</li>
+          <li><b>한 화면·한 핵심</b> — 한 슬라이드에 한 가지, 세로 넘침 0.</li>
+        </ul>
+        <div class="colortag">
+          <span class="ct-red">흡열 = 빨강</span>
+          <span class="ct-blue">발열 = 파랑</span>
+          <span class="small" style="align-self:center">색 언어는 모든 단원 고정</span>
+        </div>
+      </div>
+      <div class="guard">
+        <h3>② 디자인 시스템 · 자동 점검</h3>
+        <div class="sub">references/design-system.md · scripts/</div>
+        <ul>
+          <li><b>단일 진실 원천</b> — 색·폰트·클래스를 한 곳에서 정의(색은 변수로만).</li>
+          <li><b>프레임워크 자동</b> — 네비·줌·발표 기능은 손대지 않아도 동작.</li>
+          <li><b>자동 점검(린트)</b> — 문법·중복·연결 오류를 기계가 잡아냄.</li>
+          <li><b>외과적 변경</b> — 고칠 땐 그 슬라이드만, 전체를 다시 쓰지 않음.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 역할 요약 표 ===== -->
+  <section>
+    <div class="sechead"><span class="num">요약</span><h2>누가 무엇을 하나 — 한 표로</h2></div>
+    <div class="rolewrap">
+      <table>
+        <thead><tr><th style="width:170px">단계</th><th>시스템(AI)이 하는 일</th><th>선생님이 하는 일</th></tr></thead>
+        <tbody>
+          <tr><td>0 · 주제 정하기</td><td>핵심부터 하나씩 되묻기, 중복 확인</td><td><b>입력</b> 단원·대상·시간 / <b>선택</b> 제시된 보기</td></tr>
+          <tr><td>1 · 설계도</td><td>목표·오개념·흐름·개요표 작성·저장</td><td><b>확인·승인</b> 목표·오개념·구성</td></tr>
+          <tr><td>2 · 빈 덱</td><td>틀 복사, 제목·단원 채움(자동 기능 내장)</td><td><span class="small">이름 확인 정도</span></td></tr>
+          <tr><td>3 · 한 장 짓기</td><td>요소를 순서대로 결정·추가·점검</td><td><b>선택·지시</b> 레이아웃·활동·수치 / <b>확인</b></td></tr>
+          <tr><td>4 · 흐름 점검</td><td>전체 흐름 점검·제안·설계도 수정</td><td><b>판단</b> 제안 동의 여부</td></tr>
+          <tr><td>5 · 검증</td><td>오류·넘침·수치 일치 확인 후 보고</td><td><b>확인·승인</b> 미리보기로 최종 확인</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== 스킬 사전 ===== -->
+  <section>
+    <div class="sechead"><span class="num">참고</span><h2>스킬 이름 사전</h2></div>
+    <p class="seclead">흐름도에 나온 영어 이름들이 무슨 일을 하는지 간단히 모았습니다. (선생님이 외울 필요는 없습니다.)</p>
+    <div class="dict">
+      <div class="di"><code>chem-pedagogy-guidelines</code><span>화학 수업 제작의 교육 원칙(항상 적용)</span></div>
+      <div class="di"><code>lesson-blueprint</code><span>단원 전체 설계도 만들기</span></div>
+      <div class="di"><code>lesson-activity-types</code><span>넣을 탐구 활동 7가지 팔레트</span></div>
+      <div class="di"><code>lesson-deck-shell</code><span>빈 발표판(덱) 깔기</span></div>
+      <div class="di"><code>slide-compose</code><span>슬라이드 한 장씩 짓기</span></div>
+      <div class="di"><code>lesson-slide-2col / single</code><span>2단/단일 컬럼 레이아웃</span></div>
+      <div class="di"><code>lesson-simulator-particle</code><span>움직이는 분자 입자 시뮬</span></div>
+      <div class="di"><code>lesson-graph</code><span>시간에 따른 농도 그래프</span></div>
+      <div class="di"><code>lesson-comprehension-check</code><span>객관식·O/X 형성평가</span></div>
+      <div class="di"><code>lesson-reveal-gate</code><span>활동 뒤 버튼으로 정리 펼치기</span></div>
+      <div class="di"><code>flow-check</code><span>전체 흐름 되돌아보기</span></div>
+      <div class="di"><code>lesson-verify</code><span>완료 전 검증</span></div>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="meta">수업 자료 제작 시스템 · 제작 흐름 안내</div>
+    <div>코드 0줄 · 말로 요청 · 거시↔미시 반복 · 자동 검증 — 선생님은 “무엇을 가르칠지”에 집중합니다.</div>
+    <div class="small">최수진 · 경해여자고등학교</div>
+  </div>
+</footer>
+
+</body>
+</html>
