@@ -312,6 +312,17 @@ header,.navbar{display:none!important}
 .col-l>*:first-child,.col-r>*:first-child{margin-top:0}
 .col-l::-webkit-scrollbar,.col-r::-webkit-scrollbar,.slide.single::-webkit-scrollbar{width:9px;height:9px}
 .col-l::-webkit-scrollbar-thumb,.col-r::-webkit-scrollbar-thumb,.slide.single::-webkit-scrollbar-thumb{background:#c2d6d2;border-radius:9px}
+/* ===== 추가 레이아웃 (3단·상하분할·헤더+2단·2단 역비율) — 레이아웃 갤러리 참고 ===== */
+.col,.row-t,.row-b,.col-head{overflow:auto;min-height:0;padding-right:8px}
+.col{height:100%}
+.col>*:first-child,.row-t>*:first-child,.row-b>*:first-child,.col-head>*:first-child{margin-top:0}
+.col::-webkit-scrollbar,.row-t::-webkit-scrollbar,.row-b::-webkit-scrollbar,.col-head::-webkit-scrollbar{width:9px;height:9px}
+.col::-webkit-scrollbar-thumb,.row-t::-webkit-scrollbar-thumb,.row-b::-webkit-scrollbar-thumb,.col-head::-webkit-scrollbar-thumb{background:#c2d6d2;border-radius:9px}
+.slide.cols3.active{grid-template-columns:1fr 1fr 1fr;gap:16px}                                  /* 3단: 비교·3단계·세 사례 */
+.slide.cols2wide.active{grid-template-columns:1fr minmax(300px,360px)}                           /* 2단 역비율: 좌 큰 시뮬 · 우 좁은 설명 */
+.slide.split.active{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:14px;align-content:stretch}      /* 상하 분할: 위 제시 · 아래 전개 */
+.slide.headcols.active{grid-template-columns:minmax(340px,400px) 1fr;grid-template-rows:auto 1fr;gap:14px 22px;align-content:stretch}  /* 헤더+2단 */
+.slide.headcols .col-head{grid-column:1 / -1}                                                    /* 헤더는 상단 풀폭 */
 .botbar{height:56px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;
   background:rgba(255,255,255,.7);border-top:1px solid var(--line);backdrop-filter:blur(6px)}
 .botbar .navlabel{flex:1;font-size:13px;font-weight:700;color:var(--muted)}

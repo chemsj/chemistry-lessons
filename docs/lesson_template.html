@@ -312,6 +312,17 @@ header,.navbar{display:none!important}
 .col-l>*:first-child,.col-r>*:first-child{margin-top:0}
 .col-l::-webkit-scrollbar,.col-r::-webkit-scrollbar,.slide.single::-webkit-scrollbar{width:9px;height:9px}
 .col-l::-webkit-scrollbar-thumb,.col-r::-webkit-scrollbar-thumb,.slide.single::-webkit-scrollbar-thumb{background:#c2d6d2;border-radius:9px}
+/* ===== 추가 레이아웃 (3단·상하분할·헤더+2단·2단 역비율) — docs/layout-gallery.html 참고 ===== */
+.col,.row-t,.row-b,.col-head{overflow:auto;min-height:0;padding-right:8px}
+.col{height:100%}
+.col>*:first-child,.row-t>*:first-child,.row-b>*:first-child,.col-head>*:first-child{margin-top:0}
+.col::-webkit-scrollbar,.row-t::-webkit-scrollbar,.row-b::-webkit-scrollbar,.col-head::-webkit-scrollbar{width:9px;height:9px}
+.col::-webkit-scrollbar-thumb,.row-t::-webkit-scrollbar-thumb,.row-b::-webkit-scrollbar-thumb,.col-head::-webkit-scrollbar-thumb{background:#c2d6d2;border-radius:9px}
+.slide.cols3.active{grid-template-columns:1fr 1fr 1fr;gap:16px}                                  /* 3단: 비교·3단계·세 사례 */
+.slide.cols2wide.active{grid-template-columns:1fr minmax(300px,360px)}                           /* 2단 역비율: 좌 큰 시뮬 · 우 좁은 설명 */
+.slide.split.active{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:14px;align-content:stretch}      /* 상하 분할: 위 제시 · 아래 전개 */
+.slide.headcols.active{grid-template-columns:minmax(340px,400px) 1fr;grid-template-rows:auto 1fr;gap:14px 22px;align-content:stretch}  /* 헤더+2단 */
+.slide.headcols .col-head{grid-column:1 / -1}                                                    /* 헤더는 상단 풀폭 */
 .botbar{height:56px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;
   background:rgba(255,255,255,.7);border-top:1px solid var(--line);backdrop-filter:blur(6px)}
 .botbar .navlabel{flex:1;font-size:13px;font-weight:700;color:var(--muted)}
@@ -823,6 +834,94 @@ tr.lcopen .lkcell::after{content:none}
           <div class="fb" id="q1fb"></div>
         </div>
         <div class="scoreband"><div class="sc" id="scoreNum">0 / 1</div><span id="scoreMsg">문항을 풀어 보세요.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 예시 · 3단 (비교 · 3단계 · 세 사례) ===== -->
+  <section class="slide cols3" data-title="예시 · 3단(비교)">
+    <div class="col">
+      <div class="card">
+        <span class="tag q"><i class="dotmark"></i> 첫째</span>
+        <p class="ask">비교 항목 ①</p>
+        <p class="helper">세 가지를 나란히 비교하거나, 3단계 과정·세 사례를 보여줄 때 씁니다.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <span class="tag sim"><i class="dotmark"></i> 둘째</span>
+        <p class="ask">비교 항목 ②</p>
+        <p class="helper">각 칸은 <span class="var">col</span> 하나. 칸 수만큼 반복합니다.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <span class="tag sum"><i class="dotmark"></i> 셋째</span>
+        <p class="ask">비교 항목 ③</p>
+        <p class="helper">예: 흡열 / 발열 / 촉매, 반응물 / 정반응 / 생성물.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 예시 · 상하 분할 (위 제시 · 아래 전개) ===== -->
+  <section class="slide split" data-title="예시 · 상하 분할">
+    <div class="row-t">
+      <span class="kicker"><span class="n">1</span> 소단원</span>
+      <h1 class="title">위: 발문 · 큰 그래프</h1>
+      <p class="ask">위에는 발문이나 폭이 넓은 그래프, 아래에는 표·선택지처럼 가로로 길게 펼칠 내용을 둡니다.</p>
+    </div>
+    <div class="row-b">
+      <div class="card" style="height:100%">
+        <span class="tag sim"><i class="dotmark"></i> 아래: 가로로 넓은 전개</span>
+        <table class="tbl" style="margin-top:10px">
+          <thead><tr><th>구분</th><th>항목 A</th><th>항목 B</th><th>항목 C</th></tr></thead>
+          <tbody>
+            <tr><td>값</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td>설명</td><td>—</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 예시 · 헤더+2단 (상단 반응식·공통 맥락 + 좌우 활동) ===== -->
+  <section class="slide headcols" data-title="예시 · 헤더+2단">
+    <div class="col-head">
+      <span class="kicker"><span class="n">1</span> 소단원</span>
+      <h1 class="title" style="margin-bottom:4px">상단 헤더 — 반응식 · 공통 맥락</h1>
+      <p class="helper">반응식이나 공통 조건을 위에 고정하고, 아래 좌우에서 활동을 전개합니다.</p>
+    </div>
+    <div class="col-l">
+      <div class="card" style="height:100%">
+        <span class="tag sim"><i class="dotmark"></i> 왼쪽</span>
+        <div style="min-height:130px;background:#fff;border:1.5px dashed #c5d6d2;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;font-size:13px;margin-top:10px">입자 시뮬레이션 영역</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="card" style="height:100%">
+        <span class="tag q"><i class="dotmark"></i> 오른쪽</span>
+        <div style="min-height:130px;background:#fff;border:1.5px dashed #c5d6d2;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;font-size:13px;margin-top:10px">그래프 영역</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 예시 · 2단 역비율 (좌 큰 시뮬 · 우 좁은 설명) ===== -->
+  <section class="slide cols2wide" data-title="예시 · 2단 역비율">
+    <div class="col-l">
+      <div class="card" style="height:100%">
+        <span class="tag sim"><i class="dotmark"></i> 왼쪽(넓게) · 시뮬·그림이 주인공</span>
+        <div style="min-height:300px;background:#fff;border:1.5px dashed #c5d6d2;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;font-size:13px;margin-top:10px">큰 입자 시뮬레이션 / 실험 사진 영역</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <span class="kicker"><span class="n">2</span> 소단원</span>
+      <h1 class="title">좁은 설명</h1>
+      <div class="card">
+        <span class="tag sum"><i class="dotmark"></i> 관찰 포인트</span>
+        <ul class="sumlist" style="margin-top:8px">
+          <li><span class="b">1</span> 무엇을 볼지</li>
+          <li><span class="b">2</span> 어떻게 변하는지</li>
+        </ul>
       </div>
     </div>
   </section>
