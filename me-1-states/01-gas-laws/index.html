@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기체의 성질 ① 기체 법칙 — 물질과 에너지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+
+
+:root{
+  --bg:#eef4f3;
+  --bg2:#e3eeec;
+  --surface:#ffffff;
+  --ink:#15302c;
+  --muted:#5d7470;
+  --primary:#0f766e;
+  --primary-d:#0b5650;
+  --primary-l:#d6efeb;
+  --primary-ll:#eafaf7;
+  --accent:#e08a1e;
+  --accent-l:#fcefda;
+  --ok:#10936b;
+  --ok-l:#dcf3ea;
+  --no:#d6435f;
+  --no-l:#fbe2e8;
+  --line:#dbe7e4;
+  --no2:#9a3412;     /* NO2 적갈색 */
+  --atomN:#2f6fb0;   /* 질소 파랑 */
+  --atomO:#c0392b;   /* 산소 빨강 */
+  --shadow:0 18px 40px -22px rgba(15,118,110,.45);
+  --shadow-s:0 6px 18px -10px rgba(15,48,44,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Pretendard','Pretendard Variable',-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(900px 500px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 55%),
+    radial-gradient(700px 600px at 105% 8%, var(--primary-ll) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(160deg,var(--bg) 0%, var(--bg2) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.var{font-family:Georgia,'Times New Roman',serif;font-style:italic}
+sub,sup{font-size:.7em;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.28em}
+
+/* ---------- Header ---------- */
+header{
+  position:sticky;top:0;z-index:30;
+  backdrop-filter:saturate(1.2) blur(8px);
+  background:rgba(255,255,255,.72);
+  border-bottom:1px solid var(--line);
+}
+.hbar{max-width:1080px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:11px;flex:1;min-width:0}
+.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,var(--primary),var(--primary-d));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;box-shadow:var(--shadow-s);flex:none}
+.brand b{font-size:15px;font-weight:800}
+.brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin-top:1px}
+.dots{display:flex;gap:7px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;background:#c6d8d4;cursor:pointer;transition:.25s;border:none;padding:0}
+.dot:hover{transform:scale(1.25)}
+.dot.on{background:var(--primary);width:24px;border-radius:6px}
+.dot.done{background:var(--ok)}
+
+/* ---------- Layout ---------- */
+main{max-width:1080px;margin:0 auto;padding:26px 22px 120px}
+.slide{display:none;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.slide.active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.kicker{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:12.5px;
+  color:var(--primary-d);background:var(--primary-l);padding:7px 14px;border-radius:999px;letter-spacing:.2px}
+.kicker .n{background:var(--primary);color:#fff;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px}
+h1.title{font-size:30px;font-weight:800;letter-spacing:-.6px;margin:14px 0 6px;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;font-weight:600;line-height:1.6}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:var(--shadow);margin-top:18px}
+.card.tight{padding:20px 22px}
+
+.tag{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:12.5px;padding:6px 12px;border-radius:999px;margin-bottom:12px}
+.tag.q{color:#8a5208;background:var(--accent-l)}
+.tag.sim{color:var(--primary-d);background:var(--primary-l)}
+.tag.sum{color:#0c6a4f;background:var(--ok-l)}
+.dotmark{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+.ask{font-size:18px;font-weight:700;line-height:1.6;color:var(--ink)}
+.ask .hl{background:linear-gradient(transparent 58%, #ffe2b3 58%);padding:0 2px;border-radius:2px}
+.helper{font-size:13.5px;color:var(--muted);font-weight:600;margin-top:10px;line-height:1.6}
+
+.sumlist{list-style:none;display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.sumlist li{display:flex;gap:12px;align-items:flex-start;font-size:15.5px;line-height:1.55;font-weight:600}
+.sumlist .b{flex:none;width:24px;height:24px;border-radius:8px;background:var(--ok-l);color:#0c6a4f;
+  display:grid;place-items:center;font-weight:800;font-size:13px;margin-top:1px}
+.sumlist b{color:var(--primary-d);font-weight:800}
+
+.btn{appearance:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;border-radius:13px;transition:.18s;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;padding:13px 24px;font-size:15px;box-shadow:var(--shadow-s)}
+.btn.primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn.ghost{background:#fff;color:var(--primary-d);border:1.6px solid var(--primary-l);padding:11px 18px;font-size:14px}
+.btn.ghost:hover{background:var(--primary-ll);border-color:var(--primary)}
+.btn.sm{padding:9px 15px;font-size:13.5px;border-radius:11px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---------- Footer nav ---------- */
+.navbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.82);
+  backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+.navin{max-width:1080px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:14px}
+.navlabel{flex:1;font-size:13.5px;font-weight:700;color:var(--muted)}
+.navlabel b{color:var(--ink)}
+.navbtn{appearance:none;border:1.6px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+  font-weight:700;font-size:14px;padding:10px 18px;border-radius:12px;cursor:pointer;transition:.15s}
+.navbtn:hover:not([disabled]){border-color:var(--primary);color:var(--primary-d)}
+.navbtn[disabled]{opacity:.4;cursor:not-allowed}
+.navbtn.go{background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;border:none;box-shadow:var(--shadow-s)}
+
+/* ---------- Sim shared ---------- */
+.simwrap{display:grid;gap:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel{background:var(--primary-ll);border:1px solid var(--primary-l);border-radius:18px;padding:16px}
+.panel h4{font-size:14px;font-weight:800;color:var(--primary-d);margin-bottom:12px;text-align:center}
+.vessel{position:relative;width:100%;height:128px;border-radius:14px 14px 16px 16px;overflow:hidden;
+  background:#fff;border:2px solid #cfe2de;box-shadow:inset 0 -8px 18px -10px rgba(0,0,0,.12)}
+.vessel canvas{position:absolute;inset:0;width:100%;height:100%}
+.vtint{position:absolute;inset:0;transition:background .2s linear;pointer-events:none}
+.grf{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px}
+.grf canvas{width:100%;height:130px;display:block}
+.rates{display:flex;gap:10px;margin-top:10px;align-items:flex-end;justify-content:center;height:64px}
+.ratecol{display:flex;flex-direction:column;align-items:center;gap:5px;width:74px}
+.ratebar{width:100%;height:44px;background:#eef3f1;border-radius:8px;position:relative;overflow:hidden;display:flex;align-items:flex-end}
+.ratebar i{display:block;width:100%;border-radius:8px 8px 0 0;transition:height .12s linear}
+.ratecol small{font-size:11px;font-weight:700;color:var(--muted)}
+.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12.5px;font-weight:700;color:var(--muted);margin-top:4px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:13px;height:13px;border-radius:4px}
+.ctrls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.eqflag{text-align:center;font-weight:800;color:var(--ok);font-size:13.5px;height:20px;transition:.3s;opacity:0}
+.eqflag.on{opacity:1}
+
+/* misconception / quiz */
+.oxbox{background:#fff;border:1.6px dashed var(--accent);border-radius:16px;padding:18px;margin-top:16px}
+.oxq{font-weight:800;font-size:15px;margin-bottom:13px;line-height:1.5}
+.oxq .lab{display:inline-block;background:var(--accent);color:#fff;font-size:11.5px;padding:3px 10px;border-radius:8px;margin-right:8px;vertical-align:middle}
+.choices{display:flex;flex-direction:column;gap:9px}
+.choice{text-align:left;width:100%;background:#fbfdfc;border:1.6px solid var(--line);border-radius:12px;padding:13px 16px;
+  font-family:inherit;font-weight:700;font-size:14.5px;color:var(--ink);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:11px}
+.choice:hover:not(.locked){border-color:var(--primary);background:var(--primary-ll)}
+.choice .mk{flex:none;width:24px;height:24px;border-radius:7px;background:#eef3f1;display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--muted)}
+.choice.correct{border-color:var(--ok);background:var(--ok-l)}
+.choice.correct .mk{background:var(--ok);color:#fff}
+.choice.wrong{border-color:var(--no);background:var(--no-l)}
+.choice.wrong .mk{background:var(--no);color:#fff}
+.fb{margin-top:12px;font-size:14px;font-weight:700;line-height:1.6;padding:12px 14px;border-radius:12px;display:none}
+.fb.show{display:block}
+.fb.good{background:var(--ok-l);color:#0c6a4f}
+.fb.bad{background:var(--no-l);color:#a31d36}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;overflow:hidden;border-radius:12px}
+.tbl th,.tbl td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--line)}
+.tbl thead th{background:var(--primary-l);color:var(--primary-d);font-weight:800;font-size:12.5px}
+.tbl tbody tr:nth-child(even){background:#f7faf9}
+.tbl td.res{font-weight:800;color:var(--muted);font-family:Georgia,serif}
+.tbl td.res.filled{color:var(--primary-d)}
+.tbl col.hi,.tbl th.hi{background:var(--ok-l)!important}
+.tbl td.hi{background:var(--ok-l)}
+.fbtns{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
+.fbtn{flex:1;min-width:150px;background:#fff;border:1.6px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;
+  font-family:inherit;transition:.15s;text-align:center}
+.fbtn:hover{border-color:var(--primary);background:var(--primary-ll)}
+.fbtn.sel{border-color:var(--primary);background:var(--primary-ll);box-shadow:var(--shadow-s)}
+.fbtn .fl{font-weight:800;color:var(--primary-d);font-size:15px;margin-bottom:5px}
+.fbtn .fe{font-size:15px}
+.proc{background:#0f201d;color:#d9f3ee;border-radius:14px;padding:14px 16px;margin-top:14px;font-size:13.5px;
+  min-height:54px;font-family:'Pretendard',monospace;line-height:1.85;display:none}
+.proc.show{display:block}
+.proc .pl{opacity:0;animation:pl .35s forwards}
+@keyframes pl{to{opacity:1}}
+.proc .num{color:#f3c46b;font-family:Georgia,serif}
+
+/* K builder */
+.kbuild{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:center;background:var(--primary-ll);
+  border:1px solid var(--primary-l);border-radius:16px;padding:20px}
+.rxn{display:flex;align-items:center;gap:7px;font-size:19px;font-weight:700;flex-wrap:wrap;justify-content:center}
+.coef{display:inline-flex;flex-direction:column;border:1.6px solid var(--primary-l);border-radius:10px;overflow:hidden;background:#fff}
+.coef button{border:none;background:#fff;color:var(--primary-d);font-weight:800;cursor:pointer;font-size:11px;padding:1px 8px;line-height:1.3}
+.coef button:hover{background:var(--primary-l)}
+.coef span{text-align:center;font-weight:800;font-size:15px;padding:1px 0;border-top:1px solid var(--primary-l);border-bottom:1px solid var(--primary-l);font-family:Georgia,serif;color:var(--primary-d)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;text-align:center}
+.frac .top,.frac .bot{padding:3px 12px;font-size:20px;font-weight:700}
+.frac .bar{height:2.5px;background:var(--ink);width:100%;border-radius:2px}
+.keq{display:flex;align-items:center;gap:14px;justify-content:center;margin-top:20px;font-size:24px;font-weight:700}
+.toggle{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:14px;user-select:none}
+.tg{width:46px;height:26px;border-radius:999px;background:#cdddd9;position:relative;transition:.2s;flex:none}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.toggle.on .tg{background:var(--primary)}
+.toggle.on .tg::after{left:23px}
+.calcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:800;color:var(--primary-d)}
+.field input{font-family:Georgia,serif;font-size:16px;font-weight:700;padding:11px 12px;border:1.6px solid var(--line);
+  border-radius:11px;text-align:center;color:var(--ink);width:100%}
+.field input:focus{outline:none;border-color:var(--primary);background:var(--primary-ll)}
+.result{margin-top:16px;background:var(--ok-l);border-radius:14px;padding:16px 18px;text-align:center;font-size:18px;font-weight:800;color:#0c6a4f}
+.result .var{color:#0c6a4f}
+.note{font-size:13px;color:var(--muted);font-weight:600;line-height:1.6;margin-top:10px;background:#f7faf9;border-radius:12px;padding:12px 14px;border-left:3px solid var(--primary-l)}
+
+/* K meaning */
+.kmeter{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:center;margin-top:6px}
+.balloon{height:230px;background:#fff;border:1px solid var(--line);border-radius:16px;position:relative;overflow:hidden;display:grid;place-items:center}
+.balloon .lbl{position:absolute;top:12px;left:0;right:0;text-align:center;font-weight:800;font-size:13.5px;color:var(--muted)}
+.circ{border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;transition:width .25s,height .25s;text-align:center;line-height:1.2}
+.circ.react{background:radial-gradient(circle at 35% 30%,#f08aa0,var(--no))}
+.circ.prod{background:radial-gradient(circle at 35% 30%,#4fcfa6,var(--ok))}
+.kreadout{text-align:center;margin-top:18px;font-size:20px;font-weight:800}
+.kreadout .var{color:var(--primary-d)}
+.kverdict{text-align:center;font-size:15px;font-weight:700;color:var(--muted);margin-top:6px;min-height:22px}
+.slider{-webkit-appearance:none;width:100%;height:8px;border-radius:999px;margin-top:22px;
+  background:linear-gradient(90deg,var(--no) 0%,#e7ecea 50%,var(--ok) 100%);outline:none}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;
+  border:3px solid var(--primary);cursor:pointer;box-shadow:var(--shadow-s)}
+.slider::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--primary);cursor:pointer}
+.scaleLbl{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);margin-top:8px}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;justify-content:center}
+.chip{background:#fff;border:1.6px solid var(--line);border-radius:12px;padding:11px 15px;cursor:pointer;font-family:inherit;
+  font-weight:700;font-size:13.5px;transition:.15s;text-align:left;line-height:1.4}
+.chip:hover{border-color:var(--accent);background:var(--accent-l)}
+.chip small{display:block;color:var(--muted);font-weight:700;font-size:11.5px}
+
+/* Q bars */
+.qkstage{display:flex;gap:26px;align-items:flex-end;justify-content:center;height:230px;background:#fff;
+  border:1px solid var(--line);border-radius:16px;padding:24px 18px 18px;position:relative}
+.qkbase{position:absolute;left:18px;right:18px;bottom:46px;border-bottom:2px dashed #c9d8d4}
+.bargrp{display:flex;flex-direction:column;align-items:center;gap:0;width:90px;height:100%;justify-content:flex-end;z-index:1}
+.bar3d{width:64px;border-radius:9px 9px 0 0;transition:height .15s;position:relative;display:flex;align-items:flex-start;justify-content:center;color:#fff;font-weight:800;padding-top:6px;font-size:14px}
+.bar3d.q{background:linear-gradient(180deg,#f3b24c,var(--accent))}
+.bar3d.k{background:linear-gradient(180deg,#7d6fd6,#5c4fb3)}
+.barcap{margin-top:8px;font-weight:800;font-size:15px}
+.barcap.q{color:#b06a10}.barcap.k{color:#4a3da0}
+.arrowzone{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:140px}
+.bigarrow{font-size:38px;font-weight:800;transition:.2s}
+.dirtext{font-weight:800;font-size:15px;text-align:center;margin-top:4px}
+.qkverdict{margin-top:18px;text-align:center;font-size:17px;font-weight:800;padding:14px;border-radius:14px;transition:.2s}
+
+/* step reveal */
+.steps{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.step{background:#fbfdfc;border:1.6px solid var(--line);border-radius:14px;padding:0;overflow:hidden;transition:.2s}
+.step .sh{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;font-weight:800;font-size:14.5px}
+.step .sh .sn{flex:none;width:26px;height:26px;border-radius:8px;background:var(--primary-l);color:var(--primary-d);display:grid;place-items:center;font-size:13px}
+.step .sb{max-height:0;overflow:hidden;transition:max-height .3s;padding:0 16px;font-size:14.5px;line-height:1.7;font-weight:600}
+.step.open{border-color:var(--primary-l);box-shadow:var(--shadow-s)}
+.step.open .sb{max-height:240px;padding:0 16px 16px 54px}
+.eqn{font-family:Georgia,serif;font-size:17px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:inline-block;margin:6px 0}
+.scoreband{display:flex;align-items:center;gap:14px;background:var(--primary-ll);border-radius:14px;padding:14px 18px;margin-top:18px}
+.scoreband .sc{font-size:22px;font-weight:800;color:var(--primary-d)}
+.scoreband span{font-weight:700;color:var(--muted);font-size:14px}
+
+.endhero{text-align:center;padding:18px 10px}
+.endhero h2{font-size:24px;font-weight:800;margin-bottom:8px}
+.recap{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;text-align:left}
+.recap .rc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.recap .rc b{color:var(--primary-d);font-size:14px}
+.recap .rc p{font-size:14px;font-weight:600;color:var(--muted);margin-top:7px;line-height:1.6}
+
+@media(max-width:780px){
+  .two{grid-template-columns:1fr}
+  .recap{grid-template-columns:1fr}
+  .calcgrid{grid-template-columns:1fr}
+  h1.title{font-size:25px}
+  main{padding:20px 14px 120px}
+  .qkstage{gap:12px}
+  .arrowzone{min-width:90px}
+}
+
+
+/* ===== 16:9 landscape deck overrides ===== */
+html,body{height:100%;overflow:hidden;background:#0b1a18}
+body{padding:0}
+header,.navbar{display:none!important}
+.viewport{position:fixed;inset:0;display:grid;place-items:center;
+  background:
+    radial-gradient(1200px 700px at 20% -10%, #14302c 0%, rgba(0,0,0,0) 60%),
+    radial-gradient(900px 700px at 110% 120%, #0f2a26 0%, rgba(0,0,0,0) 55%),
+    #0b1a18;}
+.deck{width:1280px;height:720px;flex:none;transform-origin:center center;
+  border-radius:22px;overflow:hidden;display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 500px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 55%),
+    radial-gradient(700px 600px at 105% 8%, var(--primary-ll) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(160deg,var(--bg) 0%, var(--bg2) 100%);
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.05);}
+.topbar{height:54px;flex:none;display:flex;align-items:center;gap:16px;padding:0 24px;
+  background:rgba(255,255,255,.62);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+.topbar .brand{display:flex;align-items:center;gap:11px;flex:1;min-width:0}
+.topbar .logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(145deg,var(--primary),var(--primary-d));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px;flex:none;box-shadow:var(--shadow-s)}
+.topbar b{font-size:14px;font-weight:800}
+.topbar .brand span{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.stage{position:relative;flex:1;overflow:hidden}
+.slide{position:absolute;inset:0;padding:18px 26px;display:none;margin:0}
+.slide.active{display:grid;grid-template-columns:minmax(340px,400px) 1fr;gap:22px;animation:rise .4s cubic-bezier(.2,.7,.2,1)}
+.slide.single{padding:26px 30px}
+.slide.single.active{display:block;overflow:auto}
+.col-l,.col-r{overflow:auto;min-height:0;height:100%;padding-right:8px}
+.col-l>*:first-child,.col-r>*:first-child{margin-top:0}
+.col-l::-webkit-scrollbar,.col-r::-webkit-scrollbar,.slide.single::-webkit-scrollbar{width:9px;height:9px}
+.col-l::-webkit-scrollbar-thumb,.col-r::-webkit-scrollbar-thumb,.slide.single::-webkit-scrollbar-thumb{background:#c2d6d2;border-radius:9px}
+/* ===== 추가 레이아웃 (3단·상하분할·헤더+2단·2단 역비율) — 레이아웃 갤러리 참고 ===== */
+.col,.row-t,.row-b,.col-head{overflow:auto;min-height:0;padding-right:8px}
+.col{height:100%}
+.col>*:first-child,.row-t>*:first-child,.row-b>*:first-child,.col-head>*:first-child{margin-top:0}
+.col::-webkit-scrollbar,.row-t::-webkit-scrollbar,.row-b::-webkit-scrollbar,.col-head::-webkit-scrollbar{width:9px;height:9px}
+.col::-webkit-scrollbar-thumb,.row-t::-webkit-scrollbar-thumb,.row-b::-webkit-scrollbar-thumb,.col-head::-webkit-scrollbar-thumb{background:#c2d6d2;border-radius:9px}
+.slide.cols3.active{grid-template-columns:1fr 1fr 1fr;gap:16px}                                  /* 3단: 비교·3단계·세 사례 */
+.slide.cols2wide.active{grid-template-columns:1fr minmax(300px,360px)}                           /* 2단 역비율: 좌 큰 시뮬 · 우 좁은 설명 */
+.slide.split.active{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:14px;align-content:stretch}      /* 상하 분할: 위 제시 · 아래 전개 */
+.slide.headcols.active{grid-template-columns:minmax(340px,400px) 1fr;grid-template-rows:auto 1fr;gap:14px 22px;align-content:stretch}  /* 헤더+2단 */
+.slide.headcols .col-head{grid-column:1 / -1}                                                    /* 헤더는 상단 풀폭 */
+/* ===== 조합형 .framed (상 .row-head / 중 .row-mid.cols-1/2/3 / 하 .row-foot — 있는 박스만 넣음) ===== */
+.slide.framed.active{display:flex;flex-direction:column;gap:14px}
+.slide.framed .row-head,.slide.framed .row-foot{flex:none;overflow:auto;min-height:0}
+.slide.framed .row-head>*:first-child,.slide.framed .row-foot>*:first-child{margin-top:0}
+.slide.framed .row-mid{flex:1;min-height:0;display:grid;gap:16px;align-content:safe center}
+.slide.framed .row-mid.cols-1{grid-template-columns:1fr}
+.slide.framed .row-mid.cols-2{grid-template-columns:1fr 1fr}
+.slide.framed .row-mid.cols-3{grid-template-columns:1fr 1fr 1fr}
+.botbar{height:56px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;
+  background:rgba(255,255,255,.7);border-top:1px solid var(--line);backdrop-filter:blur(6px)}
+.botbar .navlabel{flex:1;font-size:13px;font-weight:700;color:var(--muted)}
+.botbar .navlabel b{color:var(--ink)}
+
+/* compact typography for slides */
+.kicker{font-size:11.5px;padding:6px 12px}
+.kicker .n{width:18px;height:18px;font-size:10px}
+h1.title{font-size:22px;margin:9px 0 4px;line-height:1.25}
+.sub{font-size:13px;line-height:1.55}
+.card{padding:17px 18px;border-radius:18px;margin-top:12px;box-shadow:var(--shadow-s)}
+.card.tight{padding:15px 17px}
+.tag{margin-bottom:9px;font-size:11.5px;padding:5px 11px}
+.ask{font-size:15px;line-height:1.55}
+.helper{font-size:12.5px;margin-top:8px}
+.sumlist{gap:8px}
+.sumlist li{font-size:13px;line-height:1.45}
+.sumlist .b{width:21px;height:21px;font-size:12px;border-radius:7px}
+.note{font-size:12px;padding:10px 12px;margin-top:9px}
+
+/* compact simulation pieces */
+.vessel{height:104px}
+.grf canvas{height:104px}
+.grf{padding:6px;margin-top:9px}
+.rates{height:50px;margin-top:8px}
+.ratebar{height:36px}
+.panel{padding:13px}
+.panel h4{margin-bottom:9px;font-size:13px}
+.oxbox{padding:15px;margin-top:13px}
+.oxq{font-size:13.5px;margin-bottom:11px}
+.choice{padding:11px 13px;font-size:13.5px}
+.fb{font-size:13px;padding:10px 12px;margin-top:10px}
+.two{gap:14px}
+.legend{font-size:11.5px;margin-top:8px;gap:12px}
+.tbl th,.tbl td{padding:8px 6px;font-size:12.5px}
+.fbtn{padding:11px;min-width:130px}
+.fbtn .fl{font-size:14px}.fbtn .fe{font-size:13.5px}
+.proc{font-size:12.5px;padding:12px 14px;line-height:1.7}
+.keq{font-size:21px;margin-top:15px}.frac .top,.frac .bot{font-size:18px}
+.kbuild{padding:16px}.rxn{font-size:17px}
+.calcgrid{gap:10px}.field input{font-size:15px;padding:9px}
+.field label{font-size:12px}
+.result{font-size:16px;padding:13px 15px;margin-top:13px}
+.kmeter{gap:12px}.balloon{height:188px}
+.kreadout{font-size:18px;margin-top:14px}.kverdict{font-size:13.5px}
+.slider{margin-top:16px}
+.chips{margin-top:14px;gap:8px}.chip{padding:9px 12px;font-size:12.5px}
+.qkstage{height:188px;padding:18px 16px 14px}.qkbase{bottom:42px}
+.bar3d{width:56px}.barcap{font-size:14px;margin-top:6px}
+.bigarrow{font-size:32px}.dirtext{font-size:14px}
+.qkverdict{font-size:15px;padding:12px;margin-top:14px}
+.steps{gap:9px}.step .sh{padding:12px 14px;font-size:13.5px}
+.step.open .sb{font-size:13.5px}
+.scoreband{padding:12px 16px;margin-top:14px}.scoreband .sc{font-size:20px}
+.endhero h2{font-size:21px}
+.recap{gap:12px;margin-top:14px}.recap .rc{padding:15px}
+.recap .rc p{font-size:13px}
+.btn.primary{padding:11px 20px;font-size:14px}
+.btn.ghost{padding:9px 15px;font-size:13px}
+
+@media (max-width:560px){
+  .slide.active{grid-template-columns:1fr;grid-auto-rows:min-content;overflow:auto}
+  .col-l,.col-r{overflow:visible;height:auto}
+}
+
+/* ===== gated 핵심 정리 (reveal after activity) ===== */
+.card.summary{display:none}
+.card.summary.show{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.revealwrap{margin-top:12px}
+.revealbtn{width:100%;border:1.7px dashed var(--ok);background:var(--ok-l);color:#0c6a4f;
+  font-family:inherit;font-weight:800;font-size:13px;padding:13px;border-radius:16px;cursor:pointer;
+  transition:.15s;display:flex;align-items:center;justify-content:center;gap:9px}
+.revealbtn:hover{background:#cdeee0;transform:translateY(-1px)}
+.revealbtn .rdot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none}
+.cnts{display:flex;justify-content:center;gap:14px;margin-top:9px;font-size:12px;font-weight:700;color:var(--muted)}
+.cnts span{display:inline-flex;align-items:center;gap:5px}
+.cnts b{font-family:Georgia,serif;font-size:16px;color:var(--ink);min-width:20px;text-align:right;display:inline-block}
+.cdot{width:11px;height:11px;border-radius:50%;flex:none}
+.fbtn.done{border-color:var(--ok);background:var(--ok-l)}
+.fbtn.done .fl::after{content:" ✓";color:var(--ok);font-size:13px}
+.mindmap{display:flex;flex-direction:column;align-items:center;gap:14px}
+.mm-center{background:linear-gradient(145deg,var(--primary),var(--primary-d));color:#fff;padding:13px 30px;border-radius:16px;font-weight:800;font-size:20px;box-shadow:var(--shadow-s);position:relative}
+.mm-center::after{content:"";position:absolute;left:50%;bottom:-14px;width:2px;height:14px;background:#c2d6d2;transform:translateX(-50%)}
+.mm-center span{display:block;font-size:12px;font-weight:600;opacity:.9;margin-top:3px}
+.mm-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%}
+.mm-branch{display:flex;flex-direction:column;gap:9px}
+.mm-h{font-weight:800;font-size:13.5px;padding:9px 12px;border-radius:11px;text-align:center;color:#fff}
+.mm-h.b02{background:var(--primary)}
+.mm-h.b03{background:#5c4fb3}
+.mm-node{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;font-weight:700;text-align:left;line-height:1.45}
+.mm-node b{color:var(--ink)}
+.mm-node span{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:3px}
+.mm-node.ok{border-color:var(--ok);background:var(--ok-l);color:#0c6a4f}
+.mm-node.mid{border-color:#c9d8d4;background:#eef3f1;color:var(--muted)}
+.mm-node.no{border-color:var(--no);background:var(--no-l);color:#a31d36}
+.eqnote{display:none;margin-top:10px;background:var(--ok-l);color:#0c6a4f;border-radius:12px;padding:11px 13px;font-size:12.5px;font-weight:700;line-height:1.5}
+.eqnote.show{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+@media(max-width:560px){.mm-cols{grid-template-columns:1fr}}
+
+/* ===== compaction: keep activities within one screen ===== */
+.topbar{height:48px}
+.botbar{height:50px}
+.slide{padding:14px 24px}
+.slide.single{padding:18px 24px}
+.card{padding:14px 16px;margin-top:10px}
+.card.tight{padding:12px 14px}
+h1.title{font-size:21px;margin:7px 0 3px}
+.sub{font-size:12.5px}
+.tag{margin-bottom:7px;font-size:11px;padding:5px 10px}
+.ask{font-size:14.5px;line-height:1.5}
+.helper{font-size:12px;margin-top:6px}
+.sumlist{gap:7px}.sumlist li{font-size:12.5px}
+.sumlist .b{width:20px;height:20px;font-size:11.5px}
+.keq{margin-top:10px;font-size:20px}
+.oxbox{padding:12px;margin-top:10px}
+.oxq{margin-bottom:9px;font-size:13px}
+.choice{padding:9px 12px;font-size:13px}
+.choice .mk{width:22px;height:22px}
+.fb{font-size:12.5px;padding:9px 11px;margin-top:9px}
+.vessel{height:96px}.grf canvas{height:90px}.grf{margin-top:8px;padding:6px}
+.rates{height:42px;margin-top:7px}.ratebar{height:30px}
+.ratecol small{font-size:10.5px}
+.panel{padding:11px}.panel h4{margin-bottom:8px;font-size:12.5px}
+.cnts{margin-top:7px}.cnts b{font-size:14px}
+.legend{margin-top:7px;font-size:11px;gap:10px}
+.eqflag{font-size:12.5px;height:18px}
+.proc{font-size:11.5px;padding:10px 12px;line-height:1.5;max-height:108px;overflow:auto}
+.tbl th,.tbl td{padding:7px 5px;font-size:12px}
+.fbtns{margin:12px 0 6px}.fbtn{padding:10px}
+.calcgrid{gap:9px}.field input{padding:8px;font-size:14px}.field label{font-size:11.5px}
+.result{padding:11px 13px;margin-top:11px;font-size:15px}
+.note{padding:9px 11px;margin-top:8px;font-size:11.5px}
+.kmeter{gap:10px}.balloon{height:170px}
+.kreadout{font-size:17px;margin-top:12px}
+.slider{margin-top:13px}
+.chips{margin-top:12px}.chip{padding:8px 11px;font-size:12px}
+.qkstage{height:170px;padding:16px 14px 12px}.qkbase{bottom:40px}
+.bar3d{width:52px}
+.steps{gap:8px}.step .sh{padding:11px 13px;font-size:13px}
+.scoreband{padding:11px 14px;margin-top:11px}.scoreband .sc{font-size:18px}
+.revealwrap{margin-top:10px}.revealbtn{padding:11px;font-size:12.5px}
+.eqnote{margin-top:8px;padding:10px 12px;font-size:12px}
+.mindmap{gap:12px}
+.mm-center{padding:11px 26px;font-size:18px}
+.mm-cols{gap:13px}.mm-branch{gap:8px}
+.mm-h{padding:8px 12px;font-size:12.5px}
+.mm-node{padding:9px 12px;font-size:12.5px}
+.mm-node span{font-size:11.5px}
+.recap{gap:11px}.recap .rc{padding:13px}.recap .rc p{font-size:12.5px}
+
+/* ===== per-slide vertical balance: center content, even out whitespace ===== */
+.slide.active{align-content:safe center}
+.col-l,.col-r{height:auto;max-height:100%}
+.slide.single.active{display:flex;flex-direction:column;justify-content:safe center;align-items:center;overflow:auto}
+
+/* Q vs K fraction-arrow visual */
+.qfrac{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;margin-bottom:12px;flex-wrap:wrap}
+.qfrac .qlead{font-size:19px;font-weight:800}
+.qfrac .qval{font-size:19px;font-weight:800}
+.qfrac .qval b{font-family:Georgia,serif;color:#b06a10;font-size:22px}
+.qfracbody{display:flex;flex-direction:column;align-items:stretch;text-align:center}
+.qnum,.qden{font-family:Georgia,serif;font-size:15px;font-weight:700;padding:3px 12px;display:flex;align-items:center;gap:7px;justify-content:center}
+.qnum small,.qden small{font-family:'Pretendard',sans-serif;font-size:10.5px;color:var(--muted);font-weight:700}
+.qbar2{height:2.5px;background:var(--ink);border-radius:2px;margin:1px 0}
+.qarrow{font-size:17px;font-weight:800;min-width:16px;display:inline-block;text-align:center}
+.slide.single>div{width:100%}
+
+/* ===== free zoom / pan ===== */
+.viewport{overflow:auto;place-content:safe center}
+.sizer{flex:none}
+.deck{transform-origin:top left}
+.zoomctl{position:fixed;top:7px;left:50%;transform:translateX(-50%);z-index:60;display:flex;gap:5px;align-items:center;
+  background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:11px;padding:4px;box-shadow:0 8px 20px -8px rgba(0,0,0,.45)}
+.zoomctl button{border:none;background:#fff;color:var(--ink);font-family:inherit;font-weight:800;font-size:14px;height:30px;min-width:34px;border-radius:8px;cursor:pointer;line-height:1}
+.zoomctl button:hover{background:var(--primary-ll);color:var(--primary-d)}
+.zoomctl #zoomLbl{min-width:52px;font-size:12px;color:var(--primary-d)}
+
+/* ===== 투사 가독성 타이포 (개정) — 본문 글자 키움 ===== */
+h1.title{font-size:27px;margin:9px 0 5px}
+.sub{font-size:15.5px}
+.ask{font-size:17.5px;line-height:1.55}
+.helper{font-size:14px;margin-top:8px}
+.sumlist{gap:9px}.sumlist li{font-size:15px}.sumlist .b{width:24px;height:24px;font-size:13px}
+.note{padding:11px 13px;margin-top:9px;font-size:13.5px;line-height:1.65}
+.recap{gap:14px}.recap .rc{padding:18px 20px}.recap .rc p{font-size:15.5px;line-height:1.75}.recap .rc b{font-size:16.5px}
+.tbl th,.tbl td{padding:11px 8px;font-size:14.5px}
+.oxq{margin-bottom:10px;font-size:15px;line-height:1.5}.choice{padding:11px 14px;font-size:14.5px}.choice .mk{width:24px;height:24px}.fb{font-size:13.5px;padding:11px 13px;margin-top:10px}
+.steps .step .sh{font-size:14.5px}
+.scoreband .sc{font-size:21px}.scoreband span{font-size:14px}
+.mm-center{font-size:23px;padding:14px 32px}.mm-h{font-size:15px;padding:10px 14px}.mm-node{font-size:15px;padding:12px 15px}.mm-node span{font-size:13.5px}
+.btn.primary{font-size:15.5px;padding:13px 26px}.btn.ghost{font-size:14px;padding:10px 17px}
+/* 한국어 줄바꿈: 글자 단위가 아닌 어절(단어/의미) 단위로 줄바꿈 — 본문 전반 적용 */
+.qkverdict{word-break:keep-all;line-height:1.45}
+.ask,.helper,.note,.sub,.sumlist li,.tbl td,.scaleLbl,.glabel,.glegend{word-break:keep-all}
+/* 토글 reveal 버튼 화살표 + 펼침 표시 */
+.revealbtn .ra{font-weight:900;font-size:14px;line-height:1}
+.revealbtn.open{background:#cdeee0}
+/* 선택 토글 버튼(예: 흡열/발열 데이터 전환) 활성 표시.
+   ⚠️ 일부 렌더링 엔진은 background 단축 속성 안의 var()를 무효 처리함 → 반드시 background-color 롱핸드 사용. */
+.btn.ghost.done{background-color:var(--primary);color:#fff;border-color:var(--primary-d);box-shadow:0 4px 12px -3px rgba(15,118,110,.55);transform:translateY(-1px)}
+.btn.ghost.done:hover{background-color:var(--primary-d);border-color:var(--primary-d)}
+/* ===== 핵심 정리·마무리 "칩 흐름" (서술식 대신 아이콘→화살표→색칩) =====
+   사용: <div class="flowrow red"><span class="fbadge">❄️ 냉각</span><span class="farr">→</span>발열·역반응<span class="farr">→</span><span class="fchip">붉은색</span></div>
+   .red=흡열/냉각/붉은 계열, .blue=발열/가열/파란 계열. 결과 색칩은 .fchip(.red/.blue 상속). */
+.flowrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-radius:12px;padding:8px 11px;font-size:12.5px;font-weight:700;border:1px solid}
+.flowrow.red{background:#fde7ec;border-color:#f3c2cd}
+.flowrow.blue{background:#e6f0f7;border-color:#c2dbec}
+.flowrow .fbadge{font-weight:800}
+.flowrow.red .fbadge{color:#a31d36}
+.flowrow.blue .fbadge{color:#2b7fb8}
+.flowrow .farr{font-weight:900}
+.flowrow.red .farr{color:#cf94a1}
+.flowrow.blue .farr{color:#94b8d0}
+.flowrow .fchip{color:#fff;border-radius:7px;padding:2px 10px}
+.flowrow.red .fchip{background:#d6435f}
+.flowrow.blue .fchip{background:#2b7fb8}
+/* 정리표 답 칸 잠금(탐구하면 채워짐): <td class="lkcell"><span class="ans">…</span></td>, 행에 .lcopen 부여 시 공개 */
+.lkcell{position:relative}
+.lkcell .ans{display:inline-block;filter:blur(5px);opacity:.25;transition:filter .45s,opacity .45s}
+tr.lcopen .lkcell .ans{filter:none;opacity:1}
+.lkcell::after{content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#c2b89b;font-weight:800;font-size:17px;pointer-events:none}
+tr.lcopen .lkcell::after{content:none}
+@keyframes lcpulse{0%{transform:scale(.65)}55%{transform:scale(1.28)}100%{transform:scale(1)}}  /* 화살표 펄스: inline 요소 + 고정높이 overflow:hidden 컨테이너에 적용 */
+
+/* ===== 단일(single) 슬라이드: 여백 많으니 글자·여백을 더 크게 (투사 가독성) ===== */
+.slide.single h1.title{font-size:32px;margin:10px 0 9px}
+.slide.single .sub{font-size:17.5px;line-height:1.6}
+.slide.single .card{padding:24px 28px;margin-top:16px}
+.slide.single .recap{gap:18px}
+.slide.single .recap .rc{padding:24px 26px}
+.slide.single .recap .rc b{font-size:19px}
+.slide.single .recap .rc p{font-size:17.5px;line-height:1.9}
+.slide.single .note{font-size:15px;padding:13px 15px;line-height:1.65}
+.slide.single .tbl th,.slide.single .tbl td{font-size:15.5px;padding:12px 9px}
+.slide.single .mindmap{gap:11px}
+.slide.single .mm-center{font-size:23px;padding:12px 30px}
+.slide.single .mm-h{font-size:14.5px;padding:9px 13px}
+.slide.single .mm-node{font-size:14.5px;padding:10px 13px}
+.slide.single .mm-node span{font-size:13px}
+.slide.single .btn.primary{font-size:17px;padding:15px 32px}
+.slide.single .btn.ghost{font-size:15px;padding:12px 22px}
+
+/* ===== 시뮬레이션 컨트롤(속도/일시정지/초기화) + 수치 칩 + 시간 그래프 ===== */
+.simrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:10px}
+.simrow .slabel{font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.slider.spd{width:auto;flex:1;min-width:88px;height:7px;margin-top:0;
+  background:linear-gradient(90deg,#bfe3db 0%,var(--primary) 100%)}
+.slider.spd::-webkit-slider-thumb{width:20px;height:20px;border-width:3px}
+.slider.spd::-moz-range-thumb{width:20px;height:20px;border-width:3px}
+.simval{font-family:Georgia,serif;font-weight:800;color:var(--primary-d);font-size:13px;min-width:42px;text-align:right}
+.readout{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.rdchip{display:inline-flex;align-items:center;gap:6px;background:#f3f8f6;border:1px solid var(--line);
+  border-radius:9px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--muted)}
+.rdchip .cdot{width:10px;height:10px;border-radius:50%;flex:none}
+.rdchip b{font-family:Georgia,serif;font-size:14px;color:var(--ink);min-width:18px;text-align:right}
+.graphbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 8px 2px;position:relative}
+.graphbox .glabel{position:absolute;top:5px;left:9px;font-size:10px;font-weight:800;color:var(--muted)}
+.graphbox canvas{width:100%;display:block}
+.glegend{display:flex;gap:12px;justify-content:center;font-size:10.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.glegend span{display:inline-flex;align-items:center;gap:5px}
+.glegend i{width:12px;height:3px;border-radius:2px;display:inline-block}
+
+/* ===== 실제 사진/그림 (figure) ===== */
+.figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow-s)}
+.figure img{display:block;width:100%;height:auto;border-radius:9px;object-fit:cover}
+.figure.contain img{object-fit:contain;background:#f3f8f6}
+.figcap{font-size:12px;color:var(--muted);font-weight:600;margin-top:7px;line-height:1.5;text-align:center}
+.figcap .src{display:block;font-size:10.5px;color:#9bb0ab;margin-top:2px}      /* 출처 표기 */
+.photogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}                 /* 사진 2장 비교 */
+.photogrid.three{grid-template-columns:1fr 1fr 1fr}
+.imgband{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* ===== 사례 학습(단일 슬라이드) 포맷 헬퍼 — 좌 시뮬 + 우 그래프 + 2박스 헤더 + 칩 =====
+   구조: <section class="slide single">
+           <div> ① 헤더행(kicker+title+.hgroup 2개)  ② grid 1fr 1fr (좌 시뮬카드 / 우 그래프+컨트롤 카드)
+                 ③ reveal 버튼  ④ 핵심정리 카드(.flowrow 칩 + .sumconc) </div>
+         </section>
+   헤더 2박스: 1번=화학반응식(상태 (g)(aq)(s)(l) 표기) + .hbadge, 2번=요인 칩(.qchip)/또는 2번째 평형식.
+   하단 §41(README) 참고. */
+.flowrow.grn{background:#e3f1ea;border-color:#bfdccf}
+.flowrow.grn .fbadge{color:#0c6a4f}
+.flowrow.grn .farr{color:#8fc3ab}
+.flowrow.grn .fchip{background:#2f9e6e}
+/* 헤더 2박스(반응식/요인) */
+.qchip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:var(--primary-d);background:#fff;border:1px solid #cfe3db;border-radius:999px;padding:4px 11px;white-space:nowrap}
+.hgroup{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:13px;padding:6px 12px;background:#fbfdfc}
+.hgroup.fx{background:var(--primary-ll);border-color:#bfdccf}
+.hgroup .glabel2{font-size:11px;font-weight:800;letter-spacing:.02em}
+.hbadge{font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px;white-space:nowrap}
+/* 3열 미터 바(평형 수득률·속도·실효 등 0~100 가로 막대) */
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;margin-top:10px;padding:0 4px}
+.meter{text-align:center}
+.meter .mhead{font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.meter .mhead .mval{font-family:Georgia,serif;font-weight:800;font-size:13.5px;color:var(--ink);margin-left:3px}
+.meter.eff .mhead .mval{color:var(--primary-d)}
+.meter .mtrack{position:relative;height:9px;border-radius:6px;background:#e8efec;margin-top:6px}
+.meter .mfill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;transition:width .25s,background .25s}
+.meter .mmax{position:absolute;right:0;top:11px;font-size:9px;color:#9bb0ab;font-weight:700}
+.mnote{grid-column:1 / -1;font-size:11px;color:var(--muted);font-weight:700;text-align:center;margin-top:7px;line-height:1.4}
+/* 핵심정리 종합 결론 박스(칩 흐름 아래) */
+.sumconc{margin-top:9px;font-size:12px;font-weight:700;color:#0c6a4f;background:var(--ok-l);border:1px solid #bfe0d0;border-radius:10px;padding:9px 12px;line-height:1.55}
+
+</style>
+</head>
+<body>
+<div class="viewport" id="viewport"><div class="sizer" id="sizer"><div class="deck" id="deck">
+  <div class="topbar">
+    <div class="brand"><div class="logo">물에</div>
+      <div><b>기체의 성질</b><span>① 기체 법칙 · 보일 · 샤를 · 아보가드로</span></div></div>
+    <div class="dots" id="dots"></div>
+  </div>
+  <div class="stage" id="main">
+
+  <!-- ▼▼▼ 슬라이드 삽입 위치 — slide-compose 가 <section class="slide"> 를 여기에 한 장씩 추가 ▼▼▼ -->
+  <section class="slide framed active" data-title="도입 · 무엇이 부피를 바꿀까">
+    <div class="row-head">
+      <span class="kicker"><span class="n">★</span> Ⅰ. 물질의 세 가지 상태 · 도입</span>
+      <h1 class="title">같은 풍선, <span class="hl">무엇이 부피를 바꿀까?</span></h1>
+      <p class="sub">같은 풍선에 세 가지 자극을 준다 — <b>직접 해 보고</b>(불기·감압), <b>영상으로 확인하며</b>(액체 질소) 부피를 바꾸는 원인을 찾자.</p>
+    </div>
+    <div class="row-mid cols-3">
+      <div class="col">
+        <div class="card" style="height:100%;margin-top:0">
+          <span class="tag sim"><i class="dotmark"></i> 조별 직접</span>
+          <div style="font-size:16.5px;font-weight:800;margin-top:8px">① 양 — 풍선 불기</div>
+          <p class="helper" style="margin-top:6px">공기를 더 불어넣으면 부피는 어떻게 될까?</p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" style="height:100%;margin-top:0">
+          <span class="tag sim"><i class="dotmark"></i> 조별 직접</span>
+          <div style="font-size:16.5px;font-weight:800;margin-top:8px">② 압력 — 진공 감압</div>
+          <p class="helper" style="margin-top:6px">진공 용기에서 공기를 빼면 부피는?</p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" style="height:100%;margin-top:0">
+          <span class="tag q"><i class="dotmark"></i> 영상</span>
+          <div style="font-size:16.5px;font-weight:800;margin-top:8px">③ 온도 — 액체 질소</div>
+          <p class="helper" style="margin-top:6px">아주 차갑게(−196 ℃) 하면 부피는?</p>
+          <div style="margin-top:8px"><span class="btn ghost sm" style="opacity:.5;cursor:not-allowed">▶ 영상 (준비 중)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="row-foot">
+      <button class="revealbtn" data-reveal="introSum" onclick="reveal(this)"><span class="rdot"></span> 세 활동을 마친 뒤 — 무엇을 발견했나? <span class="ra">▼</span></button>
+      <div class="card summary" id="introSum" style="margin-top:10px">
+        <span class="tag sum"><i class="dotmark"></i> 발견</span>
+        <p class="ask" style="margin-top:6px">같은 풍선인데 <span class="hl">셋 다 부피가 변했다.</span> 양 · 압력 · 온도가 기체의 부피를 바꾼다.</p>
+        <p class="helper" style="margin-top:8px">그렇다면 각각 <b>어떤 규칙</b>으로 변할까? → 보일 · 샤를 · 아보가드로 법칙으로 알아보자.</p>
+      </div>
+    </div>
+  </section>
+  <!-- ▲▲▲ 슬라이드 삽입 위치 끝 ▲▲▲ -->
+
+  </div>
+  <div class="botbar">
+    <button class="navbtn" id="prevBtn" onclick="go(cur-1)">← 이전</button>
+    <div class="navlabel"><b id="navTitle"></b> <span id="navCount"></span></div>
+    <button class="navbtn go" id="nextBtn" onclick="go(cur+1)">다음 →</button>
+  </div>
+</div></div></div>
+<div class="zoomctl"><button onclick="zoomOut()" title="축소 (Ctrl+휠)">&#8722;</button><button onclick="zoomReset()" id="zoomLbl" title="화면 맞춤">100%</button><button onclick="zoomIn()" title="확대 (Ctrl+휠)">&#65291;</button></div>
+
+<script>
+
+/* ===================== 프레임워크 (보통 수정 불필요) ===================== */
+const slides=[...document.querySelectorAll('.slide')];
+const N=slides.length;
+let cur=0;
+const dotsWrap=document.getElementById('dots');
+for(let i=0;i<N;i++){const b=document.createElement('button');b.className='dot'+(i===0?' on':'');b.onclick=()=>go(i);dotsWrap.appendChild(b);}
+const dotEls=[...dotsWrap.children];
+function go(i){
+  if(i<0||i>=N)return;
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  dotEls.forEach((d,k)=>{d.classList.toggle('on',k===cur);d.classList.toggle('done',k<cur);});
+  document.getElementById('navTitle').textContent=slides[cur].dataset.title||'';
+  document.getElementById('navCount').textContent='('+(cur+1)+' / '+N+')';
+  document.getElementById('prevBtn').disabled=cur===0;
+  const nb=document.getElementById('nextBtn'); nb.textContent=cur===N-1?'완료':'다음 →'; nb.disabled=cur===N-1;
+  initFor(cur);
+  const vp=document.getElementById('viewport'); if(vp) vp.scrollTo({top:0,left:0,behavior:'smooth'});
+}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+/* 슬라이드가 처음 열릴 때 data-init="함수이름" 을 1회 실행 */
+const _inited={};
+function initFor(i){ if(_inited[i])return; _inited[i]=true; const fn=slides[i].dataset.init; if(fn&&typeof window[fn]==='function') window[fn](); }
+/* 펼치기/접기 토글(핵심 정리 등). 버튼 안 <span class="ra">↓</span> 화살표가 ↑/↓로 뒤집힘.
+   예: <button class="revealbtn" onclick="reveal(this)" data-reveal="대상id"><span class="rdot"></span> 핵심 정리 보기 <span class="ra">↓</span></button> */
+function reveal(btn){ const t=document.getElementById(btn.dataset.reveal); if(!t)return; const on=t.classList.toggle('show'); btn.classList.toggle('open',on); const a=btn.querySelector('.ra'); if(a)a.textContent=on?'↑':'↓'; }
+/* 형성평가/오개념 점검: onclick="check(this,true|false,'피드백id','메시지(HTML)')" */
+let _score=0; const _answered={};
+function check(btn,correct,fbId,msg){
+  if(_answered[fbId])return; _answered[fbId]=true;
+  const box=btn.closest('.choices'); [...box.children].forEach(c=>{c.classList.add('locked');c.onclick=null;});
+  btn.classList.add(correct?'correct':'wrong');
+  const fb=document.getElementById(fbId); if(fb){fb.className='fb show '+(correct?'good':'bad'); fb.innerHTML=msg;}
+  if(correct)_score++;
+  const scope=btn.closest('.slide')||document;
+  const total=scope.querySelectorAll('.choices').length;
+  const sn=document.getElementById('scoreNum'); if(sn) sn.textContent=_score+' / '+total;
+  const done=Object.keys(_answered).length;
+  const sm=document.getElementById('scoreMsg'); if(sm&&done>=total) sm.textContent=(_score===total?'완벽합니다! 모두 맞혔어요.':'틀린 문항의 개념을 다시 확인해 보세요.');
+}
+
+/* ===================== 자유 확대/축소 (수정 불필요) ===================== */
+let deckScale=1, userZoom=1;
+function applyZoom(){
+  const fit=Math.min(window.innerWidth/1280, window.innerHeight/720);
+  deckScale=fit*userZoom;
+  document.getElementById('deck').style.transform='scale('+deckScale+')';
+  const s=document.getElementById('sizer'); s.style.width=(1280*deckScale)+'px'; s.style.height=(720*deckScale)+'px';
+  const lbl=document.getElementById('zoomLbl'); if(lbl) lbl.textContent=Math.round(userZoom*100)+'%';
+}
+function setZoom(z){userZoom=Math.min(4,Math.max(0.4,z));applyZoom();}
+function zoomIn(){setZoom(userZoom*1.15);}
+function zoomOut(){setZoom(userZoom/1.15);}
+function zoomReset(){setZoom(1);}
+window.addEventListener('resize',applyZoom);
+(function(){const vp=document.getElementById('viewport'); if(vp)vp.addEventListener('wheel',function(e){if(e.ctrlKey||e.metaKey){e.preventDefault();setZoom(userZoom*(e.deltaY<0?1.1:0.9));}},{passive:false});})();
+/* 캔버스 헬퍼: 확대 배율을 반영해 또렷하게 그림. 사용법: const {ctx,w,h}=fitCanvas(myCanvas); */
+function fitCanvas(cv){
+  const r=cv.getBoundingClientRect();const dpr=window.devicePixelRatio||1;const s=deckScale||1;
+  const w=Math.max(2,r.width/s),h=Math.max(2,r.height/s);
+  cv.width=w*dpr;cv.height=h*dpr; const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+
+/* ▼▼▼ 슬라이드별 data-init 함수를 여기에 추가 (입자 시뮬을 쓰면 sim-helpers.js 내용을 먼저 붙여넣기) ▼▼▼ */
+
+/* ▲▲▲ data-init 함수 끝 ▲▲▲ */
+
+/* 시작 */
+go(0);
+applyZoom();
+
+</script>
+</body>
+</html>
