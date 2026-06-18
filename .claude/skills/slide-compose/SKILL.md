@@ -14,7 +14,11 @@ description: 사용 시점 — blueprint의 슬라이드를 실제로 만들 때
 ## 결정 순서 (슬라이드 i)
 1. **의도** — 이 슬라이드가 학생에게 남길 한 가지(blueprint i번 칸). 없으면 먼저 정한다.
 2. **이전 슬라이드 연결** — 무엇을 이어받고 무엇을 새로 던지나(흐름 일관성). 직전 슬라이드를 다시 본다.
-3. **레이아웃** — 상황에 맞게 고른다(견본·적합한 경우 한눈에: `docs/layout-gallery.html`): [[lesson-slide-2col]](질문+시뮬, 가장 흔함) · [[lesson-slide-single]](도입·마무리·사례·형성평가4) · [[lesson-slide-layouts]](3단 `.cols3` · 상하분할 `.split` · 헤더+2단 `.headcols` · 2단 역비율 `.cols2wide`).
+3. **레이아웃 — 사용자가 선택(AI는 추천만, 확정 금지)** — **순서가 중요**:
+   - **㉠ 먼저 조합 예시를 이미지(와이어프레임)로 보여준다** — `show_widget`(현재 의도에 맞는 추천 조합 + 대안) 또는 `docs/layout-gallery.html`. *처음 쓰는 사람도 '이렇게 답하면 이런 레이아웃이 된다'를 눈으로 보고 알 수 있게.*
+   - **㉡ 그 다음 묻는다: ① 상단 박스(제목·질문)? · ② 중단 몇 단(1·2·3)? · ③ 하단 박스(종합·reveal)?**
+   - AI는 의도·활동유형에 맞게 추천하고 **사용자가 확정**한다(AI 임의 확정 금지).
+   구현은 `.framed`(상 `.row-head` / 중 `.row-mid.cols-1/2/3` / 하 `.row-foot` — 있는 박스만). 프리셋: single=중1 · 2col=중2 · cols3=중3 · headcols=상+중2 · split=상+하.
 4. **요소 선택** — [[lesson-activity-types]]에서 이 슬라이드에 넣을 요소를 고른다: 발문 · 입자 시뮬([[lesson-simulator-particle]]) · 그래프([[lesson-graph]]) · 핵심요약 칩 · 이해도 체크([[lesson-comprehension-check]]) · 실험사진 · 슬라이더/계산기 · POE.
 5. **배치** — 각 요소를 어디에: **시뮬·그래프는 col-r**, **질문·확인·정리는 col-l**(README §2). 핵심 정리는 [[lesson-reveal-gate]]로 활동 뒤 펼침. single이면 사례 학습 포맷(헤더 2박스→좌시뮬/우그래프→reveal→칩 정리).
 6. **내용 작성** — 각 요소의 실제 텍스트·수치. 표기는 학생이 배운 것만, 실측 앵커, 흡열=빨강·발열=파랑. 시뮬 표시값=입자수=그래프=Q 일치(연속값).
@@ -27,5 +31,6 @@ description: 사용 시점 — blueprint의 슬라이드를 실제로 만들 때
 - 정답을 먼저 보여주지 않는다: 발문 → 시뮬/관찰 → (버튼) 정리.
 - `data-reveal` 값=카드 id, 형성평가 `fb` id는 슬라이드마다 **중복 금지**(lint가 잡음).
 - 재사용할 만한 레이아웃·예시가 나오면 `docs/layout-gallery.html`에 카드로 등재한다(새 레이아웃이면 `lesson_template.html`·`deck-shell.html`에 CSS·견본도 함께).
+- **레이아웃은 사용자 선택** — 매 장 갤러리 후보를 제시하고 AI는 추천만 한다. 절대 AI가 혼자 확정하지 않는다.
 
 다음: [[flow-check]] · 되돌아가기 [[lesson-blueprint]]

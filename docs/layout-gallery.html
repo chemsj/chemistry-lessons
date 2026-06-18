@@ -51,8 +51,14 @@ footer{margin-top:36px;font-size:13px;color:var(--muted);font-weight:600;text-al
 <div class="wrap">
 <header>
   <h1>슬라이드 레이아웃 갤러리</h1>
-  <p>수업 슬라이드를 만들 때 상황에 맞는 레이아웃을 먼저 고르세요. 실물 견본은 <code>docs/lesson_template.html</code>에 같은 이름으로 들어 있습니다.</p>
+  <p>수업 슬라이드를 만들 때 상황에 맞는 레이아웃을 먼저 고르세요. <strong>레이아웃의 최종 선택권은 선생님께 있습니다 — AI는 후보를 추천만 합니다.</strong> 실물 견본은 <code>docs/lesson_template.html</code>에 같은 이름으로 들어 있습니다.</p>
 </header>
+
+<div class="guide">
+  <h2>레이아웃 = 조합 (상 · 중 N단 · 하)</h2>
+  <p style="font-size:14px;font-weight:600;color:var(--ink)">레이아웃은 세 가지로 정합니다 — <strong>① 상단 박스(제목·질문)?</strong> · <strong>② 중단 몇 단(1·2·3)?</strong> · <strong>③ 하단 박스(종합·reveal)?</strong></p>
+  <p class="alt">아래 6종은 자주 쓰는 <em>프리셋</em>(single=중1 · 2col=중2 · cols3=중3 · headcols=상+중2 …), 그 밖의 조합은 <code>.framed</code>로 즉석 구성합니다 — 상 <code>.row-head</code> / 중 <code>.row-mid.cols-1·2·3</code> / 하 <code>.row-foot</code> (있는 박스만).</p>
+</div>
 
 <div class="guide">
   <h2>＋ 새 레이아웃·예시 추가하는 법</h2>
