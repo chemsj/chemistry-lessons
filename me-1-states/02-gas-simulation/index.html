@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기체 시뮬레이션 — 압력·온도·양·부피의 관계 확인하기 (1차시 해보기)</title>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     [1] 교사 설정 영역 — 이 블록만 고치면 시료와 조건 범위가 바뀐다.
+     ══════════════════════════════════════════════════════════════════════ -->
+<script>
+/* 공개본 — 시료 후보를 한 개만 둔다.
+   1차시 「해보기」는 압력·부피·온도·기체의 양만 쓰고 시료의 정체를 묻지 않는다.
+   ─ 기준질량범위 = 시작 조건에서 뽑히는 질량의 범위(g). 여기서 처음 몰수가 정해진다. */
+const 시료후보 = [
+  { 이름:'시료', 화학식:'', 몰질량: 28.0, 기준질량범위:[0.800, 1.400] }
+];
+
+/* 사양서 §4-B 「노이즈」 — 표시값에 곱해지는 흔들림의 최대 비율(0.007 = ±0.7%).
+   사양서가 정한 ±0.5~1% 안에 든다. 반드시 시드에서 결정되며 Math.random 을 쓰지 않는다. */
+const 오차폭 = 0.007;
+
+/* 사양서 §4-A 「읽기 자릿수 제한」 — 표시값을 여기서 끊는다.
+   ⚠ 1차시 「해보기」 판: 압력을 소수 <b>셋째</b> 자리까지 읽힌다.
+   목표가 "PV/nT 가 일정하다"를 찾아내는 것이라, 둘째 자리에서 끊으면
+   반올림만으로 1~2% 가 흔들려 관계가 흐려진다.
+   */
+const 압력소수자리 = 3;
+const 질량유효숫자 = 3;
+
+/* 시작 조건이 뽑히는 범위. 압력을 1 atm 보다 낮게 잡아야 소수 둘째 자리에서 끊는 것만으로도
+   몰질량에 1% 안팎의 어긋남이 생긴다(사양서 §4-A). */
+const 시작압력범위 = [0.30, 0.50];   /* atm */
+const 시작온도범위 = [15, 35];       /* ℃ */
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     [2] 결정론 코어 — 시료 코드 하나에서 시료·초기 조건·노이즈가 모두 나온다.
+         이 블록에는 화면을 건드리는 코드가 없다(사양서 §5 「코드로 완전 복원」).
+     ══════════════════════════════════════════════════════════════════════ -->
+<script>
+var GAS_CONST_R = 0.082;    /* L·atm/(mol·K) — 압력 계산에 쓴다. 화면에는 띄우지 않는다. */
+var TEMP_OFFSET = 273;      /* 섭씨 → 절대 온도 보정. 내부 전용, 온도는 ℃ 로만 표시한다(사양서 §1) */
+var TEMP_MIN = -20, TEMP_MAX = 150;
+var VOL_STEP = 20;                                  /* 부피 슬라이더 눈금 간격(mL) */
+var STEP_MIN = 3, STEP_MAX = 10, STEP_DEFAULT = 5;  /* 기체의 양 — 몰수는 숨기고 「단계」로만 보인다 */
+
+/* 시료 코드 문자 32종. K 는 절대 온도 단위로 오해될 수 있어 뺐고, I·O·U 는 혼동·오독 때문에 뺐다.
+   코드 5글자 = 32⁵ ≈ 3355만 가지 = 시드 그 자체다. */
+var CODE_ALPHABET = '0123456789ABCDEFGHJLMNPQRSTVWXYZ';
+
+/* ── 결정론 난수 ──────────────────────────────────────────────────────
+   mix32: 정수 두 개를 섞어 32비트 해시를 낸다(splitmix 계열 마무리 함수).
+   rngFrom: mulberry32. 같은 시드면 언제 어디서 돌려도 같은 수열이 나온다. */
+function mix32(a, b){
+  var h = ((a | 0) ^ Math.imul((b | 0) ^ ((b | 0) >>> 15), 0x2545f491)) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  return (h ^ (h >>> 16)) >>> 0;
+}
+function rngFrom(seed){
+  var s = seed >>> 0;
+  return function(){
+    s = (s + 0x6D2B79F5) | 0;
+    var t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ── 시료 코드 ────────────────────────────────────────────────────────
+   다섯 글자가 시드가 되어 처음 조건과 흔들림을 결정한다.
+   같은 코드를 넣으면 언제나 같은 화면이 나온다. */
+function normalizeCode(text){
+  var s = String(text == null ? '' : text).toUpperCase().replace(/[^0-9A-Z]/g, '');
+  if(s.length !== 5) return null;
+  for(var i=0;i<5;i++) if(CODE_ALPHABET.indexOf(s.charAt(i)) < 0) return null;
+  return s;
+}
+function seedFromCode(raw){
+  var n = 0;
+  for(var i=0;i<5;i++) n = n * 32 + CODE_ALPHABET.indexOf(raw.charAt(i));
+  return n;
+}
+function sampleIndexFromCode(raw){
+  return CODE_ALPHABET.indexOf(raw.charAt(2)) % 시료후보.length;
+}
+function middleLettersFor(sampleIndex){
+  var out = [];
+  for(var v=0; v<CODE_ALPHABET.length; v++){
+    if(v % 시료후보.length === sampleIndex) out.push(CODE_ALPHABET.charAt(v));
+  }
+  return out;
+}
+/* 코드 생성 — 여기서만 Math.random 을 쓴다(시드를 새로 뽑는 자리). 측정값에는 쓰지 않는다. */
+function newCode(sampleIndex){
+  var pick = function(pool){ return pool.charAt ? pool.charAt(Math.floor(Math.random()*pool.length))
+                                                : pool[Math.floor(Math.random()*pool.length)]; };
+  var mid = middleLettersFor(sampleIndex);
+  return pick(CODE_ALPHABET) + pick(CODE_ALPHABET) + pick(mid)
+       + pick(CODE_ALPHABET) + pick(CODE_ALPHABET);
+}
+function formatCode(raw){ return raw.slice(0,2) + '-' + raw.slice(2); }
+
+/* ── 코드 → 시료·초기 조건 (사양서 §5) ────────────────────────────────
+   같은 코드를 넣으면 언제나 같은 시료·같은 초기 온도·부피·기체의 양이 나온다. */
+function setupFromCode(text){
+  var raw = normalizeCode(text);
+  if(!raw) return null;
+  var idx = sampleIndexFromCode(raw);
+  var seed = seedFromCode(raw);
+  var s = 시료후보[idx];
+  var rnd = rngFrom(mix32(seed, 0x53414D50));
+  var tempC = 시작온도범위[0] + Math.floor(rnd() * (시작온도범위[1] - 시작온도범위[0] + 1));
+  var p0 = 시작압력범위[0] + rnd() * (시작압력범위[1] - 시작압력범위[0]);
+  var mass0 = s.기준질량범위[0] + rnd() * (s.기준질량범위[1] - s.기준질량범위[0]);
+  var n0 = mass0 / s.몰질량;
+  var v0 = Math.round(n0 * GAS_CONST_R * (tempC + TEMP_OFFSET) / p0 * 1000 / VOL_STEP) * VOL_STEP;
+  return {
+    code: raw, seed: seed, sampleIndex: idx,
+    molPerStep: n0 / STEP_DEFAULT,
+    initTempC: tempC, initVolumeMl: v0, initAmountStep: STEP_DEFAULT,
+    volMin: Math.max(VOL_STEP, Math.round(v0 * 0.45 / VOL_STEP) * VOL_STEP),
+    volMax: Math.round(v0 * 1.55 / VOL_STEP) * VOL_STEP
+  };
+}
+
+/* ── 물리 계산 ──────────────────────────────────────────────────────── */
+function molesOf(setup, amountStep){ return setup.molPerStep * amountStep; }
+function truePressure(setup, tempC, volumeMl, amountStep){
+  return molesOf(setup, amountStep) * GAS_CONST_R * (tempC + TEMP_OFFSET) / (volumeMl / 1000);
+}
+function trueMass(setup, amountStep){
+  return molesOf(setup, amountStep) * 시료후보[setup.sampleIndex].몰질량;
+}
+
+/* ── 노이즈 (사양서 §4-B) ─────────────────────────────────────────────
+   조건과 읽기 회차의 함수일 뿐 호출 시각의 함수가 아니다.
+   → 같은 코드·같은 조건·같은 회차면 며칠 뒤에 열어도 같은 값이 나온다. */
+function noiseOf(seed, channel, tempC, volumeMl, amountStep, readIndex){
+  var h = mix32(seed, channel);
+  h = mix32(h, tempC);
+  h = mix32(h, volumeMl);
+  h = mix32(h, amountStep);
+  h = mix32(h, readIndex);
+  return ((h / 4294967296) * 2 - 1) * 오차폭;
+}
+function shownPressure(setup, tempC, volumeMl, amountStep, readIndex){
+  return truePressure(setup, tempC, volumeMl, amountStep)
+       * (1 + noiseOf(setup.seed, 1, tempC, volumeMl, amountStep, readIndex));
+}
+function shownMass(setup, tempC, volumeMl, amountStep, readIndex){
+  return trueMass(setup, amountStep)
+       * (1 + noiseOf(setup.seed, 2, tempC, volumeMl, amountStep, readIndex));
+}
+
+/* ── 표시 자릿수 (사양서 §4-A) ────────────────────────────────────────── */
+function fmtSig(x, sig){
+  if(!isFinite(x)) return '—';
+  if(x === 0) return '0';
+  var mag = Math.floor(Math.log(Math.abs(x)) / Math.LN10 + 1e-12);
+  var dec = Math.min(15, Math.max(0, sig - 1 - mag));
+  var out = x.toFixed(dec);
+  var back = Math.abs(parseFloat(out));
+  if(back > 0){                       /* 0.9999 → 1.000 처럼 자릿수가 올라간 경우 한 번 더 맞춘다 */
+    var mag2 = Math.floor(Math.log(back) / Math.LN10 + 1e-12);
+    if(mag2 !== mag) out = x.toFixed(Math.min(15, Math.max(0, sig - 1 - mag2)));
+  }
+  return out;
+}
+/* 1차시판은 부피를 L 로 보여 준다 (2026-08-13 교사 확정).
+   단위 변환(mL→L) 훈련은 학습지 전개 ⓒ 「단위 맞추기 훈련」이 지면에서 전담하고 전개 ⓓ 문제도 L 로 주므로,
+   해보기까지 mL 로 받으면 같은 변환을 두 번 시키게 되어 관계 발견(PV/nT 가 일정)에서 시선이 흩어진다.
+   ⚠ 내부 계산·저장·시드는 mL 그대로 둔다(VOL_STEP 20 mL = 0.02 L) — 표시만 바꾼다.
+   */
+function fmtVol(ml){ return (ml/1000).toFixed(2); }
+function fmtPressure(x){ return x.toFixed(압력소수자리); }
+function fmtMass(x){ return fmtSig(x, 질량유효숫자); }
+</script>
+
+<style>
+/* ── 공통 ─────────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+:root{
+  --ink:#111; --line:#7a8496; --deep:#46536b; --soft:#eef1f5; --bg:#fff;
+  --warm:#b3541e; --mute:#555;
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
+  font-size:14px; line-height:1.6; color:var(--ink); background:var(--bg);
+  margin:0 auto; padding:18px 16px 40px; max-width:1120px;
+}
+h1{font-size:20px; margin:0 0 4px; letter-spacing:-.02em}
+h2{font-size:15px; margin:22px 0 8px; padding:5px 10px; background:var(--soft);
+   border-left:4px solid var(--deep)}
+h3{font-size:14px; margin:14px 0 6px}
+p{margin:0 0 6px}
+small{font-size:12px; color:var(--mute)}
+button{font:inherit; cursor:pointer; border:1px solid var(--line); background:#fff;
+  border-radius:5px; padding:6px 12px; color:var(--ink)}
+button:hover{background:#f1f4f8}
+button:active{background:#e4e9f0}
+button.main{background:var(--deep); color:#fff; border-color:#2f3950; font-weight:600}
+button.main:hover{background:#3a465c}
+button.tiny{padding:2px 8px; font-size:12px; border-radius:4px}
+input[type="text"]{font:inherit; border:1px solid var(--line); border-radius:4px; padding:4px 6px}
+
+/* ── 머리글 ───────────────────────────────────────────────────────── */
+.head{border:2px solid var(--deep); padding:12px 14px; margin-bottom:14px}
+.head .meta{display:flex; flex-wrap:wrap; gap:4px 18px; font-size:12.5px; color:#333; margin-top:4px}
+.std{font-size:12.5px; background:#f7f8fa; border:1px dashed var(--line);
+     padding:7px 10px; margin-top:8px}
+.who{display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; margin-top:10px;
+     padding-top:9px; border-top:1px solid #d6dbe4; font-size:13px}
+.who input{width:64px; text-align:center}
+.sample{margin-left:auto; border:2px solid var(--deep); padding:5px 14px; text-align:center; background:#f4f6f9}
+.sample .cap{display:block; font-size:11px; color:var(--mute); letter-spacing:.02em}
+.sample .code{display:block; font-size:22px; font-weight:700; letter-spacing:.10em; font-variant-numeric:tabular-nums}
+/* 사양서 §5 — 새로고침 경고 */
+.refresh-warn{margin-top:10px; border:2px solid var(--warm); background:#fdf3ec;
+  color:#7d3a13; font-size:13px; font-weight:600; padding:7px 11px}
+
+/* ── 본체 배치 ────────────────────────────────────────────────────── */
+.board{display:grid; grid-template-columns:300px 1fr; gap:16px; align-items:start}
+@media (max-width:780px){ .board{grid-template-columns:1fr} }
+.card{border:1px solid var(--line); padding:12px}
+
+/* 계기판 */
+.gauges{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px}
+@media (max-width:560px){ .gauges{grid-template-columns:repeat(2,1fr)} }
+.g{border:1px solid var(--line); padding:7px 9px; background:#fbfcfd}
+.g .lb{font-size:11.5px; color:var(--mute); display:block; line-height:1.3}
+.g .vl{font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.01em}
+.g .un{font-size:12px; font-weight:400; color:#333; margin-left:2px}
+.g.p{background:#f3f6fb; border-color:var(--deep); border-width:2px}
+.bar{display:block; height:7px; background:#e3e8ef; border:1px solid #c8d0da; margin-top:6px; position:relative}
+.bar i{position:absolute; left:0; top:0; bottom:0; background:var(--deep); display:block}
+.hint{font-size:12px; color:var(--warm); border-left:3px solid var(--warm);
+      padding:3px 8px; margin:8px 0 0; background:#fdf7f3; display:none}
+.hint.on{display:block}
+/* 사양서 §6 — 현재 고정된 값들 */
+.fixed{font-size:12.5px; background:#f4f6f9; border:1px solid #d6dbe4; padding:5px 10px; margin-top:9px}
+.fixed b{color:var(--deep)}
+
+/* 조작부 */
+.ctrl{border-top:1px solid #d6dbe4; padding-top:10px; margin-top:10px}
+.row{display:grid; grid-template-columns:96px 1fr auto; gap:8px; align-items:center; margin-bottom:9px}
+.row .nm{font-weight:600; font-size:13px}
+.row .rd{font-variant-numeric:tabular-nums; font-size:14px; min-width:104px; text-align:right}
+.row input[type="range"]{width:100%; margin:0}
+.stepper{display:flex; gap:4px; align-items:center; justify-content:flex-end}
+.acts{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; align-items:center}
+.note{font-size:12px; color:#444; background:#fbfbfc; border-left:3px solid #9aa3b2;
+      padding:5px 9px; margin:9px 0}
+.note.warn{border-left-color:var(--warm)}
+
+/* 그림 */
+.stage{text-align:center}
+.stage svg{width:100%; height:auto; max-width:280px}
+.stage .cap{font-size:11.5px; color:var(--mute); margin-top:4px}
+
+/* 사양서 §6 — 함께 띄우는 참고 자료 */
+.refcard{display:grid; grid-template-columns:230px 1fr; gap:14px; align-items:start;
+  border:1px solid var(--line); border-top:3px solid var(--deep); padding:12px}
+@media (max-width:780px){ .refcard{grid-template-columns:1fr} }
+.constbox{border:1px solid var(--line); background:#f4f6f9; padding:9px 11px; text-align:center}
+.constbox .cap{display:block; font-size:11.5px; color:var(--mute)}
+.constbox .val{display:block; font-size:19px; font-weight:700; margin:2px 0 1px}
+.constbox .un{display:block; font-size:12.5px; color:#333}
+
+/* 표 */
+table{width:100%; border-collapse:collapse; font-size:13px; margin:6px 0 4px}
+th,td{border:1px solid var(--line); padding:4px 6px; text-align:center; vertical-align:middle}
+th{background:var(--soft); font-weight:600; font-size:12.5px}
+td.l,th.l{text-align:left}
+td.num{font-variant-numeric:tabular-nums}
+tbody tr:nth-child(even) td{background:#fafbfc}
+.empty{color:var(--mute); font-size:12.5px; padding:14px 0; text-align:center;
+       border:1px dashed var(--line)}
+.tblwrap{overflow-x:auto}
+
+/* 접이식 */
+details{border:1px solid var(--line); padding:0; margin-top:16px}
+details>summary{cursor:pointer; padding:8px 12px; background:var(--soft); font-weight:600; font-size:13.5px}
+details>summary::marker{color:var(--deep)}
+details .in{padding:12px}
+details.teacher{border:2px solid var(--deep); margin-top:26px}
+details.teacher>summary{background:var(--deep); color:#fff}
+.answer{border:1px solid var(--line); background:#f7f8fa; padding:10px 12px; margin:8px 0; display:none}
+.answer.on{display:block}
+.answer .big{font-size:17px; font-weight:700}
+.foot{margin-top:22px; padding-top:8px; border-top:1px solid #9aa3b2; font-size:11.5px; color:var(--mute)}
+.tag{display:inline-block; border:1px solid var(--line); border-radius:3px; padding:0 5px;
+     font-size:11px; color:#333; background:#f4f6f9; margin-right:3px}
+.msg{font-size:12.5px; color:#1c5e3a; margin-left:6px}
+.msg.bad{color:var(--warm)}
+#in-code{width:120px; text-align:center; letter-spacing:.10em; font-weight:700; text-transform:uppercase}
+
+/* ── 인쇄 ─────────────────────────────────────────────────────────── */
+@media print{
+  @page{size:A4; margin:14mm 12mm}
+  body{max-width:none; padding:0; font-size:10.5pt}
+  .noprint{display:none !important}
+  .board{grid-template-columns:230px 1fr; gap:10px}
+  .card,.head,details,.refcard{border-color:#333}
+  details>summary{background:#eee !important; color:#000 !important}
+  .g .vl{font-size:16pt}
+  table{font-size:9.5pt}
+  .pagebreak{page-break-before:always}
+}
+</style>
+<style>
+  /* 1차시 「해보기」 모드 — 평가 전용 UI는 감춘다 */
+  .who, .refresh-warn { display:none !important; }
+  details.teacher { display:none !important; }
+  /* 1차시 「해보기」는 P·T·n·V 만 쓴다 — 나머지 칸은 감춘다. */
+  #card-mass, #tbl-candidates, #cand-caption, #cand-note { display:none !important; }
+  #tbl-rec th.wcol, #tbl-rec td.wcol { display:none !important; }
+  /* PV/nT 가 일정하다는 것을 스스로 찾는 시간이므로 R 을 미리 띄우지 않는다. */
+  #sec-ref, .refcard { display:none !important; }
+  .lessonbox { border:1.5px solid #2b6; border-radius:8px; background:#f4faf6;
+               padding:12px 16px; margin:16px 0 10px; }
+  .lessonbox h3 { margin:0 0 6px; font-size:16px; color:#1a6b3c; }
+  .lessonbox ol { margin:4px 0 0; padding-left:20px; }
+  .lessonbox li { margin-bottom:3px; }
+  .lessonbox .eq { font-weight:700; font-size:17px; }
+
+  /* 계산기 — 학생이 다른 앱을 켜지 않고 PV/nT 를 바로 계산하도록 화면 안에 둔다. */
+  .calc { display:grid; grid-template-columns:1fr 250px; gap:14px; align-items:start;
+          border:1px solid var(--line); border-top:3px solid var(--deep); padding:12px; }
+  @media (max-width:780px){ .calc{ grid-template-columns:1fr } }
+  .calc-expr { width:100%; font-size:17px; font-variant-numeric:tabular-nums;
+               padding:8px 10px; text-align:right; }
+  .calc-out { display:flex; align-items:baseline; justify-content:flex-end; gap:8px;
+              margin-top:6px; padding:7px 10px; background:#f4f6f9; border:1px solid #d6dbe4;
+              min-height:42px; }
+  .calc-out .lb { font-size:13px; color:var(--mute); }
+  .calc-out .vl { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums;
+                  letter-spacing:-.01em; word-break:break-all; }
+  .calc-out .vl.err { font-size:13px; font-weight:600; color:var(--warm); }
+  .calc-pad { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:9px; }
+  .calc-pad button { padding:9px 0; font-size:16px; border-radius:5px; }
+  .calc-pad button.op { background:#f4f6f9; }
+  .calc-pad button.fn { background:#f4f6f9; font-size:14px; color:var(--deep); font-weight:600; }
+  .calc-tip { font-size:12px; color:#444; background:#fbfbfc; border-left:3px solid #9aa3b2;
+              padding:5px 9px; margin:10px 0 0; }
+  .calc-side h3 { margin:0 0 6px; }
+  .calc-hist { list-style:none; margin:0; padding:0; border:1px solid #d6dbe4;
+               max-height:212px; overflow:auto; }
+  .calc-hist li { padding:5px 9px; font-size:12.5px; font-variant-numeric:tabular-nums;
+                  border-bottom:1px solid #e6eaf0; cursor:pointer; }
+  .calc-hist li:last-child { border-bottom:0; }
+  .calc-hist li:hover { background:#f1f4f8; }
+  .calc-hist li b { display:block; font-size:15px; }
+  .calc-hist-empty { border:1px dashed var(--line); color:var(--mute); font-size:12.5px;
+                     padding:10px; text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>기체 시뮬레이션 — 압력·온도·양·부피의 관계 확인하기</h1>
+  <div class="meta">
+    <span><b>과목</b> 물질과 에너지 (진로선택)</span>
+    <span><b>영역</b> Ⅰ. 물질의 세 가지 상태</span>
+    <span><b>차시</b> Ⅰ-1 · 해보기 (평가 아님)</span>
+  </div>
+  <div class="std">
+    <b>성취기준 [12물에01-01]</b> 기체의 온도, 압력, 부피, 몰수 사이의 관계를 통합적으로 이해하고,
+    이상 기체 방정식을 근사적으로 활용하는 사례를 조사하여 화학의 유용함을 인식할 수 있다.
+    <span class="tag">원문(별책9)</span>
+  </div>
+  <div class="who">
+    <label>반 <input type="text" id="in-class" inputmode="numeric" maxlength="2" placeholder="2"></label>
+    <label>번호 <input type="text" id="in-number" inputmode="numeric" maxlength="2" placeholder="07"></label>
+    <small>이름은 적지 않는다. 제출물은 <b>반·번호로만</b> 식별한다.</small>
+    <span class="sample">
+      <span class="cap">배정된 시료 코드</span>
+      <span class="code" id="sample-code">—</span>
+    </span>
+  </div>
+  <div class="refresh-warn">
+    ⚠ 시료 코드를 개인 답안지 머리에 <b>옮겨 적기 전에는 창을 닫거나 새로고침하지 마세요.</b>
+    새로 뽑으면 시료가 바뀌어 앞서 모은 자료를 쓸 수 없습니다.
+  </div>
+  <div class="note warn" id="storage-warn" style="display:none">
+    이 브라우저에서는 기록이 저장되지 않는다. <b>새로고침하거나 창을 닫으면 측정 기록이 사라진다.</b>
+    수시로 CSV로 내려받을 것.
+  </div>
+</div>
+
+<div class="board">
+
+  <!-- 그림 -->
+  <div class="card stage">
+    <svg id="vessel" viewBox="0 0 260 344" role="img" aria-label="피스톤이 달린 실린더 속 기체 입자">
+      <defs>
+        <clipPath id="clip-gas"><rect id="clip-rect" x="54" y="60" width="152" height="244"></rect></clipPath>
+      </defs>
+      <!-- 눈금자 -->
+      <g stroke="#b9c1cc" stroke-width="1" font-size="8" fill="#8a93a0" text-anchor="end">
+        <line x1="44" y1="54" x2="44" y2="306"></line>
+        <g id="ticks"></g>
+      </g>
+      <!-- 기체 영역 -->
+      <rect id="gas" x="54" y="60" width="152" height="244" fill="#cfe3f7"></rect>
+      <g clip-path="url(#clip-gas)"><g id="particles"></g></g>
+      <!-- 실린더 벽(위가 열린 U자) -->
+      <path d="M50 40 L50 308 Q50 312 54 312 L206 312 Q210 312 210 308 L210 40"
+            fill="none" stroke="#46536b" stroke-width="5" stroke-linecap="round"></path>
+      <!-- 받침 -->
+      <rect x="66" y="314" width="128" height="7" rx="3" fill="#8a93a0"></rect>
+      <rect x="96" y="321" width="68" height="10" rx="3" fill="#6c7686"></rect>
+      <!-- 피스톤 -->
+      <g id="piston">
+        <rect id="rod" x="123" y="12" width="14" height="40" rx="3" fill="#6c7686"></rect>
+        <rect id="plate" x="52" y="52" width="156" height="13" rx="3" fill="#8a93a0"
+              stroke="#4d5768" stroke-width="1.5"></rect>
+      </g>
+      <!-- 가열/냉각 표시 -->
+      <g id="thermo">
+        <rect x="82" y="333" width="96" height="8" rx="4" fill="#d8dde5"></rect>
+        <rect id="thermo-fill" x="82" y="333" width="48" height="8" rx="4" fill="#c46a45"></rect>
+      </g>
+    </svg>
+    <div class="cap">피스톤을 올리고 내려 부피를 바꾼다. 아래쪽 띠는 가열·냉각 정도를 나타낸다.</div>
+    <label class="noprint" style="font-size:12px; display:inline-block; margin-top:6px">
+      <input type="checkbox" id="chk-anim"> 입자 움직임 멈추기
+    </label>
+  </div>
+
+  <!-- 계기 + 조작 -->
+  <div class="card">
+    <div class="gauges">
+      <div class="g p">
+        <span class="lb">압력 P <small>(결과)</small></span>
+        <span class="vl" id="out-p">—</span><span class="un">atm</span>
+        <span class="bar"><i id="bar-p" style="width:0%"></i></span>
+      </div>
+      <div class="g">
+        <span class="lb">부피 V</span>
+        <span class="vl" id="out-v">—</span><span class="un">L</span>
+      </div>
+      <div class="g">
+        <span class="lb">온도</span>
+        <span class="vl" id="out-t">—</span><span class="un">℃</span>
+      </div>
+      <div class="g">
+        <span class="lb">양 n</span>
+        <span class="vl" id="out-n">—</span><span class="un">mol</span>
+      </div>
+      <div class="g" id="card-mass">
+        <span class="lb">시료의 질량 w</span>
+        <span class="vl" id="out-w">—</span><span class="un">g</span>
+      </div>
+    </div>
+    <div class="hint" id="hint-high">압력이 높다. 실제 기체라면 이런 조건에서 이상 기체 방정식이 잘 맞지 않는다.</div>
+    <div class="hint" id="hint-low">압력이 낮다. 압력은 소수 셋째 자리까지만 읽히므로 이 조건에서는 읽기 오차가 커진다.</div>
+
+    <div class="fixed" id="fixed-now">—</div>
+
+    <div class="ctrl">
+      <div class="row">
+        <span class="nm">온도</span>
+        <input type="range" id="sl-t" min="-20" max="150" step="1" value="25" aria-label="온도">
+        <span class="stepper">
+          <button class="tiny noprint" data-step="t" data-d="-1" aria-label="온도 낮추기">−</button>
+          <span class="rd"><b id="rd-t">25</b> ℃</span>
+          <button class="tiny noprint" data-step="t" data-d="1" aria-label="온도 높이기">＋</button>
+        </span>
+      </div>
+      <div class="row">
+        <span class="nm">부피</span>
+        <input type="range" id="sl-v" min="100" max="2000" step="20" value="1000" aria-label="부피">
+        <span class="stepper">
+          <button class="tiny noprint" data-step="v" data-d="-1" aria-label="부피 줄이기">−</button>
+          <span class="rd"><b id="rd-v">1.00</b> L</span>
+          <button class="tiny noprint" data-step="v" data-d="1" aria-label="부피 늘리기">＋</button>
+        </span>
+      </div>
+      <div class="row">
+        <span class="nm">기체의 양</span>
+        <input type="range" id="sl-n" min="3" max="10" step="1" value="5" aria-label="기체의 양">
+        <span class="stepper">
+          <button class="tiny noprint" data-step="n" data-d="-1" aria-label="기체 양 줄이기">−</button>
+          <span class="rd">n = <b id="rd-n">—</b> mol</span>
+          <button class="tiny noprint" data-step="n" data-d="1" aria-label="기체 양 늘리기">＋</button>
+        </span>
+      </div>
+      <div class="note">
+        <b>한 번에 하나씩만</b> 바꾼다. 네 값(P·T·n·V)이 화면에 나오므로,
+        조건을 바꿀 때마다 <b>PV/nT</b>를 직접 계산해 학습지 표에 적는다.
+      </div>
+      <div class="acts noprint">
+        <button class="main" id="btn-rec">이 조건 기록</button>
+        <button id="btn-remeasure">다시 측정</button>
+        <button id="btn-reset">처음 조건으로</button>
+        <span class="msg" id="msg-act"></span>
+      </div>
+      <div class="note warn noprint">
+        같은 조건에서 <b>다시 측정</b>을 누르면 값이 조금 달라진다. 실제 측정과 같다.
+        무엇을 바꾸든 <b>모든 조작은 아래 기록에 남는다.</b>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 id="sec-ref">참고 — 계산에 쓸 자료</h2>
+<div class="refcard">
+  <div class="constbox">
+    <span class="cap">기체 상수</span>
+    <span class="val">R = 0.082</span>
+    <span class="un">L·atm/(mol·K)</span>
+  </div>
+  <div>
+    <p id="cand-caption" style="font-size:12.5px; margin-bottom:2px"><b>이 화면의 기체는 아래 다섯 가지 가운데 하나다.</b>
+      오늘은 종류를 맞힐 필요가 없다.</p>
+    <div class="tblwrap">
+      <table id="tbl-candidates">
+        <thead><tr id="cand-head"><th class="l" style="width:120px">시료</th></tr></thead>
+        <tbody><tr id="cand-mass"><th class="l">몰질량 (g/mol)</th></tr></tbody>
+      </table>
+    </div>
+    <p><small>표시되는 값에는 실제 측정과 마찬가지로 작은 흔들림과 읽기 자릿수의 한계가 있다.
+      <span id="cand-note">값이 후보와 딱 떨어지지 않는 것은 정상이며,
+      <b>가장 가까운 후보</b>가 무엇인지 근거를 들어 판단한다.</span></small></p>
+  </div>
+</div>
+
+<div class="lessonbox">
+  <h3>해보기 — 기체의 압력·온도·양(mol)·부피의 관계 확인하기</h3>
+  <ol>
+    <li><b>한 번에 하나씩만</b> 바꾸어 조건 4개를 만들고, 그때마다 <b>이 조건 기록</b>을 누른다.</li>
+    <li>기록표의 값을 학습지 표에 옮겨 적는다. <b>온도는 절대 온도(K = ℃ + 273)</b>로 고쳐 적는다.</li>
+    <li>조건마다 <span class="eq">PV / nT</span> 를 계산한다. <b>부피는 L로</b> 고쳐서 넣는다(1000 mL = 1 L).</li>
+    <li>네 값을 비교하고, 무엇을 뜻하는지 이야기해 본다.</li>
+  </ol>
+  <p style="margin:8px 0 0"><small>표시되는 값에는 실제 측정과 마찬가지로 작은 흔들림과 읽기 자릿수의 한계가 있다.
+    네 값이 소수점 아래에서 조금씩 다른 것은 정상이다.</small></p>
+</div>
+
+<h2>측정 기록표</h2>
+<div class="tblwrap">
+  <table id="tbl-rec">
+    <thead>
+      <tr>
+        <th style="width:46px">번호</th>
+        <th style="width:78px">시각</th>
+        <th>압력 P (atm)</th>
+        <th>부피 V (L)</th>
+        <th>온도 (℃)</th>
+        <th>양 n (mol)</th>
+        <th class="wcol">질량 w (g)</th>
+        <th class="l">직전 기록에서 바뀐 것</th>
+        <th class="noprint" style="width:52px">삭제</th>
+      </tr>
+    </thead>
+    <tbody id="tb-rec"></tbody>
+  </table>
+</div>
+<div class="empty" id="rec-empty">아직 기록이 없다. 조건을 정한 뒤 <b>이 조건 기록</b>을 누른다.</div>
+<div class="acts noprint">
+  <button id="btn-csv">측정 기록 CSV 내려받기</button>
+  <button id="btn-copy">측정 기록 복사</button>
+  <button id="btn-clear-rec">측정 기록 전체 지우기</button>
+  <span class="msg" id="msg-rec"></span>
+</div>
+
+<h2 class="noprint">계산기</h2>
+<div class="calc noprint">
+  <div>
+    <input id="calc-expr" class="calc-expr" type="text" spellcheck="false" autocomplete="off"
+           placeholder="예)  0.367*2.70/(0.0406*298)" aria-label="계산식">
+    <div class="calc-out"><span class="lb">＝</span><span class="vl" id="calc-val">—</span></div>
+    <div class="calc-pad">
+      <button type="button" data-k="7">7</button>
+      <button type="button" data-k="8">8</button>
+      <button type="button" data-k="9">9</button>
+      <button type="button" class="op" data-k="/">÷</button>
+      <button type="button" class="fn" data-k="clear">C</button>
+
+      <button type="button" data-k="4">4</button>
+      <button type="button" data-k="5">5</button>
+      <button type="button" data-k="6">6</button>
+      <button type="button" class="op" data-k="*">×</button>
+      <button type="button" class="fn" data-k="back">←</button>
+
+      <button type="button" data-k="1">1</button>
+      <button type="button" data-k="2">2</button>
+      <button type="button" data-k="3">3</button>
+      <button type="button" class="op" data-k="-">−</button>
+      <button type="button" class="op" data-k="(">(</button>
+
+      <button type="button" data-k="0">0</button>
+      <button type="button" data-k=".">.</button>
+      <button type="button" class="main" data-k="eq">=</button>
+      <button type="button" class="op" data-k="+">＋</button>
+      <button type="button" class="op" data-k=")">)</button>
+    </div>
+    <p class="calc-tip">키보드로 그대로 쳐도 된다 — <b>Enter</b> 계산, <b>Esc</b> 지우기.
+      온도를 절대 온도로 바꿀 때는 <b>25+273</b> 처럼 식에 그대로 적으면 된다.
+      부피는 <b>L</b> 로 넣는다(1000 mL = 1 L).</p>
+  </div>
+  <div class="calc-side">
+    <h3>계산 기록</h3>
+    <ul class="calc-hist" id="calc-hist" hidden></ul>
+    <div class="calc-hist-empty" id="calc-hist-empty">아직 계산한 것이 없다.<br>조건 4개의 값을 여기에 쌓아 두고 비교한다.</div>
+    <div class="acts"><button type="button" class="tiny" id="btn-calc-clear">계산 기록 지우기</button></div>
+  </div>
+</div>
+
+<details id="det-log">
+  <summary>조작 로그 — 무엇을 언제 바꿨는지 (<span id="log-count">0</span>건)</summary>
+  <div class="in">
+    <p><small>슬라이더를 움직이거나 버튼을 누른 내용이 모두 순서대로 남는다. 지울 수 없다.</small></p>
+    <div class="tblwrap">
+      <table>
+        <thead>
+          <tr><th style="width:52px">순번</th><th style="width:78px">시각</th>
+              <th style="width:120px">조작한 것</th><th class="l">내용</th></tr>
+        </thead>
+        <tbody id="tb-log"></tbody>
+      </table>
+    </div>
+    <div class="acts noprint">
+      <button id="btn-log-csv">조작 로그 CSV 내려받기</button>
+      <span class="msg" id="msg-log"></span>
+    </div>
+  </div>
+</details>
+
+
+<div class="foot">
+  물질과 에너지 · Ⅰ. 물질의 세 가지 상태 · 1차시 해보기 ｜
+  성취기준·적용 시 고려 사항은 교육부 고시 제2022-33호 [별책 9] <b>원문</b> 인용.
+  외부 자료를 전혀 불러오지 않는다 — 인터넷 없이 열린다.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     [3] 화면 — 위 결정론 코어를 불러 쓰기만 한다.
+     ══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+'use strict';
+
+var STORE_NAME = 'mulje-gas-sim-v2';
+
+/* ── 저장소 (file:// 에서 막히는 브라우저 대비) ────────────────────── */
+var memStore = {};
+var store = (function(){
+  try{
+    var probe = '__probe__';
+    window.localStorage.setItem(probe,'1');
+    window.localStorage.removeItem(probe);
+    return { ok:true,
+      get:function(k){ return window.localStorage.getItem(k); },
+      set:function(k,v){ try{ window.localStorage.setItem(k,v); }catch(e){} } };
+  }catch(e){
+    return { ok:false,
+      get:function(k){ return Object.prototype.hasOwnProperty.call(memStore,k)?memStore[k]:null; },
+      set:function(k,v){ memStore[k]=String(v); } };
+  }
+})();
+
+/* ── 상태 ─────────────────────────────────────────────────────────────
+   저장하는 것은 「시료 코드 + 학생이 한 일」뿐이다. 시료·처음 조건·흔들림은
+   코드에서 언제든 다시 계산되므로 저장할 필요가 없다(그것이 사양서 §5의 요구다). */
+var state = {
+  poolSig:'', code:'',
+  tempC:25, volumeMl:1000, amountStep:5,
+  readCount:{}, lastVar:'',
+  klass:'', number:'',
+  records:[], logs:[], nextRecord:1, nextLog:1
+};
+var setup = null;          /* setupFromCode(state.code) 의 결과 */
+var visualRnd = Math.random;   /* 입자 그림 전용 — 측정값에는 쓰지 않는다 */
+
+function $(id){ return document.getElementById(id); }
+function poolSignature(){
+  return 시료후보.map(function(s){ return s.화학식 + ':' + s.몰질량; }).join('|');
+}
+function nowStamp(){
+  var d = new Date(), p = function(x){ return (x<10?'0':'')+x; };
+  return p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+}
+function sample(){ return 시료후보[setup.sampleIndex]; }
+
+/* ── 읽기 회차 — 「다시 측정」을 누른 만큼만 올라간다 ────────────────
+   조건마다 따로 센다. 조건을 바꿨다 되돌아오면 그 조건에서 마지막에 본 값이 그대로 다시 보인다. */
+function readKey(){ return state.tempC + '|' + state.volumeMl + '|' + state.amountStep; }
+function readIndex(){
+  var k = readKey();
+  return Object.prototype.hasOwnProperty.call(state.readCount, k) ? state.readCount[k] : 0;
+}
+function bumpRead(){ state.readCount[readKey()] = readIndex() + 1; }
+
+function nowPressure(){ return shownPressure(setup, state.tempC, state.volumeMl, state.amountStep, readIndex()); }
+function nowMass(){ return shownMass(setup, state.tempC, state.volumeMl, state.amountStep, readIndex()); }
+
+/* ── 시료 배정 ────────────────────────────────────────────────────── */
+function applyCode(raw, keepRecords){
+  var s = setupFromCode(raw);
+  if(!s) return false;
+  setup = s;
+  state.code = s.code;
+  state.poolSig = poolSignature();
+  state.tempC = s.initTempC; state.volumeMl = s.initVolumeMl; state.amountStep = s.initAmountStep;
+  state.readCount = {}; state.lastVar = '';
+  if(!keepRecords){ state.records = []; state.logs = []; state.nextRecord = 1; state.nextLog = 1; }
+  visualRnd = rngFrom(mix32(s.seed, 0x56495355));
+  lastTop = null; lastH = null; particles = [];
+  var box = $('particles'); if(box) box.innerHTML = '';
+  syncSliderRanges();
+  return true;
+}
+function assignRandom(sampleIndex){
+  var idx = (typeof sampleIndex === 'number') ? sampleIndex
+          : Math.floor(Math.random() * 시료후보.length);
+  applyCode(newCode(idx), false);
+}
+function syncSliderRanges(){
+  var sl = $('sl-v');
+  sl.min = setup.volMin; sl.max = setup.volMax; sl.step = VOL_STEP;
+  $('sl-t').min = TEMP_MIN; $('sl-t').max = TEMP_MAX;
+  $('sl-n').min = STEP_MIN; $('sl-n').max = STEP_MAX;
+  drawTicks();
+}
+
+/* ── 로그 ─────────────────────────────────────────────────────────── */
+function addLog(kind, text){
+  state.logs.push({ no:state.nextLog++, time:nowStamp(), kind:kind, text:text });
+  renderLog(); save();
+}
+var pending = {}, timers = {};
+function scheduleLog(key, label, before, unit, fmt){
+  if(!(key in pending)) pending[key] = before;
+  if(timers[key]) clearTimeout(timers[key]);
+  timers[key] = setTimeout(function(){ flushLog(key, label, unit, fmt); }, 650);
+}
+function flushLog(key, label, unit, fmt){
+  if(timers[key]){ clearTimeout(timers[key]); timers[key] = null; }
+  if(!(key in pending)) return;
+  var before = pending[key];
+  delete pending[key];
+  var after = key==='온도' ? state.tempC : (key==='부피' ? state.volumeMl : state.amountStep);
+  if(before === after) return;
+  var f = fmt || function(v){ return v; };
+  addLog(label, f(before) + unit + ' → ' + f(after) + unit);
+}
+function flushAll(){
+  flushLog('온도','온도',' ℃');
+  flushLog('부피','부피',' L', fmtVol);
+  flushLog('기체의 양','기체의 양','단계');
+}
+
+/* ── 저장/복원 ────────────────────────────────────────────────────── */
+var SAVE_KEYS = ['poolSig','code','tempC','volumeMl','amountStep','readCount','lastVar',
+                 'klass','number','records','logs','nextRecord','nextLog'];
+function save(){
+  try{
+    var o = {};
+    for(var i=0;i<SAVE_KEYS.length;i++) o[SAVE_KEYS[i]] = state[SAVE_KEYS[i]];
+    store.set(STORE_NAME, JSON.stringify(o));
+  }catch(e){}
+}
+function load(){
+  var raw = store.get(STORE_NAME), obj = null;
+  if(raw){ try{ obj = JSON.parse(raw); }catch(e){ obj = null; } }
+  if(obj && obj.poolSig === poolSignature() && normalizeCode(obj.code)){
+    for(var i=0;i<SAVE_KEYS.length;i++){
+      var k = SAVE_KEYS[i];
+      if(Object.prototype.hasOwnProperty.call(obj,k)) state[k] = obj[k];
+    }
+    if(applyCode(obj.code, true)){
+      /* 학생이 마지막에 보던 조건을 그대로 되살린다 */
+      state.tempC = obj.tempC; state.volumeMl = obj.volumeMl; state.amountStep = obj.amountStep;
+      state.readCount = obj.readCount || {}; state.lastVar = obj.lastVar || '';
+      clampToRanges();
+      return true;
+    }
+  }
+  assignRandom();
+  return false;
+}
+function clampToRanges(){
+  state.tempC = Math.max(TEMP_MIN, Math.min(TEMP_MAX, Math.round(state.tempC)));
+  state.volumeMl = Math.max(setup.volMin, Math.min(setup.volMax,
+    Math.round(state.volumeMl / VOL_STEP) * VOL_STEP));
+  state.amountStep = Math.max(STEP_MIN, Math.min(STEP_MAX, Math.round(state.amountStep)));
+}
+
+/* ── 그리기 ───────────────────────────────────────────────────────── */
+var GAS_BOTTOM = 306, H_MIN = 26, H_MAX = 250, PLATE_H = 13;
+function volFrac(v){
+  var span = setup.volMax - setup.volMin;
+  return span > 0 ? (v - setup.volMin) / span : 0.5;
+}
+function gasHeight(){ return H_MIN + volFrac(state.volumeMl) * (H_MAX - H_MIN); }
+function gasTop(){ return GAS_BOTTOM - gasHeight(); }
+
+function rampColor(stops, t){
+  t = Math.max(0, Math.min(1, t));
+  var span = 1 / (stops.length - 1);
+  var i = Math.min(stops.length - 2, Math.floor(t / span));
+  var u = (t - i*span) / span, a = stops[i], b = stops[i+1];
+  return 'rgb(' + Math.round(a[0]+(b[0]-a[0])*u) + ',' +
+                  Math.round(a[1]+(b[1]-a[1])*u) + ',' +
+                  Math.round(a[2]+(b[2]-a[2])*u) + ')';
+}
+var GAS_RAMP    = [[176,210,244],[224,231,222],[248,206,150],[246,150,110]];
+var THERMO_RAMP = [[ 74,124,190],[124,160,180],[198,142, 62],[196, 74, 50]];
+function tempFrac(){ return (state.tempC - TEMP_MIN) / (TEMP_MAX - TEMP_MIN); }
+
+/* 부피 범위가 시료마다 다르므로 눈금도 그때그때 고른다 */
+function niceMarks(lo, hi){
+  var cands = [50,100,200,250,500,1000,2000,2500], want = (hi - lo) / 4, step = cands[cands.length-1];
+  for(var i=0;i<cands.length;i++){ if(cands[i] >= want){ step = cands[i]; break; } }
+  var out = [], v = Math.ceil(lo/step)*step;
+  while(v <= hi + 0.5 && out.length < 12){ out.push(v); v += step; }
+  return out;
+}
+function drawTicks(){
+  var g = $('ticks'), out = '', marks = niceMarks(setup.volMin, setup.volMax);
+  for(var i=0;i<marks.length;i++){
+    var y = GAS_BOTTOM - (H_MIN + volFrac(marks[i]) * (H_MAX - H_MIN));
+    /* 눈금도 L 로 적는다 — 계기판·기록표와 단위가 달라지면 학생이 헷갈린다 */
+    out += '<line x1="38" y1="'+y.toFixed(1)+'" x2="44" y2="'+y.toFixed(1)+'"></line>'
+        +  '<text x="35" y="'+(y+3).toFixed(1)+'">'+fmtVol(marks[i])+'</text>';
+  }
+  g.innerHTML = out;
+}
+
+var particles = [];
+function syncParticles(){
+  /* 입자 밀도 (2026-08-13) — ×3(9~30개)은 「압력 = 충돌 빈도」가 느껴지지 않아 ×10(30~100개)으로 올렸다.
+     PhET 대비 유일한 약점이 밀도였다. 기체 칸이 가장 납작할 때(높이 26px)도 뭉개지지 않도록 반지름은 3.2 → 2.6.
+     ⚠ 이 수는 「기체의 양」 슬라이더 단계에 비례할 뿐 몰수의 실제 값과는 무관하다(그림 전용). */
+  var want = state.amountStep * 10;
+  if(particles.length === want) return;
+  var box = $('particles'), html = '', i;
+  for(i=0;i<want;i++) html += '<circle r="2.6" fill="#33507a" fill-opacity="0.8"></circle>';
+  box.innerHTML = html;
+  var kids = box.children, next = [], top = gasTop(), h = gasHeight();
+  for(i=0;i<want;i++){
+    var old = particles[i];
+    next.push({
+      x:  old ? old.x  : 60 + visualRnd()*140,
+      y:  old ? old.y  : top + visualRnd()*h,
+      dx: old ? old.dx : visualRnd()*2-1,
+      dy: old ? old.dy : visualRnd()*2-1,
+      el: kids[i]
+    });
+  }
+  particles = next;
+  paintParticles();
+}
+function paintParticles(){
+  for(var i=0;i<particles.length;i++){
+    particles[i].el.setAttribute('cx', particles[i].x.toFixed(1));
+    particles[i].el.setAttribute('cy', particles[i].y.toFixed(1));
+  }
+}
+function speedFactor(){ return Math.sqrt((state.tempC + TEMP_OFFSET) / 300); }
+var lastFrame = 0, paused = false;
+function frame(ts){
+  requestAnimationFrame(frame);
+  if(!lastFrame) lastFrame = ts;
+  var dt = Math.min((ts - lastFrame)/1000, 0.05);
+  lastFrame = ts;
+  if(paused) return;
+  var top = gasTop() + 3.5, bottom = GAS_BOTTOM - 3.5;
+  var left = 57.5, right = 202.5;
+  var sp = 48 * speedFactor();
+  for(var i=0;i<particles.length;i++){
+    var p = particles[i];
+    var len = Math.sqrt(p.dx*p.dx + p.dy*p.dy) || 1;
+    p.x += p.dx/len * sp * dt;
+    p.y += p.dy/len * sp * dt;
+    if(p.x < left){ p.x = left; p.dx = Math.abs(p.dx); }
+    if(p.x > right){ p.x = right; p.dx = -Math.abs(p.dx); }
+    if(p.y < top){ p.y = top; p.dy = Math.abs(p.dy); }
+    if(p.y > bottom){ p.y = bottom; p.dy = -Math.abs(p.dy); }
+    p.el.setAttribute('cx', p.x.toFixed(1));
+    p.el.setAttribute('cy', p.y.toFixed(1));
+  }
+}
+
+var lastTop = null, lastH = null;
+function renderVessel(){
+  var top = gasTop(), h = gasHeight();
+  if(lastTop !== null && lastH > 0 && (Math.abs(top - lastTop) > 0.01)){
+    for(var i=0;i<particles.length;i++){
+      particles[i].y = top + (particles[i].y - lastTop) * (h / lastH);
+    }
+  }
+  lastTop = top; lastH = h;
+  $('gas').setAttribute('y', top.toFixed(1));
+  $('gas').setAttribute('height', h.toFixed(1));
+  $('gas').setAttribute('fill', rampColor(GAS_RAMP, tempFrac()));
+  $('clip-rect').setAttribute('y', top.toFixed(1));
+  $('clip-rect').setAttribute('height', h.toFixed(1));
+  $('plate').setAttribute('y', (top - PLATE_H).toFixed(1));
+  $('rod').setAttribute('y', (top - PLATE_H - 40).toFixed(1));
+  $('thermo-fill').setAttribute('width', Math.max(4, 96 * tempFrac()).toFixed(1));
+  $('thermo-fill').setAttribute('fill', rampColor(THERMO_RAMP, tempFrac()));
+  syncParticles();
+  paintParticles();
+}
+
+/* 사양서 §6 — 지금 고정되어 있는 값을 계속 띄운다 */
+function renderFixed(){
+  var parts = [];
+  if(state.lastVar !== '온도')      parts.push('온도 ' + state.tempC + ' ℃');
+  if(state.lastVar !== '부피')      parts.push('부피 ' + fmtVol(state.volumeMl) + ' L');
+  if(state.lastVar !== '기체의 양') parts.push('기체의 양 ' + state.amountStep + '단계');
+  $('fixed-now').innerHTML = '<b>지금 고정된 값</b> — ' + parts.join(' &nbsp;·&nbsp; ')
+    + (state.lastVar ? ' <small>(마지막으로 바꾼 것: ' + state.lastVar + ')</small>'
+                     : ' <small>(아직 아무것도 바꾸지 않았다)</small>');
+}
+
+function renderReadout(){
+  var p = nowPressure();
+  $('out-p').textContent = fmtPressure(p);
+  $('out-v').textContent = fmtVol(state.volumeMl);
+  $('out-t').textContent = String(state.tempC);
+  $('out-w').textContent = fmtMass(nowMass());
+  $('out-n').textContent = molesOf(setup, state.amountStep).toFixed(4);   /* 1차시: 몰수를 드러낸다 */
+  var frac = (Math.log(p) - Math.log(0.05)) / (Math.log(5) - Math.log(0.05));
+  $('bar-p').style.width = (Math.max(0, Math.min(1, frac))*100).toFixed(1) + '%';
+  $('hint-high').className = 'hint' + (p >= 2.5 ? ' on' : '');
+  $('hint-low').className  = 'hint' + (p <  0.25 ? ' on' : '');
+  $('rd-t').textContent = String(state.tempC);
+  $('rd-v').textContent = fmtVol(state.volumeMl);
+  $('rd-n').textContent = molesOf(setup, state.amountStep).toFixed(4);   /* 1차시: 단계 → mol */
+  $('sl-t').value = state.tempC; $('sl-v').value = state.volumeMl; $('sl-n').value = state.amountStep;
+  $('sample-code').textContent = formatCode(state.code);
+  renderFixed();
+  renderAnswer();
+}
+
+function changedSinceLast(){
+  if(!state.records.length) return '—';
+  var last = state.records[state.records.length-1], out = [];
+  if(last.tempC !== state.tempC) out.push('온도');
+  if(last.volumeMl !== state.volumeMl) out.push('부피');
+  if(last.amountStep !== state.amountStep) out.push('기체의 양');
+  return out.length ? out.join(', ') : '없음 (같은 조건 재측정)';
+}
+
+function renderRecords(){
+  var tb = $('tb-rec'), out = '';
+  for(var i=0;i<state.records.length;i++){
+    var r = state.records[i];
+    out += '<tr><td class="num">'+r.no+'</td><td class="num">'+r.time+'</td>'
+        +  '<td class="num">'+r.p+'</td><td class="num">'+fmtVol(r.volumeMl)+'</td>'
+        +  '<td class="num">'+r.tempC+'</td>'
+        +  '<td class="num">'+molesOf(setup, r.amountStep).toFixed(4)+'</td>'
+        +  '<td class="num wcol">'+r.w+'</td>'
+        +  '<td class="l">'+r.changed+'</td>'
+        +  '<td class="noprint"><button class="tiny" data-del="'+r.no+'">삭제</button></td></tr>';
+  }
+  tb.innerHTML = out;
+  $('rec-empty').style.display = state.records.length ? 'none' : 'block';
+  $('tbl-rec').style.display = state.records.length ? '' : 'none';
+}
+
+function renderLog(){
+  var tb = $('tb-log'), out = '';
+  for(var i=0;i<state.logs.length;i++){
+    var l = state.logs[i];
+    out += '<tr><td class="num">'+l.no+'</td><td class="num">'+l.time+'</td>'
+        +  '<td>'+l.kind+'</td><td class="l">'+l.text+'</td></tr>';
+  }
+  tb.innerHTML = out || '<tr><td colspan="4" style="color:#666">아직 조작이 없다.</td></tr>';
+  $('log-count').textContent = String(state.logs.length);
+}
+
+function renderAnswer(){
+  if(!document.getElementById('ans-name')) return;  /* 공개본에는 교사용 블록이 없다 */
+  var s = sample();
+  $('ans-name').textContent = s.이름 + ' (' + s.화학식 + ')';
+  $('ans-code').textContent = formatCode(state.code) + '  (시드 ' + setup.seed + ')';
+  $('ans-mm').textContent = s.몰질량.toFixed(1) + ' g/mol';
+  $('ans-init').textContent = '온도 ' + setup.initTempC + ' ℃ · 부피 ' + fmtVol(setup.initVolumeMl)
+    + ' L · 기체의 양 ' + setup.initAmountStep + '단계 · 부피 조작 범위 '
+    + fmtVol(setup.volMin) + '~' + fmtVol(setup.volMax) + ' L';
+  $('ans-true').textContent = '몰수 ' + molesOf(setup, state.amountStep).toFixed(4) + ' mol · 압력 '
+    + truePressure(setup, state.tempC, state.volumeMl, state.amountStep).toFixed(4)
+    + ' atm · 질량 ' + trueMass(setup, state.amountStep).toFixed(4) + ' g';
+  $('ans-read').textContent = (readIndex() + 1) + '회차 (「다시 측정」을 ' + readIndex() + '번 눌렀다)';
+}
+
+/* 시료 표 */
+function renderTables(){
+  var head = '<th class="l" style="width:120px">시료</th>', mass = '<th class="l">몰질량 (g/mol)</th>';
+  var dec = '', opts = '', i;
+  for(i=0;i<시료후보.length;i++){
+    var s = 시료후보[i];
+    head += '<th>' + s.이름 + ' ' + s.화학식 + '</th>';
+    mass += '<td class="num">' + s.몰질량.toFixed(1) + '</td>';
+    dec  += '<tr><td class="l">'+s.이름+' ('+s.화학식+')</td>'
+         +  '<td class="num">'+s.몰질량.toFixed(1)+'</td>'
+         +  '<td class="l num"><b>'+middleLettersFor(i).join(' ')+'</b></td></tr>';
+    opts += '<option value="'+i+'">'+s.이름+' ('+s.화학식+', '+s.몰질량.toFixed(1)+')</option>';
+  }
+  $('cand-head').innerHTML = head;
+  $('cand-mass').innerHTML = mass;
+}
+
+function renderAll(){ renderReadout(); renderVessel(); renderRecords(); renderLog(); }
+
+/* ── CSV ──────────────────────────────────────────────────────────── */
+function cell(v){
+  var s = (v === null || v === undefined) ? '' : String(v);
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function idPart(){
+  var c = state.klass ? state.klass + '반' : '반미기재';
+  var n = state.number ? state.number + '번' : '번호미기재';
+  return c + '_' + n;
+}
+function recordCsv(){
+  /* 질량(g) 열은 1차시판에서 뺀다 — 화면·로그와 같은 「평가 보호」 취지. 양은 mol 로 준다. */
+  var rows = [['반','번호','시료코드','기록번호','시각','압력(atm)','부피(L)','온도(℃)','양(mol)','읽기회차','직전 기록에서 바뀐 것']];
+  for(var i=0;i<state.records.length;i++){
+    var r = state.records[i];
+    rows.push([state.klass, state.number, formatCode(state.code), r.no, r.time, r.p,
+               fmtVol(r.volumeMl), r.tempC, molesOf(setup, r.amountStep).toFixed(4), r.readNo, r.changed]);
+  }
+  return rows.map(function(r){ return r.map(cell).join(','); }).join('\r\n');
+}
+function logCsv(){
+  var rows = [['반','번호','시료코드','순번','시각','조작한 것','내용']];
+  for(var i=0;i<state.logs.length;i++){
+    var l = state.logs[i];
+    rows.push([state.klass, state.number, formatCode(state.code), l.no, l.time, l.kind, l.text]);
+  }
+  return rows.map(function(r){ return r.map(cell).join(','); }).join('\r\n');
+}
+function download(name, text){
+  try{
+    var blob = new Blob(['﻿' + text], { type:'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    return true;
+  }catch(e){ return false; }
+}
+function fallbackCopy(text){
+  try{
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.top = '-1000px';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    var done = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return done;
+  }catch(e){ return false; }
+}
+function copyText(text, done){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ done(true); },
+                                            function(){ done(fallbackCopy(text)); });
+  }else{ done(fallbackCopy(text)); }
+}
+function flash(id, text, bad){
+  var el = $(id);
+  el.textContent = text;
+  el.className = 'msg' + (bad ? ' bad' : '');
+  setTimeout(function(){ if(el.textContent === text) el.textContent = ''; }, 3500);
+}
+
+/* ── 조작 처리 ────────────────────────────────────────────────────── */
+function afterChange(varName){
+  state.lastVar = varName;
+  renderReadout(); renderVessel(); save();
+}
+function setTemp(v, log){
+  v = Math.max(TEMP_MIN, Math.min(TEMP_MAX, Math.round(v)));
+  if(v === state.tempC) return;
+  if(log) scheduleLog('온도','온도', state.tempC, ' ℃');
+  state.tempC = v; afterChange('온도');
+}
+function setVolume(v, log){
+  v = Math.round(v / VOL_STEP) * VOL_STEP;
+  v = Math.max(setup.volMin, Math.min(setup.volMax, v));
+  if(v === state.volumeMl) return;
+  if(log) scheduleLog('부피','부피', state.volumeMl, ' L', fmtVol);
+  state.volumeMl = v; afterChange('부피');
+}
+function setAmount(v, log){
+  v = Math.max(STEP_MIN, Math.min(STEP_MAX, Math.round(v)));
+  if(v === state.amountStep) return;
+  if(log) scheduleLog('기체의 양','기체의 양', state.amountStep, '단계');
+  state.amountStep = v; afterChange('기체의 양');
+}
+
+function doRecord(){
+  flushAll();
+  var rec = {
+    no: state.nextRecord++, time: nowStamp(),
+    p: fmtPressure(nowPressure()), volumeMl: state.volumeMl, tempC: state.tempC,
+    w: fmtMass(nowMass()), amountStep: state.amountStep, readNo: readIndex() + 1,
+    changed: changedSinceLast()
+  };
+  state.records.push(rec);
+  /* ⚠ 1차시판은 질량 w 를 학생에게 보이지 않는다(위 「평가 보호」 CSS와 같은 취지).
+     조작 로그와 CSV 는 학생이 열 수 있는 자리라 여기서도 질량을 빼야 화면과 어긋나지 않는다. */
+  addLog('기록', rec.no + '번 기록 — 압력 ' + rec.p + ' atm · 부피 ' + fmtVol(rec.volumeMl)
+    + ' L · 온도 ' + rec.tempC + ' ℃ · 양 ' + molesOf(setup, rec.amountStep).toFixed(4) + ' mol'
+    + (rec.changed === '—' ? '' : ' / 직전 기록에서 바뀐 것: ' + rec.changed));
+  renderRecords(); save();
+  flash('msg-act', rec.no + '번으로 기록되었다.');
+}
+
+/* ── 시작 ─────────────────────────────────────────────────────────── */
+function boot(){
+  var restored = load();
+  if(!store.ok) $('storage-warn').style.display = 'block';
+  renderTables();
+  $('in-class').value = state.klass || '';
+  $('in-number').value = state.number || '';
+  renderAll();
+  if(!restored) addLog('시작', '시료 ' + formatCode(state.code) + ' 배정 · 처음 조건에서 시작');
+  save();
+
+  /* 슬라이더 */
+  $('sl-t').addEventListener('input', function(){ setTemp(+this.value, true); });
+  $('sl-v').addEventListener('input', function(){ setVolume(+this.value, true); });
+  $('sl-n').addEventListener('input', function(){ setAmount(+this.value, true); });
+
+  /* ± 단추 */
+  var steppers = document.querySelectorAll('button[data-step]');
+  for(var i=0;i<steppers.length;i++){
+    steppers[i].addEventListener('click', function(){
+      var d = +this.getAttribute('data-d');
+      var k = this.getAttribute('data-step');
+      if(k === 't') setTemp(state.tempC + d, true);
+      else if(k === 'v') setVolume(state.volumeMl + d*VOL_STEP, true);
+      else setAmount(state.amountStep + d, true);
+    });
+  }
+
+  $('btn-rec').addEventListener('click', doRecord);
+  $('btn-remeasure').addEventListener('click', function(){
+    flushAll(); bumpRead(); renderReadout(); save();
+    addLog('다시 측정', '조건을 바꾸지 않고 같은 조건에서 다시 읽었다 (' + (readIndex()+1) + '회차)');
+    flash('msg-act', '같은 조건에서 다시 측정했다.');
+  });
+  $('btn-reset').addEventListener('click', function(){
+    flushAll();
+    var changed = (state.tempC !== setup.initTempC) || (state.volumeMl !== setup.initVolumeMl)
+                || (state.amountStep !== setup.initAmountStep);
+    state.tempC = setup.initTempC; state.volumeMl = setup.initVolumeMl;
+    state.amountStep = setup.initAmountStep;
+    state.lastVar = '';
+    renderReadout(); renderVessel(); save();
+    if(changed) addLog('처음 조건', '온도 ' + setup.initTempC + ' ℃ · 부피 ' + fmtVol(setup.initVolumeMl)
+      + ' L · 기체의 양 ' + setup.initAmountStep + '단계로 되돌렸다');
+    flash('msg-act', '처음 조건으로 되돌렸다.');
+  });
+
+  /* 기록 삭제 */
+  $('tb-rec').addEventListener('click', function(e){
+    var no = e.target && e.target.getAttribute && e.target.getAttribute('data-del');
+    if(!no) return;
+    no = +no;
+    for(var j=0;j<state.records.length;j++){
+      if(state.records[j].no === no){
+        var r = state.records[j];
+        state.records.splice(j,1);
+        addLog('기록 삭제', no + '번 기록을 지웠다 (압력 ' + r.p + ' atm · 부피 ' + fmtVol(r.volumeMl)
+          + ' L · 온도 ' + r.tempC + ' ℃ · 양 ' + molesOf(setup, r.amountStep).toFixed(4) + ' mol)');
+        break;
+      }
+    }
+    renderRecords(); save();
+  });
+
+  $('btn-clear-rec').addEventListener('click', function(){
+    if(!state.records.length){ flash('msg-rec','지울 기록이 없다.', true); return; }
+    if(!window.confirm('측정 기록을 전부 지운다. 되돌릴 수 없다. 계속할까?')) return;
+    var n = state.records.length;
+    state.records = [];
+    addLog('기록 전체 삭제', n + '건을 한꺼번에 지웠다');
+    renderRecords(); save();
+    flash('msg-rec', n + '건을 지웠다.');
+  });
+
+  $('btn-csv').addEventListener('click', function(){
+    if(!state.records.length){ flash('msg-rec','기록이 없다.', true); return; }
+    var done = download('측정기록_' + idPart() + '_' + state.code + '.csv', recordCsv());
+    flash('msg-rec', done ? '내려받았다.' : '내려받기가 막혔다. 「측정 기록 복사」를 쓸 것.', !done);
+  });
+  $('btn-copy').addEventListener('click', function(){
+    if(!state.records.length){ flash('msg-rec','기록이 없다.', true); return; }
+    copyText(recordCsv(), function(done){
+      flash('msg-rec', done ? '복사했다. 문서에 붙여 넣으면 된다.' : '복사가 막혔다. 표를 직접 옮겨 적을 것.', !done);
+    });
+  });
+  $('btn-log-csv').addEventListener('click', function(){
+    var done = download('조작로그_' + idPart() + '_' + state.code + '.csv', logCsv());
+    flash('msg-log', done ? '내려받았다.' : '내려받기가 막혔다.', !done);
+  });
+
+  /* 반·번호 */
+  $('in-class').addEventListener('input', function(){
+    state.klass = this.value.replace(/[^0-9]/g,'').slice(0,2); this.value = state.klass; save();
+  });
+  $('in-number').addEventListener('input', function(){
+    state.number = this.value.replace(/[^0-9]/g,'').slice(0,2); this.value = state.number; save();
+  });
+
+  /* 애니메이션 */
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){ paused = true; $('chk-anim').checked = true; }
+  $('chk-anim').addEventListener('change', function(){ paused = this.checked; });
+  requestAnimationFrame(frame);
+
+  /* 인쇄 시 조작 로그를 펼쳐 준다 */
+  var wasOpen = false;
+  window.addEventListener('beforeprint', function(){ wasOpen = $('det-log').open; $('det-log').open = true; });
+  window.addEventListener('afterprint', function(){ $('det-log').open = wasOpen; });
+}
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     [4] 계산기 — 시뮬레이션과 값을 주고받지 않는 독립 도구.
+         학생이 계산기 앱을 따로 켜지 않고 PV/nT 를 화면 안에서 계산하도록 둔다.
+         eval 을 쓰지 않고 작은 파서로 직접 읽는다.
+     ══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+'use strict';
+
+/* 식을 읽어 값을 낸다. 숫자와 + − × ÷ ( ) . 만 허용한다. */
+function evalExpr(src){
+  var s = String(src)
+            .replace(/[×xX＊]/g, '*')
+            .replace(/[÷／]/g, '/')
+            .replace(/[−–—ー]/g, '-')
+            .replace(/[＋]/g, '+')
+            .replace(/\s+/g, '');
+  if(!s) return null;
+  if(/[^0-9.+\-*/()]/.test(s)) throw new Error('숫자와 + − × ÷ ( ) 만 쓸 수 있다');
+
+  var i = 0;
+  function peek(){ return s.charAt(i); }
+
+  function expr(){
+    var v = term(), c;
+    for(;;){
+      c = peek();
+      if(c === '+'){ i++; v += term(); }
+      else if(c === '-'){ i++; v -= term(); }
+      else return v;
+    }
+  }
+  function term(){
+    var v = unary(), c;
+    for(;;){
+      c = peek();
+      if(c === '*'){ i++; v *= unary(); }
+      else if(c === '/'){ i++; v /= unary(); }
+      else return v;
+    }
+  }
+  function unary(){
+    var c = peek();
+    if(c === '+'){ i++; return unary(); }
+    if(c === '-'){ i++; return -unary(); }
+    return atom();
+  }
+  function atom(){
+    if(peek() === '('){
+      i++;
+      var v = expr();
+      if(peek() !== ')') throw new Error('괄호 ) 가 빠졌다');
+      i++;
+      return v;
+    }
+    var st = i;
+    while(/[0-9.]/.test(peek())) i++;
+    if(i === st) throw new Error('식을 다시 확인한다');
+    var num = Number(s.slice(st, i));
+    if(!isFinite(num)) throw new Error('숫자를 읽을 수 없다');
+    return num;
+  }
+
+  var out = expr();
+  if(i < s.length) throw new Error('식을 다시 확인한다');
+  if(!isFinite(out)) throw new Error('0 으로 나눌 수 없다');
+  return out;
+}
+
+/* 유효숫자 6자리까지 — 불필요한 0 은 남기지 않는다. */
+function fmtNum(x){
+  var a = Math.abs(x);
+  if(a !== 0 && (a < 1e-4 || a >= 1e7)) return x.toExponential(4);
+  return String(Number(x.toPrecision(6)));
+}
+
+function boot(){
+  var input   = document.getElementById('calc-expr');
+  var out     = document.getElementById('calc-val');
+  var pad     = document.querySelector('.calc-pad');
+  var histEl  = document.getElementById('calc-hist');
+  var emptyEl = document.getElementById('calc-hist-empty');
+  var btnClr  = document.getElementById('btn-calc-clear');
+  if(!input || !out || !pad) return;
+
+  var history = [];
+
+  function show(text, isErr){
+    out.textContent = text;
+    out.className = 'vl' + (isErr ? ' err' : '');
+  }
+
+  /* 치는 동안에는 조용히 미리 보여 주고, 아직 덜 쓴 식은 오류로 몰아세우지 않는다. */
+  function preview(){
+    if(!input.value.trim()){ show('—', false); return; }
+    try { show(fmtNum(evalExpr(input.value)), false); }
+    catch(e){ show('…', false); }
+  }
+
+  function renderHistory(){
+    histEl.innerHTML = '';
+    history.forEach(function(h){
+      var li = document.createElement('li');
+      li.title = '눌러서 이 식을 다시 불러온다';
+      li.innerHTML = '<span>' + h.expr + '</span><b>= ' + h.val + '</b>';
+      li.addEventListener('click', function(){
+        input.value = h.expr;
+        input.focus();
+        preview();
+      });
+      histEl.appendChild(li);
+    });
+    var has = history.length > 0;
+    histEl.hidden = !has;
+    emptyEl.style.display = has ? 'none' : '';
+  }
+
+  function commit(){
+    var raw = input.value.trim();
+    if(!raw) return;
+    var val;
+    try { val = evalExpr(raw); }
+    catch(e){ show(e.message, true); return; }
+    if(val === null) return;
+    var txt = fmtNum(val);
+    show(txt, false);
+    history.unshift({ expr: raw, val: txt });
+    if(history.length > 8) history.pop();
+    renderHistory();
+    input.value = txt;            /* 이어서 계산할 수 있게 결과를 그대로 남긴다 */
+    input.select();
+  }
+
+  pad.addEventListener('click', function(ev){
+    var btn = ev.target.closest('button[data-k]');
+    if(!btn) return;
+    var k = btn.getAttribute('data-k');
+    if(k === 'eq'){ commit(); return; }
+    if(k === 'clear'){ input.value = ''; show('—', false); input.focus(); return; }
+    if(k === 'back'){ input.value = input.value.slice(0, -1); preview(); input.focus(); return; }
+    input.value += k;
+    preview();
+    input.focus();
+  });
+
+  input.addEventListener('input', preview);
+  input.addEventListener('keydown', function(ev){
+    if(ev.key === 'Enter'){ ev.preventDefault(); commit(); }
+    else if(ev.key === 'Escape'){ ev.preventDefault(); input.value = ''; show('—', false); }
+  });
+
+  btnClr.addEventListener('click', function(){
+    history = [];
+    renderHistory();
+  });
+
+  renderHistory();
+}
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+})();
+</script>
+</body>
+</html>
