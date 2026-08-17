@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[학생용] 기체 시뮬레이션 — 기체의 종류를 확인하는 실험 (수상 치환 · 3차시 수행평가)</title>
+
+<style>
+  :root{ --ink:#16202b; --mute:#6b7784; --line:#c3ccd6; --soft:#f5f7fa; --head:#eef4f0;
+         --accent:#1a6b3c; --warn:#b3541e; --bad:#c0392b; --water:#a8cfe8; }
+  *{ box-sizing:border-box; }
+  body{ font-family:'Pretendard','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif;
+        color:var(--ink); margin:0; padding:18px 16px 60px; line-height:1.55; font-size:15px; background:#fff; }
+  .wrap{ max-width:1180px; margin:0 auto; }
+  .head{ border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin-bottom:14px; }
+  h1{ font-size:21px; margin:0 0 4px; letter-spacing:-0.4px; }
+  .meta{ font-size:12.5px; color:var(--mute); }
+  .meta span{ margin-right:14px; }
+  .std{ margin-top:8px; font-size:12.5px; background:var(--soft); border:1px dashed var(--line);
+        border-radius:6px; padding:7px 10px; }
+  .who{ margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; }
+  .who input{ width:52px; font-size:14px; padding:3px 6px; border:1px solid var(--line); border-radius:5px; }
+  .sample{ margin-left:auto; text-align:right; }
+  .sample .cap{ display:block; font-size:11px; color:var(--mute); }
+  .sample .code{ font-size:22px; font-weight:800; letter-spacing:2px; }
+  .refresh-warn{ margin-top:9px; font-size:12.5px; color:var(--warn); background:#fff7f2;
+                 border:1px solid #e6c3a8; border-radius:6px; padding:7px 10px; }
+
+  h2{ font-size:16px; margin:20px 0 8px; padding:5px 11px; background:var(--head);
+      border-left:4px solid var(--accent); border-radius:0 5px 5px 0; }
+  .panel{ display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; }
+  .stage{ flex:0 0 360px; border:1px solid var(--line); border-radius:9px; padding:8px; background:#fbfdff; }
+  .side{ flex:1 1 460px; min-width:330px; }
+
+  .lab{ display:flex; gap:9px; flex-wrap:wrap; margin-bottom:10px; }
+  .lab .g{ flex:1 1 140px; border:1px solid var(--line); border-radius:8px; padding:7px 11px; background:#fff; }
+  .lab .lb{ display:block; font-size:11.5px; color:var(--mute); }
+  .lab .vl{ font-size:20px; font-weight:800; }
+  .lab .un{ font-size:12px; color:var(--mute); margin-left:2px; }
+
+  .paper{ font-size:12.5px; background:#fffbe8; border:1px solid #e2d391; border-radius:7px;
+          padding:7px 11px; margin:8px 0; }
+  .pslot{ display:inline-block; width:30px; height:34px; line-height:34px; text-align:center;
+        border:1.5px solid #bbb; border-radius:5px; margin-right:5px; font-size:17px; font-weight:700;
+        color:#bbb; background:#fff; }
+  .pslot.on{ border-color:#2b6; color:#18432a; background:#f4faf5; }
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .card{ border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:#fff;
+         display:flex; align-items:center; gap:9px; }
+  .card .tag{ flex:0 0 26px; height:26px; border-radius:50%; background:var(--head);
+              border:1px solid var(--line); font-weight:800; font-size:13px;
+              display:flex; align-items:center; justify-content:center; }
+  .card .bd{ flex:1; font-size:13px; line-height:1.4; }
+  .card button{ flex:0 0 auto; }
+  .card.slider{ grid-column:1 / -1; }
+  .card input[type=range]{ flex:1; accent-color:var(--accent); min-width:130px; }
+
+  button{ font-family:inherit; font-size:13px; padding:5px 12px; border-radius:6px;
+          border:1px solid var(--line); background:#fff; cursor:pointer; }
+  button.main{ background:var(--accent); border-color:var(--accent); color:#fff; font-weight:700; }
+  .msgline{ margin-top:9px; min-height:22px; font-size:13px; color:#7a4218; font-weight:600; }
+  .rd{ font-variant-numeric:tabular-nums; }
+  .lvl-ok{ color:var(--accent); font-weight:700; }
+  .lvl-no{ color:var(--bad); font-weight:700; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+  th,td{ border:1px solid var(--line); padding:5px 7px; text-align:center; }
+  th{ background:var(--head); font-weight:600; font-size:12px; }
+  td.l,th.l{ text-align:left; }
+  .num{ font-variant-numeric:tabular-nums; }
+
+  .note{ font-size:12.5px; color:#44505c; background:var(--soft); border-left:3px solid var(--line);
+         padding:6px 10px; margin:8px 0; }
+  .note.warn{ background:#fff7f2; border-left-color:var(--warn); color:#7a4218; }
+  .foot{ margin-top:26px; padding-top:9px; border-top:1px solid var(--line); font-size:11.5px; color:var(--mute); }
+  details.teacher{ margin-top:20px; border:1px solid var(--warn); border-radius:8px; background:#fff7f2; }
+  details.teacher summary{ cursor:pointer; padding:8px 12px; font-weight:700; color:var(--warn); }
+  details.teacher .in{ padding:0 14px 12px; }
+  @media print{ .noprint{ display:none !important; } body{ padding:0; font-size:10.5pt; } }
+  /* ── 계산기 ── */
+  #calc-fab{ position:fixed; right:16px; bottom:16px; z-index:50; font-size:14px; font-weight:700;
+             background:var(--accent); color:#fff; border:none; border-radius:24px; padding:10px 16px;
+             box-shadow:0 3px 10px rgba(0,0,0,0.2); }
+  #calc{ position:fixed; right:16px; bottom:66px; z-index:50; width:212px;
+         background:#fff; border:1px solid var(--line); border-radius:10px;
+         box-shadow:0 6px 22px rgba(0,0,0,0.18); padding:10px; display:none; }
+  #calc .ttl{ font-size:12px; color:var(--mute); margin-bottom:5px; }
+  #calc input{ width:100%; font-size:17px; text-align:right; padding:6px 8px;
+               border:1px solid var(--line); border-radius:6px; font-variant-numeric:tabular-nums; }
+  #calc .res{ min-height:22px; text-align:right; font-size:15px; font-weight:800; padding:2px 4px; }
+  #calc .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:5px; }
+  #calc .grid button{ padding:8px 0; font-size:15px; border-radius:7px; }
+  #calc .grid .op{ background:var(--head); }
+  #calc .grid .eq{ background:var(--accent); border-color:var(--accent); color:#fff; font-weight:800; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="head">
+  <h1>기체의 종류를 확인하는 실험 — 수상 치환</h1>
+  <div class="meta">
+    <span><b>과목</b> 물질과 에너지 (진로선택)</span>
+    <span><b>영역</b> Ⅰ. 물질의 세 가지 상태</span>
+    <span><b>차시</b> Ⅰ-3 · 본 수행평가</span>
+  </div>
+  <div class="std">
+    <b>성취기준 [12물에01-01]</b> 기체의 온도, 압력, 부피, 몰수 사이의 관계를 통합적으로 이해하고,
+    이상 기체 방정식을 근사적으로 활용하는 사례를 조사하여 화학의 유용함을 인식할 수 있다. <b>원문(별책9)</b>
+    <br><b>탐구활동</b> 이상 기체 방정식을 활용하여 기체의 종류를 확인할 수 있는 실험 설계하고 수행하기 <b>원문(별책9)</b>
+  </div>
+  <div class="who">
+    <small>이 화면에는 아무것도 입력하지 않는다 — <b>반·번호를 포함한 모든 기록은 종이 답안지에</b> 적는다.
+      이름은 적지 않는다. 제출물은 <b>반·번호로만</b> 식별한다.</small>
+    <span class="sample"><span class="cap">배정된 시료 코드</span><span class="code" id="sample-code">—</span></span>
+  </div>
+  <div class="refresh-warn">
+    ⚠ 시료 코드를 <b>종이 답안지 머리에 먼저 옮겨 적으세요.</b>
+    새로고침하거나 탭을 닫으면 경고가 뜹니다. 실수로 닫았다면 <b>같은 주소를 다시 열고 「이어서 하기」</b>를 누르세요 —
+    <b>답안지에 적어 둔 코드와 같은지</b> 반드시 확인하고 이어야 합니다.
+    <div id="save-state" style="margin-top:5px"></div>
+  </div>
+</div>
+
+<h2>1. 실험실 조건</h2>
+<div class="lab">
+  <div class="g"><span class="lb">실험실 온도</span><span class="vl" id="out-temp">—</span><span class="un">℃</span></div>
+  <div class="g"><span class="lb">대기압</span><span class="vl" id="out-atm">—</span><span class="un">mmHg</span></div>
+  <div class="g"><span class="lb">기체 상수</span><span class="vl">0.082</span><span class="un">L·atm/(mol·K)</span></div>
+</div>
+<div class="note">
+  눈금실린더 속에는 포집한 기체 외에 <b>물이 증발하여 생긴 수증기</b>가 함께 들어 있다.
+  기체의 압력은 대기압에서 <b>실험실 온도에서의 수증기압을 빼서</b> 구한다. 수증기압은 아래 표에서 찾는다.
+</div>
+<table id="tbl-vp"><thead><tr id="vp-head"><th class="l" style="width:120px">온도 (℃)</th></tr></thead>
+  <tbody><tr id="vp-row"><th class="l">수증기압 (mmHg)</th></tr></tbody></table>
+
+<h2>2. 실험 수행</h2>
+<div class="paper">
+  ✍ <b>기록은 전부 종이 답안지에 한다.</b> 화면은 <b>잰 값을 남겨 주지 않는다</b> — 표도 목록도 없다.
+  (탭을 닫거나 새로고침해도 <b>장치 상태</b>는 이 기기에 남아 이어서 할 수 있다. 그래도 <b>값은 종이에</b> 적어야 한다.)
+  아래 조작 카드는 <b>순서 없이 섞여 있고, 카드 이름(가~사)도 사람마다 다르게 붙어 있다</b> — 옆자리를 보면 틀린다.
+  <b>먼저 순서를 정해 확정</b>한 뒤에야 조작할 수 있다. 확정한 순서를 답안지에 옮겨 적고 그대로 수행한다.
+  잘못된 순서로 확정해도 막지 않지만, <b>잘못된 결과가 그대로 돌아온다.</b>
+  용기마다 <b>3회 반복</b>하고 평균을 쓴다.
+</div>
+<div class="panel">
+  <div class="stage">
+    <svg id="scene" viewBox="0 0 340 330" width="100%" height="316" role="img" aria-label="수상 치환 장치"></svg>
+    <div class="msgline" id="msg" style="text-align:center"></div>
+  </div>
+
+  <div class="side">
+    <div class="lab">
+      <div class="g"><span class="lb">분석저울 <span style="color:#888">(마지막으로 읽은 값)</span></span><span class="vl rd" id="out-mass">—</span><span class="un">g</span></div>
+      <div class="g"><span class="lb">눈금 (마지막으로 읽은 값)</span><span class="vl rd" id="out-vol">—</span><span class="un">mL</span></div>
+    </div>
+
+    <div id="plan-panel" class="paper" style="margin-bottom:8px">
+      <b>① 먼저 실험 순서를 정한다</b> — 카드를 누를 때마다 아래 칸이 하나씩 채워집니다.
+      <b>필요한 단계만</b> 골라 순서대로 담고 <b>「이 순서로 시작」</b>을 누르면 조작이 열립니다.
+      <b style="color:#b3541e">칸을 다 채울 필요는 없습니다</b> — 칸 수는 여유분이며 정답의 길이가 아닙니다.
+      같은 카드를 여러 번 담아도 됩니다.
+      <span style="color:#b3541e">순서를 확정하기 전에는 아무 조작도 할 수 없습니다.</span>
+      <div id="plan-slots" style="margin:6px 0"></div>
+      <div id="plan-msg" style="font-size:12.5px;color:#555;margin-bottom:4px"></div>
+      <button id="btn-plan-go" class="main">이 순서로 시작</button>
+      <button id="btn-plan-undo">한 칸 지우기</button>
+    </div>
+    <div id="plan-done" class="paper" style="display:none; margin-bottom:8px; background:#eef6ef; border-color:#cde3d2">
+      <b>확정한 순서</b> &nbsp;<span id="plan-done-seq" style="font-size:16px;font-weight:700;letter-spacing:1px"></span><br>
+      <span style="font-size:12.5px">이 순서를 <b>종이 답안지 §1</b>에 옮겨 적고, 그대로 수행하세요. 순서는 바꿀 수 없습니다.</span>
+    </div>
+
+    <div class="cards noprint" id="cardbox">
+      <div class="card"><span class="tag">가</span>
+        <span class="bd">용기의 <b>누름판을 눌러</b> 기체를 내보낸다</span>
+        <button id="act-push">누르기</button></div>
+      <div class="card"><span class="tag">나</span>
+        <span class="bd">용기를 <b>분석저울에 올려 표시값을 읽고 내린다</b> — 종이에 적는다</span>
+        <button id="act-weigh">올려 읽기</button></div>
+      <div class="card slider"><span class="tag">다</span>
+        <span class="bd">수조에 물을 붓거나 빼서 <b>눈금실린더 안쪽 수면과 수조 수면의 높이를 맞춘다</b></span>
+        <input type="range" id="sl-dh" min="-150" max="150" step="2" value="90">
+        <span class="rd" id="rd-dh" style="width:110px; text-align:right">—</span></div>
+      <div class="card"><span class="tag">라</span>
+        <span class="bd">눈금실린더에 <b>물을 가득 채워</b> 수조에 <b>거꾸로</b> 세운다</span>
+        <button id="act-stand">세우기</button></div>
+      <div class="card"><span class="tag">마</span>
+        <span class="bd">눈금실린더의 <b>눈금을 읽어</b> 기체의 부피를 잰다</span>
+        <button id="act-read">읽기</button></div>
+      <div class="card"><span class="tag">바</span>
+        <span class="bd"><b>고무관</b>을 용기 입구와 눈금실린더 입구에 연결한다</span>
+        <button id="act-hose">연결</button></div>
+      <div class="card"><span class="tag">사</span>
+        <span class="bd"><b>분석저울</b>(0.0001 g) — 빈 저울에서 <b>영점 단추(0/T)</b>를 눌러 0.0000을 만든다</span>
+        <button id="act-zero">영점</button></div>
+    </div>
+
+    <div class="cards noprint" style="margin-top:8px">
+      <div class="card"><span class="tag" style="background:#fff">용기</span>
+        <span class="bd">상표를 가린 용기 두 개 — 각각 무엇인지 알아낸다</span>
+        <button id="btn-c1" class="main">용기 1</button>
+        <button id="btn-c2">용기 2</button></div>
+      <div class="card"><span class="tag" style="background:#fff">↺</span>
+        <span class="bd">지금 용기의 조작 상태만 처음으로 (용기 속 기체는 그대로)</span>
+        <button id="btn-reset">장치 정리</button></div>
+    </div>
+  </div>
+</div>
+
+<h2>3. 계산에 쓸 자료</h2>
+<div class="note">
+  <b>두 용기에 담긴 기체는 아래 일곱 가지 가운데 하나씩이다.</b>
+  구한 몰질량을 표와 견주어 어느 것인지 판별한다. 값이 딱 떨어지지 않는 것은 정상이며,
+  <b>가장 가까운 후보가 무엇인지</b> 근거를 들어 판단한다. 계산·판별은 전부 <b>종이 답안지에</b> 한다.
+</div>
+<table id="tbl-cand"><thead><tr id="cand-head"><th class="l" style="width:130px">시료</th></tr></thead>
+  <tbody><tr id="cand-mass"><th class="l">몰질량 (g/mol)</th></tr></tbody></table>
+
+
+
+<button id="calc-fab" class="noprint" type="button">🖩 계산기</button>
+<div id="calc" class="noprint">
+  <div class="ttl">계산기 — 계산 과정은 종이 답안지에도 적는다</div>
+  <input id="calc-in" inputmode="text" autocomplete="off" spellcheck="false" placeholder="예: 0.575*0.082*292/(0.96*0.326)">
+  <div class="res" id="calc-out">&nbsp;</div>
+  <div class="grid">
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="/">÷</button>
+    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="*">×</button>
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="op" data-k="-">−</button>
+    <button data-k="0">0</button><button data-k=".">.</button><button data-k="(">(</button><button class="op" data-k="+">＋</button>
+    <button data-k=")">)</button><button class="op" data-k="BS">←</button><button class="op" data-k="C">C</button><button class="eq" data-k="=">=</button>
+  </div>
+</div>
+
+<div class="foot">
+  성취기준·탐구활동 원문 = 교육부 고시 제2022-33호 [별책 9] 과학과 교육과정 ·
+  시료 5종·시료 코드·결정론 복원 = <b>시뮬레이션-사양.md</b> §3·§5 계승 ·
+  실험 절차·수증기압 보정 = 교과서 「탐구」 구성<b>기체시뮬레이션-1차시.html</b>(해보기) · <b>기체시뮬레이션.html</b>(조건 조작판)
+</div>
+
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   [1] 교사 설정 — 이 블록만 고치면 시료·조건 범위가 바뀐다
+   ══════════════════════════════════════════════════════════════════════ */
+/* 시료 7종 — 인접 간격이 모두 30% 이상이라 노이즈로 판별이 흔들리지 않는다.
+   (2→4 100% · 4→16 300% · 16→32 100% · 32→44.1 38% · 44.1→58.1 32% · 58.1→146.1 151%)
+   네온(20.2)은 CH₄와 26%라 제외. SF₆는 목소리 변조용으로 시판되는 실재 기체다. */
+var 시료후보 = [
+  { 이름:'수소 H₂',        몰질량:2.0  },
+  { 이름:'헬륨 He',        몰질량:4.0  },
+  { 이름:'메테인 CH₄',     몰질량:16.0 },
+  { 이름:'산소 O₂',        몰질량:32.0 },
+  { 이름:'프로페인 C₃H₈',   몰질량:44.1 },
+  { 이름:'뷰테인 C₄H₁₀',   몰질량:58.1 },
+  { 이름:'육플루오린화황 SF₆', 몰질량:146.1 }
+];
+var GAS_R = 0.082, T0 = 273;
+var 실험실온도범위 = [18, 28];      /* ℃ 정수 */
+var 대기압범위 = [745, 772];        /* mmHg 정수 */
+/* 용기 잔량 — 3회 측정 × 2용기를 하고도 헛누름 여유가 남아야 한다.
+   0.075 이면 한 용기당 28회뿐이라(3회 측정에 18회 필요) 헛누름 10번이면 고갈되어 복구가 안 됐다.
+   교사 확정(2026-08-13): 0.075 → 0.15 (한 용기당 약 56회). 측정값에는 영향이 없다. */
+var 용기초기몰 = 0.15;
+var 저울떨림g = 0.0002;             /* 분석저울(0.0001 g) 마지막 자리 흔들림 */
+var 부피노이즈 = 0.006;             /* 눈금 읽기 ±0.6% */
+var 실린더용량 = 500;               /* mL */
+/* 수면 높이차 — 실물 눈금실린더에서 실제로 벌어지는 범위(10~20 cm)에 맞춘다.
+   교사 확정(2026-08-13): ±40 → ±150 mm. ±40 은 압력의 0.39%뿐이라 수면을 안 맞추고 읽어도
+   오차가 0.28%(정상 0.21%)에 그쳐 「보정하지 않으면 값이 어긋난다」가 드러나지 않았다.
+   ±150 이면 최대 1.5% — 판별(후보 간격 30%↑)은 여전히 뒤집히지 않는다. */
+var 수면차범위 = 150;               /* mm */
+var 기본수면차 = 90;                /* 세운 직후의 높이차 mm */
+var CODE_ALPHABET = '0123456789ABCDEFGHJLMNPQRSTVWXYZ';
+
+/* 온도별 수증기압(mmHg) — 일반 화학 자료(교과서·편람 대조 권장, 교사 검토 대상) */
+var 수증기압표 = {18:15.5, 19:16.5, 20:17.5, 21:18.7, 22:19.8, 23:21.1,
+                  24:22.4, 25:23.8, 26:25.2, 27:26.7, 28:28.3};
+
+/* ══════════════════════════════════════════════════════════════════════
+   [2] 결정론 코어 (사양서 §5 계승)
+   ══════════════════════════════════════════════════════════════════════ */
+function mix32(a,b){
+  var h = ((a|0) ^ Math.imul((b|0) ^ ((b|0)>>>15), 0x2545f491))|0;
+  h = Math.imul(h ^ (h>>>16), 0x45d9f3b);
+  h = Math.imul(h ^ (h>>>16), 0x45d9f3b);
+  return (h ^ (h>>>16))>>>0;
+}
+function rngFrom(seed){
+  var s = seed>>>0;
+  return function(){
+    s = (s + 0x6D2B79F5)|0;
+    var t = Math.imul(s ^ (s>>>15), 1|s);
+    t = (t + Math.imul(t ^ (t>>>7), 61|t)) ^ t;
+    return ((t ^ (t>>>14))>>>0) / 4294967296;
+  };
+}
+function unit(seedA, seedB){ return rngFrom(mix32(seedA, seedB))(); }   /* 0~1 한 값 */
+function normalizeCode(text){
+  var s = String(text==null?'':text).toUpperCase().replace(/[^0-9A-Z]/g,'');
+  if(s.length !== 5) return null;
+  for(var i=0;i<5;i++) if(CODE_ALPHABET.indexOf(s.charAt(i))<0) return null;
+  return s;
+}
+function seedFromCode(raw){
+  var n=0; for(var i=0;i<5;i++) n = n*32 + CODE_ALPHABET.indexOf(raw.charAt(i));
+  return n;
+}
+function formatCode(raw){ return raw.slice(0,2)+'-'+raw.slice(2); }
+function middleLettersFor(idx){
+  var out=[];
+  for(var v=0;v<CODE_ALPHABET.length;v++) if(v % 시료후보.length === idx) out.push(CODE_ALPHABET.charAt(v));
+  return out;
+}
+/* 코드 생성 — Math.random 은 여기서만 쓴다(시드를 새로 뽑는 자리) */
+function newCode(){
+  var idx = Math.floor(Math.random()*시료후보.length);
+  var mid = middleLettersFor(idx);
+  function any(){ return CODE_ALPHABET[Math.floor(Math.random()*32)]; }
+  return any()+any()+mid[Math.floor(Math.random()*mid.length)]+any()+any();
+}
+/* 코드 → 실험실 조건 · 용기 2개(서로 다른 시료) · 회당 방출량 */
+function setupFromCode(text){
+  var raw = normalizeCode(text); if(!raw) return null;
+  var seed = seedFromCode(raw);
+  var i1 = CODE_ALPHABET.indexOf(raw.charAt(2)) % 시료후보.length;
+  var rnd = rngFrom(mix32(seed, 0x57415445));
+  var i2 = (i1 + 1 + Math.floor(rnd()*(시료후보.length-1))) % 시료후보.length;
+  var tempC = 실험실온도범위[0] + Math.floor(rnd()*(실험실온도범위[1]-실험실온도범위[0]+1));
+  var atm   = 대기압범위[0] + Math.floor(rnd()*(대기압범위[1]-대기압범위[0]+1));
+  function can(idx){
+    return { idx: idx,
+             tare: 90 + rnd()*40,                      /* 빈 용기(껍데기) 질량 g */
+             perPush: 0.0021 + rnd()*0.0007,           /* 누름 1회 방출 몰수 */
+             nLeft: 용기초기몰 };
+  }
+  return { code:raw, seed:seed, tempC:tempC, atm:atm, cans:[can(i1), can(i2)] };
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   [3] 물리
+   ══════════════════════════════════════════════════════════════════════ */
+function 수증기압(tC){ return 수증기압표[tC] != null ? 수증기압표[tC] : 20.0; }
+/* 수면 높이차 dh(mm, 안쪽이 높으면 +) → 갇힌 기체의 실제 압력(atm). 물기둥 13.6 mm ≈ 수은 1 mmHg */
+function 기체압력atm(dh){ return (setup.atm - 수증기압(setup.tempC) - dh/13.6) / 760; }
+function 기체부피mL(n, dh){ return n * GAS_R * (setup.tempC + T0) / 기체압력atm(dh) * 1000; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   [4] 상태
+   ══════════════════════════════════════════════════════════════════════ */
+var setup = null;
+var st = { can:0,            /* 0|1 — 선택된 용기 인덱스 */
+           cyl:false,        /* 눈금실린더가 물 가득·거꾸로 세워져 있나 */
+           hose:false,       /* 고무관 연결됐나 */
+           gasN:0,           /* 실린더에 모인 몰수 */
+           dh:기본수면차,       /* 수면 높이차 mm (안쪽이 + 만큼 높음) */
+           onPan:false,      /* 용기가 저울 위에 있나 */
+           zeroRef:0,        /* 영점 기준 — 「영점」을 누른 순간의 원시 표시값 */
+           placeNo:0,        /* 몇 번째로 올렸나 — 잔떨림 채널(복원 검산용) */
+           lastVol:null,
+           lastMass:null,
+           readNo:0,
+           flash:null };     /* 'coll' | 'lost' | null — 기포 표시 */
+/* 저울 초기 영점 어긋남 — 코드에서 결정. 상수라서 질량차에서는 상쇄된다(실제와 같다) */
+function zeroDrift(){ return 0.0008 + unit(setup.seed, 0x5A45524F) * 0.0040; }
+/* 지금 저울이 가리키는 값 (실시간) */
+function balanceRaw(){
+  var v = zeroDrift();
+  if(st.onPan){
+    var wob = (unit(setup.seed, mix32(0x57454947, st.placeNo)) * 2 - 1) * 저울떨림g;
+    v += can().tare + can().nLeft * 시료후보[can().idx].몰질량 + wob;
+  }
+  return v;
+}
+function balanceShown(){ return balanceRaw() - st.zeroRef; }
+function $(id){ return document.getElementById(id); }
+function say(t){ $('msg').textContent = t || ''; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   [5] 장면 그리기 — 수조(위 열림)·거꾸로 세운 눈금실린더·고무관·온도 표기
+   ══════════════════════════════════════════════════════════════════════ */
+function drawScene(){
+  var W=340, H=330;
+  var tubL=100, tubR=252, tubBot=306, tubTop=214;         /* 수조 (위 열림) — 용기는 수조 밖 오른쪽 */
+  var cylL=132, cylR=190, cylTop=52, cylMouth=282;        /* 눈금실린더 (거꾸로) */
+  var cylH = cylMouth - cylTop;
+  var V = st.gasN>0 ? 기체부피mL(st.gasN, st.dh) : 0;      /* 지금 조건의 기체 부피 */
+  var gasPx = Math.min(V/실린더용량, 0.96) * cylH;
+  var ifaceY = cylTop + gasPx;                             /* 안쪽 수면(기체-물 경계) */
+  var outerY = st.gasN>0 ? Math.min(Math.max(ifaceY + st.dh*0.20, tubTop+8), tubBot-12)
+                         : 250;                            /* 수조 수면 */
+  var s='';
+  s += '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fbfdff"/>';
+  s += '<line x1="4" y1="310" x2="336" y2="310" stroke="#b9c4cf" stroke-width="2.4"/>';   /* 실험대 */
+
+  /* 실험실 온도 표기 (요청 6) */
+  s += '<circle cx="20" cy="20" r="6" fill="#c0392b"/><rect x="18" y="6" width="4" height="12" rx="2" fill="#c0392b"/>'
+    +  '<text x="32" y="24" font-size="13" font-weight="700" fill="#16202b">실험실 '+(setup?setup.tempC:'—')+' ℃</text>'
+    +  '<text x="'+(W-8)+'" y="24" font-size="11" fill="#6b7784" text-anchor="end">대기압 '+(setup?setup.atm:'—')+' mmHg</text>';
+
+  /* 수조 — 위가 열린 그릇 (요청 1) */
+  s += '<path d="M'+tubL+' '+tubTop+' L'+tubL+' '+tubBot+' L'+tubR+' '+tubBot+' L'+tubR+' '+tubTop+'"'
+    +  ' fill="none" stroke="#7d94a8" stroke-width="3" stroke-linejoin="round"/>';
+  /* 수조 물 */
+  s += '<rect x="'+(tubL+2)+'" y="'+outerY+'" width="'+(tubR-tubL-4)+'" height="'+(tubBot-outerY-2)+'" fill="var(--water)" opacity="0.9"/>';
+
+  if(st.cyl){
+    /* 눈금실린더 — 거꾸로: 위(바닥)는 닫힘, 아래(입구)는 열림·물속 (요청 2·5)
+       왼벽↑→둥근 바닥(위)→오른벽↓ 순서로 그리고, 아래 변은 긋지 않는다 = 입구 개방 */
+    s += '<path d="M'+cylL+' '+cylMouth+' L'+cylL+' '+(cylTop+6)+' Q'+cylL+' '+cylTop+' '+(cylL+6)+' '+cylTop
+      +  ' L'+(cylR-6)+' '+cylTop+' Q'+cylR+' '+cylTop+' '+cylR+' '+(cylTop+6)
+      +  ' L'+cylR+' '+cylMouth+'" fill="#eef7fc" stroke="#5f7d94" stroke-width="2.6" stroke-linejoin="round"/>';
+    /* 입구 개방 표시 — 아래 변에는 선을 긋지 않는다. 입구 테두리만 살짝 */
+    s += '<line x1="'+(cylL-4)+'" y1="'+cylMouth+'" x2="'+(cylL+6)+'" y2="'+cylMouth+'" stroke="#5f7d94" stroke-width="2.6"/>'
+      +  '<line x1="'+(cylR-6)+'" y1="'+cylMouth+'" x2="'+(cylR+4)+'" y2="'+cylMouth+'" stroke="#5f7d94" stroke-width="2.6"/>';
+    /* 실린더 속 물 — 수조 물과 같은 색 (요청 4) */
+    s += '<rect x="'+(cylL+2)+'" y="'+ifaceY+'" width="'+(cylR-cylL-4)+'" height="'+(cylMouth-ifaceY)+'" fill="var(--water)" opacity="0.9"/>';
+    /* 눈금 — 거꾸로 세웠으니 바닥(위)에서 아래로 커진다 */
+    for(var k=1;k<=4;k++){
+      var gy = cylTop + cylH*k/5;
+      s += '<line x1="'+cylL+'" y1="'+gy+'" x2="'+(cylL+13)+'" y2="'+gy+'" stroke="#7d94a8" stroke-width="1.4"/>'
+        +  '<text x="'+(cylL+16)+'" y="'+(gy+4)+'" font-size="9.5" fill="#6b7784">'+(k*100)+'</text>';
+    }
+    /* 수면 비교선 */
+    if(st.gasN>0){
+      s += '<line x1="'+(tubL-6)+'" y1="'+outerY+'" x2="'+(tubR+6)+'" y2="'+outerY+'" stroke="#c0392b" stroke-dasharray="5 3" stroke-width="1.4"/>'
+        +  '<line x1="'+(cylL-24)+'" y1="'+ifaceY+'" x2="'+(cylR+24)+'" y2="'+ifaceY+'" stroke="#1a6b3c" stroke-dasharray="5 3" stroke-width="1.4"/>';
+    }
+  } else {
+    /* 아직 세우지 않음 — 눈금실린더가 수조 옆에 뉘어져 있다 */
+    s += '<rect x="106" y="188" width="130" height="20" rx="9" fill="#eef7fc" stroke="#8fa2b4" stroke-dasharray="4 3"/>'
+      +  '<text x="171" y="202" font-size="10" fill="#8fa2b4" text-anchor="middle">눈금실린더 (아직 안 세움)</text>';
+  }
+
+  /* 용기 — 저울 위(올려져 있을 때) 또는 수조 밖 오른쪽 실험대 위 */
+  var weighing = st.onPan;
+  var canX = weighing ? 39 : 274, canY = weighing ? 204 : 234;
+  /* 전자저울 — 실험대 위 왼쪽 */
+  s += '<rect x="18" y="270" width="76" height="9" rx="3" fill="#d7dde3" stroke="#8fa2b4"/>'
+    +  '<rect x="24" y="279" width="64" height="28" rx="3" fill="#f2f5f8" stroke="#8fa2b4"/>'
+    +  '<text x="50" y="296" font-size="11" text-anchor="middle" fill="#16202b">'
+    +  (setup ? balanceShown().toFixed(4) : '0.0000') + ' g</text>'
+    +  '<text x="42" y="305" font-size="8" fill="#6b7784" text-anchor="middle">분석저울</text>'
+    +  '<rect x="66" y="298" width="18" height="8" rx="2" fill="#e8edf2" stroke="#8fa2b4"/>'
+    +  '<text x="75" y="304.5" font-size="6.5" fill="#44505c" text-anchor="middle">0/T</text>';
+  /* 용기 본체 + 상표 가림 + 누름판 */
+  s += '<rect x="'+canX+'" y="'+canY+'" width="30" height="66" rx="7" fill="#c9a227" stroke="#8d7318" stroke-width="1.5"/>'
+    +  '<rect x="'+(canX+4)+'" y="'+(canY+22)+'" width="22" height="18" fill="#6d5a13" opacity="0.65"/>'
+    +  '<text x="'+(canX+15)+'" y="'+(canY+34)+'" font-size="7" fill="#fff" text-anchor="middle">상표 가림</text>'
+    +  '<rect x="'+(canX+9)+'" y="'+(canY-10)+'" width="12" height="10" rx="2" fill="#b9bfc6" stroke="#8fa2b4"/>'
+    +  '<text x="'+(canX+15)+'" y="'+(weighing ? canY-16 : 324)+'" font-size="10" fill="#6b7784" text-anchor="middle">용기 '+(st.can+1)+'</text>';
+
+  /* 고무관 — 용기 입구 → 물속 → 실린더 입구 "안"으로 (요청 3) */
+  if(st.hose && !weighing){
+    var noz = { x: canX+15, y: canY-10 };
+    if(st.cyl){
+      /* 수조 오른쪽 벽(tubR)을 타고 넘어 물속을 지나 입구 안으로 */
+      var tipX = (cylL+cylR)/2 + 12, tipY = cylMouth - 12;
+      s += '<path d="M'+noz.x+' '+noz.y
+        +  ' C '+(noz.x-6)+' '+(noz.y-34)+', '+(tubR-26)+' '+(tubTop-30)+', '+(tubR-30)+' '+(tubTop+26)
+        +  ' C '+(tubR-34)+' '+(cylMouth+14)+', '+(tipX+34)+' '+(cylMouth+16)+', '+tipX+' '+tipY+'"'
+        +  ' fill="none" stroke="#d4a94a" stroke-width="5" stroke-linecap="round" opacity="0.95"/>'
+        +  '<circle cx="'+tipX+'" cy="'+tipY+'" r="2.6" fill="#8d7318"/>';
+    } else {
+      s += '<path d="M'+noz.x+' '+noz.y+' C '+(noz.x-6)+' '+(noz.y-34)+', '+(tubR-22)+' '+(tubTop-28)+', '+(tubR-30)+' '+(tubTop+40)+'"'
+        +  ' fill="none" stroke="#d4a94a" stroke-width="5" stroke-linecap="round" opacity="0.95"/>';
+    }
+  }
+
+  /* 기포 — 직전 조작의 결과 */
+  if(st.flash === 'coll' && st.cyl){
+    var bx=(cylL+cylR)/2;
+    s += '<circle cx="'+(bx-8)+'" cy="'+(cylMouth-26)+'" r="3" fill="#fff" stroke="#8fb8d8"/>'
+      +  '<circle cx="'+(bx+6)+'" cy="'+(cylMouth-44)+'" r="4" fill="#fff" stroke="#8fb8d8"/>'
+      +  '<circle cx="'+(bx-2)+'" cy="'+(cylMouth-62)+'" r="3" fill="#fff" stroke="#8fb8d8"/>';
+  }
+  if(st.flash === 'lost'){
+    s += '<circle cx="226" cy="'+(outerY+16)+'" r="3" fill="#fff" stroke="#8fb8d8"/>'
+      +  '<circle cx="234" cy="'+(outerY+4)+'" r="4" fill="#fff" stroke="#8fb8d8"/>'
+      +  '<circle cx="230" cy="'+(outerY-10)+'" r="3" fill="#fff" stroke="#c0392b"/>'
+      +  '<text x="228" y="'+(outerY-20)+'" font-size="10" fill="#c0392b" text-anchor="middle">기체가 새어 나간다!</text>';
+  }
+  $('scene').innerHTML = s;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   [6] 화면 갱신 · 조작
+   ══════════════════════════════════════════════════════════════════════ */
+function render(){ try{ 저장하기(); }catch(_){}
+
+  $('out-temp').textContent = setup ? setup.tempC : '—';
+  $('out-atm').textContent  = setup ? setup.atm : '—';
+  $('sample-code').textContent = setup ? formatCode(setup.code) : '—';
+  $('out-mass').textContent = (st.lastMass == null) ? '—' : st.lastMass.toFixed(4);
+  $('out-vol').textContent  = st.lastVol==null ? '—' : String(st.lastVol);
+  $('btn-c1').className = st.can===0 ? 'main' : '';
+  $('btn-c2').className = st.can===1 ? 'main' : '';
+  var ok = st.dh === 0;
+  $('rd-dh').innerHTML = st.gasN>0
+    ? '<span class="'+(ok?'lvl-ok':'lvl-no')+'">높이차 '+(st.dh>0?'+':'')+st.dh+' mm'+(ok?' · 맞음':'')+'</span>'
+    : '<span style="color:#6b7784">기체가 없다</span>';
+  drawScene();
+}
+function can(){ return setup.cans[st.can]; }
+
+/* 저울은 「올려 읽고 내린다」 한 동작이다 — 올리기·내리기를 따로 두면
+   절차 카드에 같은 카드가 연달아 두 번 나와 학생을 헷갈리게 한다(2026-08-17 변경). */
+function actWeigh(){
+  var hosed = st.hose;
+  if(hosed) st.hose = false;
+  st.placeNo++;
+  st.onPan = true;                  /* 잠깐 올린 상태로 읽고 */
+  st.lastMass = balanceShown();
+  st.onPan = false;                 /* 바로 내린다 */
+  say((hosed ? '고무관을 빼고 ' : '') + '저울에 올려 읽고 내렸다. 표시: '
+      + st.lastMass.toFixed(4) + ' g — 종이에 적는다.');
+  st.flash = null; render();
+}
+function actZero(){
+  st.zeroRef = balanceRaw();
+  say(st.onPan
+    ? '⚠ 용기를 올린 채 영점을 눌렀다 — 이제 표시값은 이 용기를 0으로 한 변화량이다.'
+    : '영점을 맞췄다 — 표시가 0.0000이 되었다.');
+  render();
+}
+function actStand(){
+  st.cyl = true; st.gasN = 0; st.dh = 기본수면차; $('sl-dh').value = 기본수면차; st.lastVol = null; st.flash = null;
+  say('눈금실린더에 물을 가득 채워 수조에 거꾸로 세웠다.');
+  render();
+}
+function actHose(){
+  if(st.hose){ say('고무관은 이미 연결되어 있다.'); return; }
+  st.hose = true; st.flash = null;
+  say('고무관을 용기 입구와 눈금실린더 입구에 연결했다.');
+  render();
+}
+function actPush(){
+  if(can().nLeft <= 0.0005){ say('용기가 거의 비어 더 나오지 않는다.'); return; }
+  var rel = Math.min(can().perPush, can().nLeft);
+  /* ⚠ 넘침은 「막는다」 — 교사 확정(2026-08-13).
+     넘기면 용기 질량은 줄고 실린더 기체는 안 늘어 몰질량이 평균 13% 과대해지고 되돌릴 수 없다.
+     검증에서 판별이 1,500명 중 29명꼴로 뒤집혔다(절차 점수가 아니라 판별 점수를 잃는다).
+     한계 검사는 수면차를 최대로 벌린 경우(부피가 가장 커지는 조건)로 잡아, 나중에 수면을 맞추다
+     넘치는 일이 없게 한다. */
+  if(st.hose && st.cyl && 기체부피mL(st.gasN + rel, 수면차범위) > 실린더용량 * 0.94){
+    say('실린더가 거의 찼다 — 더 누르면 입구로 새어 나간다. 수면을 맞추고 눈금을 읽는다.');
+    return;
+  }
+  can().nLeft -= rel;                       /* 질량은 어느 경우든 줄어든다 — 실제와 같다 */
+  if(st.hose && st.cyl){
+    st.gasN += rel; st.flash = 'coll';
+    var frac = 기체부피mL(st.gasN, st.dh) / 실린더용량;
+    say('기체가 보글보글 모인다 — 지금 약 ' + Math.round(frac*100) + '% 찼다. 2/3 정도까지 모은다.');
+  } else if(!st.hose){
+    st.flash = 'lost';
+    say((st.onPan ? '저울 위에서 눌렀다 — ' : '') + '고무관이 연결되어 있지 않다. 기체가 공기 중으로 날아갔다. (용기 질량은 이미 줄었다)');
+  } else {
+    st.flash = 'lost';
+    say('눈금실린더를 세우지 않았다 — 기체가 물속에서 부글거리며 빠져나갔다.');
+  }
+  render();
+}
+function actRead(){
+  if(!st.cyl || st.gasN <= 0){ say('실린더에 모인 기체가 없다 — 물이 가득 차 있어 읽을 눈금이 없다.'); return; }
+  st.readNo++;
+  var noise = 1 + (unit(setup.seed, mix32(0x52454144, st.readNo)) * 2 - 1) * 부피노이즈;
+  st.lastVol = Math.round(기체부피mL(st.gasN, st.dh) * noise);
+  say('눈금: ' + st.lastVol + ' mL — 종이 답안지에 적는다.'
+      + (st.dh !== 0 ? ' (⚠ 수면 높이가 맞지 않은 채 읽었다)' : ''));
+  render();
+}
+function actReset(){
+  st.cyl = false; st.hose = false; st.gasN = 0; st.dh = 기본수면차; $('sl-dh').value = 기본수면차;
+  st.onPan = false;                     /* 용기는 내려놓는다. 영점 기준은 저울의 것 — 유지 */
+  st.lastVol = null; st.flash = null;
+  say('장치를 정리했다. 용기 속 기체는 그대로다.');
+  render();
+}
+
+function shuffleCards(){
+  var box = $('cardbox'); if(!box) return;
+  var cards = [].slice.call(box.querySelectorAll('.card'));
+  if(!cards.length) return;
+  /* ⚠ 반드시 원래 순서(가~사)로 되돌린 뒤 섞는다 — 지금 배열 위에 다시 섞으면
+     같은 코드로 복원해도 배열이 달라져 교사 검산이 학생 화면과 어긋난다. */
+  var 라벨순 = '가나다라마바사';
+  cards.sort(function(a,b){
+    return 라벨순.indexOf(a.querySelector('.tag').textContent)
+         - 라벨순.indexOf(b.querySelector('.tag').textContent);
+  });
+  var rnd = rngFrom(mix32(setup.seed, 0x43415244));   /* 'CARD' */
+  for(var i=cards.length-1;i>0;i--){
+    var j = Math.floor(rnd()*(i+1));
+    var t = cards[i]; cards[i] = cards[j]; cards[j] = t;
+  }
+  for(var k=0;k<cards.length;k++) box.appendChild(cards[k]);
+}
+
+/* 주소칸에 시료 코드를 남긴다 — 저장이 막힌 기기(file:// 등)에서도
+   새로고침으로 시료가 바뀌는 사고를 막는다. 코드는 이미 화면에 떠 있으므로 새로 새는 정보가 없다. */
+function 해시에쓰기(raw){ try{ history.replaceState(null, '', '#' + raw); }catch(_){} }
+function 해시에서읽기(){
+  try{ return normalizeCode((location.hash||'').replace('#','')); }catch(_){ return null; }
+}
+/* 이 기기에서 저장이 되는가 — 안 되면 학생에게 알려 준다 */
+var 저장가능 = (function(){
+  try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }
+  catch(_){ return false; }
+})();
+function 저장상태알림(){
+  var el = document.getElementById('save-state'); if(!el) return;
+  el.innerHTML = 저장가능
+    ? '이 기기는 <b>이어서 하기</b>가 됩니다 — 실수로 닫아도 같은 주소를 다시 열면 이어집니다.'
+    : '⚠ 이 기기는 <b>저장이 막혀 있습니다</b> — 탭을 닫으면 처음부터입니다. 값은 반드시 <b>종이에</b> 적으세요.';
+  el.style.color = 저장가능 ? '#1a6b3c' : '#b3541e';
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   [2-b] 이 기기에 임시 저장 — 2026-08-17 추가
+   탭을 닫거나 새로고침해도 실험을 이어갈 수 있게 한다.
+   ⚠ 저장하는 것은 **시료 코드와 장치의 상태**뿐이다. 잰 값의 목록은 저장하지 않는다
+     (기록은 여전히 종이 답안지에 한다 — 평가 설계의 축).
+   ⚠ 크롬북을 여러 반이 돌려 쓰므로 **자동 복원하지 않는다.** 저장이 있으면 물어보고,
+     4시간이 지난 저장은 스스로 버린다(앞 교시 학생의 상태가 살아나지 않게).
+   ══════════════════════════════════════════════════════════════════════ */
+var 저장키 = 'me-1-3-수상치환-상태';
+var 저장유효시간 = 4 * 60 * 60 * 1000;   /* 4시간 */
+function 저장하기(){
+  try{
+    if(!setup) return;
+    localStorage.setItem(저장키, JSON.stringify({ code:setup.code, st:st, at:nowMs() }));
+  }catch(_){}   /* 저장이 막힌 기기에서도 시뮬은 그대로 돌아간다 */
+}
+function 저장읽기(){
+  try{
+    var raw = localStorage.getItem(저장키); if(!raw) return null;
+    var o = JSON.parse(raw);
+    if(!o || !o.code || !o.st) return null;
+    if(nowMs() - (o.at||0) > 저장유효시간){ 저장지우기(); return null; }
+    return o;
+  }catch(_){ return null; }
+}
+function 저장지우기(){ try{ localStorage.removeItem(저장키); }catch(_){} }
+function nowMs(){ return (new Date()).getTime(); }
+
+/* 저장이 있으면 이어서 할지 물어본다 — 자동 복원 금지 */
+function 이어하기묻기(){
+  var o = 저장읽기(); if(!o) return false;
+  var box = document.createElement('div');
+  box.className = 'refresh-warn';
+  box.style.borderWidth = '2px';
+  box.innerHTML = '<b>이 기기에 하던 실험이 남아 있습니다 — 시료 코드 <b>' + formatCode(o.code) + '</b></b><br>'
+    + '<b>내 답안지에 적힌 코드와 같으면</b> 「이어서 하기」를 누르세요. '
+    + '다르면(앞 시간 학생의 것입니다) 「새로 시작」을 누르세요.<br>'
+    + '<button id="btn-resume" class="main" style="margin-top:6px">이어서 하기</button> '
+    + '<button id="btn-fresh" style="margin-top:6px">새로 시작 — 새 시료를 받는다</button>';
+  var head = document.querySelector('.head');
+  head.parentNode.insertBefore(box, head.nextSibling);
+  document.getElementById('btn-resume').onclick = function(){
+    if(applyCode(o.code)){ st = o.st; render(); 저장하기(); }
+    box.remove();
+    say('하던 실험을 이어서 합니다 — 장치 상태를 되살렸습니다. 잰 값은 답안지를 보세요.');
+  };
+  document.getElementById('btn-fresh').onclick = function(){
+    저장지우기(); applyCode(newCode()); box.remove();
+    say('새 시료를 받았습니다 — 답안지 머리의 시료 코드를 새로 적으세요.');
+  };
+  return true;
+}
+
+/* 새로고침·탭 닫기 경고 — 조작을 한 뒤에만 뜬다(브라우저 정책) */
+function 이탈경고달기(){
+  window.addEventListener('beforeunload', function(ev){
+    ev.preventDefault(); ev.returnValue = '';   /* 문구는 브라우저가 정한다 */
+    return '';
+  });
+}
+
+
+var 라벨들 = ['가','나','다','라','마','바','사'];
+/* 조작 id — 이 배열의 순서는 고정(설계 순서). 라벨만 섞인다. */
+var 조작목록 = ['act-push','act-weigh','sl-dh','act-stand','act-read','act-hose','act-zero'];
+
+
+function 라벨배정(){                       /* 조작 id → 라벨 */
+  var lab = 라벨들.slice();
+  var rnd = rngFrom(mix32(setup.seed, 0x4C41424C));   /* 'LABL' */
+  for(var i=lab.length-1;i>0;i--){ var j=Math.floor(rnd()*(i+1)); var t=lab[i]; lab[i]=lab[j]; lab[j]=t; }
+  var map = {};
+  for(var k=0;k<조작목록.length;k++) map[조작목록[k]] = lab[k];
+  return map;
+}
+/* 카드에 라벨을 다시 붙인다 */
+function 라벨적용(){
+  var m = 라벨배정();
+  var box = $('cardbox'); if(!box) return;
+  var cards = [].slice.call(box.querySelectorAll('.card'));
+  cards.forEach(function(c){
+    var ctl = c.querySelector('button, input[type=range]');
+    if(!ctl) return;
+    var tag = c.querySelector('.tag');
+    if(tag && m[ctl.id]) { tag.textContent = m[ctl.id]; c.setAttribute('data-op', ctl.id); }
+  });
+}
+/* 조작 버튼 잠금/해제 */
+function 조작잠금(locked){
+  조작목록.forEach(function(id){ var el=$(id); if(el) el.disabled = locked; });
+  var box=$('cardbox'); if(box) box.style.opacity = locked ? '0.55' : '1';
+}
+/* 순서 확정 패널 */
+var 최대단계 = 10;      
+function 계획그리기(){
+  var slot = $('plan-slots'); if(!slot) return;
+  var html = '';
+  for(var i=0;i<최대단계;i++){
+    var v = st.plan[i] || '';
+    html += '<span class="pslot'+(v?' on':'')+'">'+(v||(i+1))+'</span>';
+  }
+  slot.innerHTML = html;
+  $('plan-msg').textContent = st.planLocked
+    ? '순서를 확정했습니다 — 이 순서를 종이 답안지 §1에 옮겨 적고, 그대로 수행하세요.'
+    : (st.plan.length===0 ? '카드를 눌러 필요한 단계를 순서대로 담으세요 — 칸을 다 채울 필요는 없습니다.'
+                          : ('지금 ' + st.plan.length + '단계 — 필요한 만큼만 담고 「이 순서로 시작」을 누르세요.'));
+  $('btn-plan-go').disabled = st.planLocked || st.plan.length===0;
+  $('btn-plan-undo').disabled = st.planLocked || st.plan.length===0;
+  $('plan-panel').style.display = st.planLocked ? 'none' : 'block';
+  $('plan-done').style.display = st.planLocked ? 'block' : 'none';
+  if(st.planLocked) $('plan-done-seq').textContent = st.plan.join(' → ');
+}
+
+function applyCode(text){
+  var s = setupFromCode(text); if(!s) return false;
+  setup = s;
+  st = { can:0, cyl:false, hose:false, gasN:0, dh:기본수면차, onPan:false, zeroRef:0, placeNo:0,
+         lastVol:null, lastMass:null, readNo:0, flash:null, plan:[], planLocked:false };
+  $('sl-dh').value = 기본수면차;
+  say('');
+  shuffleCards();
+  라벨적용();
+  조작잠금(!st.planLocked);
+  계획그리기();
+  해시에쓰기(s.code);
+  render(); return true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   [7] 표 채우기 · 이벤트
+   ══════════════════════════════════════════════════════════════════════ */
+function fillTables(){
+  var h='<th class="l" style="width:130px">시료</th>', m='<th class="l">몰질량 (g/mol)</th>';
+  for(var i=0;i<시료후보.length;i++){
+    h+='<th>'+시료후보[i].이름+'</th>'; m+='<td class="num">'+시료후보[i].몰질량.toFixed(1)+'</td>';
+  }
+  $('cand-head').innerHTML=h; $('cand-mass').innerHTML=m;
+  var vh='<th class="l" style="width:120px">온도 (℃)</th>', vr='<th class="l">수증기압 (mmHg)</th>';
+  for(var t=실험실온도범위[0]; t<=실험실온도범위[1]; t++){
+    vh+='<th>'+t+'</th>'; vr+='<td class="num">'+수증기압(t).toFixed(1)+'</td>';
+  }
+  $('vp-head').innerHTML=vh; $('vp-row').innerHTML=vr;
+}
+function bind(){
+  $('act-push').onclick  = actPush;
+  $('act-weigh').onclick = actWeigh;
+  $('act-zero').onclick  = actZero;
+  $('act-stand').onclick = actStand;
+  $('act-read').onclick  = actRead;
+  $('act-hose').onclick  = actHose;
+  $('btn-reset').onclick = actReset;
+  $('sl-dh').oninput = function(){
+    st.dh = +this.value;
+    if(st.gasN > 0){
+      say(st.dh === 0 ? '안쪽 수면과 수조 수면이 맞았다 — 이제 눈금을 읽는다.'
+                      : '수조 물 높이를 조절하는 중… (높이차 ' + (st.dh>0?'+':'') + st.dh + ' mm)');
+    }
+    render();
+  };
+  $('btn-c1').onclick = function(){ st.can = 0; actReset(); say('용기 1을 골랐다.'); };
+  $('btn-c2').onclick = function(){ st.can = 1; actReset(); say('용기 2를 골랐다.'); };
+  /* 확정 전: 카드를 누르면 그 라벨이 순서 칸에 담긴다 */
+  $('cardbox').addEventListener('click', function(ev){
+    if(st.planLocked) return;
+    var card = ev.target.closest ? ev.target.closest('.card') : null;
+    if(!card) return;
+    var tag = card.querySelector('.tag'); if(!tag) return;
+    if(st.plan.length >= 최대단계) return;
+    st.plan.push(tag.textContent);
+    계획그리기(); 저장하기();
+  }, true);
+  $('btn-plan-undo').onclick = function(){
+    if(st.planLocked) return;
+    st.plan.pop(); 계획그리기(); 저장하기();
+  };
+  $('btn-plan-go').onclick = function(){
+    if(st.plan.length === 0) return;
+    st.planLocked = true; 조작잠금(false); 계획그리기(); 저장하기();
+    say('순서를 확정했습니다 — 이제 조작할 수 있습니다. 확정한 순서를 답안지에 옮겨 적으세요.');
+  };
+}
+
+function bindCalc(){
+  var box=$('calc'), fab=$('calc-fab'), inp=$('calc-in'), out=$('calc-out');
+  fab.onclick=function(){ box.style.display = box.style.display==='block' ? 'none' : 'block'; if(box.style.display==='block') inp.focus(); };
+  function evalNow(){
+    var e = inp.value.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/\s+/g,'');
+    if(!e){ out.innerHTML='&nbsp;'; return; }
+    if(!/^[0-9+\-*/().]+$/.test(e)){ out.textContent='식에 쓸 수 없는 문자'; return; }
+    try{
+      var v = Function('"use strict";return('+e+')')();
+      out.textContent = (typeof v==='number' && isFinite(v)) ? '= '+(Math.abs(v)>=1e6||Math.abs(v)<1e-4&&v!==0 ? v.toExponential(4) : +v.toPrecision(6)) : '식 오류';
+    }catch(_){ out.textContent='식 오류'; }
+  }
+  box.querySelector('.grid').onclick=function(ev){
+    var k=ev.target.getAttribute && ev.target.getAttribute('data-k'); if(!k) return;
+    if(k==='C'){ inp.value=''; out.innerHTML='&nbsp;'; }
+    else if(k==='BS'){ inp.value=inp.value.slice(0,-1); evalNow(); }
+    else if(k==='='){ evalNow(); }
+    else { inp.value+=k; evalNow(); }
+    inp.focus();
+  };
+  inp.addEventListener('input', evalNow);
+  inp.addEventListener('keydown', function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); evalNow(); } });
+}
+
+fillTables();
+/* 시료를 정하는 순서 — ① 주소칸의 코드(새로고침 복구) ② 이 기기의 저장(탭 닫기 복구) ③ 새로 뽑기 */
+var 해시코드 = 해시에서읽기();
+if(해시코드){ applyCode(해시코드); } else { applyCode(newCode()); }
+bind();
+bindCalc();
+if(!해시코드) 이어하기묻기();     /* 주소에 코드가 있으면 묻지 않는다 — 같은 학생의 새로고침이다 */
+이탈경고달기();
+저장상태알림();
+</script>
+</body>
+</html>
