@@ -81,17 +81,21 @@
   #calc-fab{ position:fixed; right:16px; bottom:16px; z-index:50; font-size:14px; font-weight:700;
              background:var(--accent); color:#fff; border:none; border-radius:24px; padding:10px 16px;
              box-shadow:0 3px 10px rgba(0,0,0,0.2); }
+  /* 계산기는 두 자리에 있다 — 실험 그림 바로 아래 붙박이(#calc2)와 화면 오른쪽 아래 팝업(#calc).
+     모양은 .calcbox 로 공통이고 자리잡기만 각자 다르다. 둘은 서로 독립이며 입력을 공유하지 않는다.
+     교사 확정(2026-08-19): 팝업만 두었더니 학생이 못 찾는다는 지적 → 조작 화면 아래에도 상시 노출. */
+  .calcbox{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px; }
   #calc{ position:fixed; right:16px; bottom:66px; z-index:50; width:212px;
-         background:#fff; border:1px solid var(--line); border-radius:10px;
-         box-shadow:0 6px 22px rgba(0,0,0,0.18); padding:10px; display:none; }
-  #calc .ttl{ font-size:12px; color:var(--mute); margin-bottom:5px; }
-  #calc input{ width:100%; font-size:17px; text-align:right; padding:6px 8px;
+         box-shadow:0 6px 22px rgba(0,0,0,0.18); display:none; }
+  #calc2{ margin-top:10px; max-width:340px; }   /* 무대 svg(viewBox 340) 폭에 맞춘다 */
+  .calcbox .ttl{ font-size:12px; color:var(--mute); margin-bottom:5px; }
+  .calcbox input{ width:100%; font-size:17px; text-align:right; padding:6px 8px;
                border:1px solid var(--line); border-radius:6px; font-variant-numeric:tabular-nums; }
-  #calc .res{ min-height:22px; text-align:right; font-size:15px; font-weight:800; padding:2px 4px; }
-  #calc .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:5px; }
-  #calc .grid button{ padding:8px 0; font-size:15px; border-radius:7px; }
-  #calc .grid .op{ background:var(--head); }
-  #calc .grid .eq{ background:var(--accent); border-color:var(--accent); color:#fff; font-weight:800; }
+  .calcbox .res{ min-height:22px; text-align:right; font-size:15px; font-weight:800; padding:2px 4px; }
+  .calcbox .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:5px; }
+  .calcbox .grid button{ padding:8px 0; font-size:15px; border-radius:7px; }
+  .calcbox .grid .op{ background:var(--head); }
+  .calcbox .grid .eq{ background:var(--accent); border-color:var(--accent); color:#fff; font-weight:800; }
 </style>
 </head>
 <body>
@@ -145,7 +149,7 @@
   용기마다 <b>3회 반복</b>하고 평균을 쓴다.
   
   <div style="margin-top:6px; padding-top:5px; border-top:1px dashed #e2d391">
-    🧮 <b>계산기는 화면 오른쪽 아래</b>에 있다 — <b>「🧮 계산기」</b> 단추를 누르면 열린다.
+    🧮 <b>계산기는 실험 그림 바로 아래</b>에 있다. 화면 <b>오른쪽 아래 「🧮 계산기」</b> 단추로도 열린다.
     개인 전자기기는 쓸 수 없다. <b>계산 과정은 종이 답안지에도 적는다.</b>
   </div>
 </div>
@@ -153,6 +157,19 @@
   <div class="stage">
     <svg id="scene" viewBox="0 0 340 330" width="100%" height="316" role="img" aria-label="수상 치환 장치"></svg>
     <div class="msgline" id="msg" style="text-align:center"></div>
+
+    <div id="calc2" class="calcbox noprint">
+      <div class="ttl">🧮 계산기 — 계산 과정은 종이 답안지에도 적는다</div>
+      <input id="calc2-in" inputmode="text" autocomplete="off" spellcheck="false" placeholder="예: 0.575*0.082*292/(0.96*0.326)">
+      <div class="res" id="calc2-out">&nbsp;</div>
+  <div class="grid">
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="/">÷</button>
+    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="*">×</button>
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="op" data-k="-">−</button>
+    <button data-k="0">0</button><button data-k=".">.</button><button data-k="(">(</button><button class="op" data-k="+">＋</button>
+    <button data-k=")">)</button><button class="op" data-k="BS">←</button><button class="op" data-k="C">C</button><button class="eq" data-k="=">=</button>
+  </div>
+    </div>
   </div>
 
   <div class="side">
@@ -226,7 +243,7 @@
 
 
 <button id="calc-fab" class="noprint" type="button">🧮 계산기</button>
-<div id="calc" class="noprint">
+<div id="calc" class="calcbox noprint">
   <div class="ttl">계산기 — 계산 과정은 종이 답안지에도 적는다</div>
   <input id="calc-in" inputmode="text" autocomplete="off" spellcheck="false" placeholder="예: 0.575*0.082*292/(0.96*0.326)">
   <div class="res" id="calc-out">&nbsp;</div>
@@ -805,9 +822,12 @@ function bind(){
   };
 }
 
-function bindCalc(){
-  var box=$('calc'), fab=$('calc-fab'), inp=$('calc-in'), out=$('calc-out');
-  fab.onclick=function(){ box.style.display = box.style.display==='block' ? 'none' : 'block'; if(box.style.display==='block') inp.focus(); };
+/* 계산기 두 벌을 같은 코드로 붙인다 — 붙박이(fab 없음)와 팝업(fab로 여닫음).
+   둘은 입력을 공유하지 않는다. 공유하면 한쪽에서 지운 식이 다른 쪽에서 사라져 더 헷갈린다. */
+function bindCalc(boxId, inId, outId, fabId){
+  var box=$(boxId), inp=$(inId), out=$(outId), fab=fabId?$(fabId):null;
+  if(!box || !inp || !out) return;
+  if(fab) fab.onclick=function(){ box.style.display = box.style.display==='block' ? 'none' : 'block'; if(box.style.display==='block') inp.focus(); };
   function evalNow(){
     var e = inp.value.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/\s+/g,'');
     if(!e){ out.innerHTML='&nbsp;'; return; }
@@ -834,7 +854,8 @@ fillTables();
 var 해시코드 = 해시에서읽기();
 if(해시코드){ applyCode(해시코드); } else { applyCode(newCode()); }
 bind();
-bindCalc();
+bindCalc('calc2','calc2-in','calc2-out',null);   /* 무대 아래 붙박이 */
+bindCalc('calc','calc-in','calc-out','calc-fab');  /* 오른쪽 아래 팝업 */
 if(!해시코드) 이어하기묻기();     /* 주소에 코드가 있으면 묻지 않는다 — 같은 학생의 새로고침이다 */
 이탈경고달기();
 저장상태알림();
