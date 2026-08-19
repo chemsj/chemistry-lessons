@@ -77,25 +77,41 @@
   details.teacher summary{ cursor:pointer; padding:8px 12px; font-weight:700; color:var(--warn); }
   details.teacher .in{ padding:0 14px 12px; }
   @media print{ .noprint{ display:none !important; } body{ padding:0; font-size:10.5pt; } }
-  /* ── 계산기 ── */
+  /* ── 계산판 — 자유 입력식 계산기를 대신한다 (2026-08-19 개편) ──
+     자유 입력이면 「0.414+0.417+0.416/3」처럼 괄호 없이 한 줄로 쳐서 연산 순서가 뒤집힌다.
+     C반 실시에서 실제로 다수 나왔다(부피가 0.4157 이 아니라 0.9697 로). 칸마다 값 하나만 받고
+     묶음(괄호)은 화면이 쥐고 있으면 그 사고가 생길 수 없다.
+     ⚠ 단위 변환(℃→K · mL→L · mmHg→atm)은 자동화하지 않는다 — 무엇을 넣을지가 채점 대상이다. */
   #calc-fab{ position:fixed; right:16px; bottom:16px; z-index:50; font-size:14px; font-weight:700;
              background:var(--accent); color:#fff; border:none; border-radius:24px; padding:10px 16px;
              box-shadow:0 3px 10px rgba(0,0,0,0.2); }
-  /* 계산기는 두 자리에 있다 — 실험 그림 바로 아래 붙박이(#calc2)와 화면 오른쪽 아래 팝업(#calc).
-     모양은 .calcbox 로 공통이고 자리잡기만 각자 다르다. 둘은 서로 독립이며 입력을 공유하지 않는다.
-     교사 확정(2026-08-19): 팝업만 두었더니 학생이 못 찾는다는 지적 → 조작 화면 아래에도 상시 노출. */
-  .calcbox{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px; }
-  #calc{ position:fixed; right:16px; bottom:66px; z-index:50; width:212px;
-         box-shadow:0 6px 22px rgba(0,0,0,0.18); display:none; }
-  #calc2{ margin-top:10px; max-width:340px; }   /* 무대 svg(viewBox 340) 폭에 맞춘다 */
-  .calcbox .ttl{ font-size:12px; color:var(--mute); margin-bottom:5px; }
-  .calcbox input{ width:100%; font-size:17px; text-align:right; padding:6px 8px;
-               border:1px solid var(--line); border-radius:6px; font-variant-numeric:tabular-nums; }
-  .calcbox .res{ min-height:22px; text-align:right; font-size:15px; font-weight:800; padding:2px 4px; }
-  .calcbox .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:5px; }
-  .calcbox .grid button{ padding:8px 0; font-size:15px; border-radius:7px; }
-  .calcbox .grid .op{ background:var(--head); }
-  .calcbox .grid .eq{ background:var(--accent); border-color:var(--accent); color:#fff; font-weight:800; }
+  .calcpad{ margin:14px 0 4px; border:1.5px solid var(--accent); border-radius:10px;
+            padding:10px 12px 8px; background:#fbfdff; }
+  .calcpad .cp-ttl{ font-weight:800; margin-bottom:7px; }
+  .calcpad .cp-ttl span{ font-weight:400; font-size:13px; color:var(--mute); }
+  .cp-row{ display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+           padding:5px 0; border-top:1px solid var(--line); }
+  .cp-no{ font-weight:800; color:var(--accent); width:1.4em; }
+  .cp-nm{ flex:0 0 132px; font-size:13px; }
+  .cp-ex{ display:flex; align-items:center; gap:4px; flex-wrap:wrap;
+          font-variant-numeric:tabular-nums; }
+  .cp-ex input{ width:88px; font-size:15px; text-align:right; padding:4px 6px;
+                border:1px solid var(--line); border-radius:5px;
+                font-variant-numeric:tabular-nums; }
+  .cp-ex select{ font-size:15px; padding:4px 2px; border:1px solid var(--line); border-radius:5px; }
+  .cp-eq{ font-weight:800; color:var(--mute); }
+  .cp-out{ min-width:88px; font-size:15px; font-weight:800; color:#b0b7bf;
+           font-variant-numeric:tabular-nums; }  /* 단위 라벨이 숫자 옆에 붙도록 최소폭 축소 (2026-08-19) */
+  .cp-out.on{ color:var(--accent); }
+  .cp-un{ font-size:12.5px; color:var(--mute); }
+  /* ②는 결과가 둘(mmHg·atm)이라 칸을 좁혀 단위 라벨이 숫자 옆에 붙게 한다. */
+  .cp-row[data-f="P2"] .cp-out,
+  .cp-row[data-f="AVG2"] .cp-out{ min-width:76px; }
+  /* ※ 질량차는 짝이 셋이라 칸을 좁혀 한 줄에 담는다. */
+  .cp-row[data-f="SUB3"] .cp-ex input{ width:74px; }
+  .cp-row[data-f="SUB3"] .cp-out{ min-width:70px; margin-right:10px; }
+  .calcpad .cp-foot{ border-top:1px solid var(--line); margin-top:4px; padding-top:6px;
+                     font-size:12.5px; color:var(--warn); }
 </style>
 </head>
 <body>
@@ -146,11 +162,12 @@
   아래 조작 카드는 <b>순서 없이 섞여 있고, 카드 이름(가~사)도 사람마다 다르게 붙어 있다</b> — 옆자리를 보면 틀린다.
   <b>먼저 순서를 정해 확정</b>한 뒤에야 조작할 수 있다. 확정한 순서를 답안지에 옮겨 적고 그대로 수행한다.
   잘못된 순서로 확정해도 막지 않지만, <b>잘못된 결과가 그대로 돌아온다.</b>
-  용기마다 <b>3회 반복</b>하고 평균을 쓴다.
+  <b>3회 반복</b>하고 평균을 쓴다.
   
   <div style="margin-top:6px; padding-top:5px; border-top:1px dashed #e2d391">
-    🧮 <b>계산기는 실험 그림 바로 아래</b>에 있다. 화면 <b>오른쪽 아래 「🧮 계산기」</b> 단추로도 열린다.
-    개인 전자기기는 쓸 수 없다. <b>계산 과정은 종이 답안지에도 적는다.</b>
+    🧮 <b>계산판은 실험 그림 아래</b>에 있다. 화면 <b>오른쪽 아래 「🧮 계산판」</b> 단추로도 갈 수 있다.
+    칸에 값을 하나씩 넣으면 묶음은 화면이 맞춘다. 개인 전자기기는 쓸 수 없다.
+    <b>계산 과정은 종이 답안지에도 적는다.</b>
   </div>
 </div>
 <div class="panel">
@@ -158,18 +175,6 @@
     <svg id="scene" viewBox="0 0 340 330" width="100%" height="316" role="img" aria-label="수상 치환 장치"></svg>
     <div class="msgline" id="msg" style="text-align:center"></div>
 
-    <div id="calc2" class="calcbox noprint">
-      <div class="ttl">🧮 계산기 — 계산 과정은 종이 답안지에도 적는다</div>
-      <input id="calc2-in" inputmode="text" autocomplete="off" spellcheck="false" placeholder="예: 0.575*0.082*292/(0.96*0.326)">
-      <div class="res" id="calc2-out">&nbsp;</div>
-  <div class="grid">
-    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="/">÷</button>
-    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="*">×</button>
-    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="op" data-k="-">−</button>
-    <button data-k="0">0</button><button data-k=".">.</button><button data-k="(">(</button><button class="op" data-k="+">＋</button>
-    <button data-k=")">)</button><button class="op" data-k="BS">←</button><button class="op" data-k="C">C</button><button class="eq" data-k="=">=</button>
-  </div>
-    </div>
   </div>
 
   <div class="side">
@@ -221,9 +226,7 @@
 
     <div class="cards noprint" style="margin-top:8px">
       <div class="card"><span class="tag" style="background:#fff">용기</span>
-        <span class="bd">상표를 가린 용기 두 개 — 각각 무엇인지 알아낸다</span>
-        <button id="btn-c1" class="main">용기 1</button>
-        <button id="btn-c2">용기 2</button></div>
+        <span class="bd">상표를 가린 용기 하나 — 이것이 무엇인지 알아낸다</span></div>
       <div class="card"><span class="tag" style="background:#fff">↺</span>
         <span class="bd">지금 용기의 조작 상태만 처음으로 (용기 속 기체는 그대로)</span>
         <button id="btn-reset">장치 정리</button></div>
@@ -231,9 +234,62 @@
   </div>
 </div>
 
+
+<div id="calcpad" class="calcpad noprint">
+  <div class="cp-ttl">🧮 계산판 <span>— 칸에 값을 하나씩 넣으면 묶음은 화면이 맞춘다. <b>계산 과정은 종이 답안지에도 적는다.</b></span></div>
+  <div class="cp-row" data-f="SUB3">
+    <span class="cp-no">※</span><span class="cp-nm">질량차 Δw — §2 표에 적을 값</span>
+    <span class="cp-ex">1회 <input inputmode="decimal" autocomplete="off"> − <input inputmode="decimal" autocomplete="off"> =</span><span class="cp-out">—</span>
+    <span class="cp-ex">2회 <input inputmode="decimal" autocomplete="off"> − <input inputmode="decimal" autocomplete="off"> =</span><span class="cp-out">—</span>
+    <span class="cp-ex">3회 <input inputmode="decimal" autocomplete="off"> − <input inputmode="decimal" autocomplete="off"> =</span><span class="cp-out">—</span>
+  </div>
+  <div class="cp-row" data-f="T">
+    <span class="cp-no">①</span><span class="cp-nm">절대 온도 T</span>
+    <span class="cp-ex"><input inputmode="decimal" autocomplete="off"> + 273</span>
+    <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">K</span>
+  </div>
+  <div class="cp-row" data-f="P2">
+    <span class="cp-no">②</span><span class="cp-nm">기체의 압력 P</span>
+    <span class="cp-ex">( <input inputmode="decimal" autocomplete="off"> − <input inputmode="decimal" autocomplete="off"> )</span>
+    <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">mmHg</span>
+    <span class="cp-eq">÷ 760 =</span><span class="cp-out">—</span><span class="cp-un">atm</span>
+  </div>
+  <div class="cp-row" data-f="AVG2">
+    <span class="cp-no">③</span><span class="cp-nm">부피 V — 3회 평균</span>
+    <span class="cp-ex">( <input inputmode="decimal" autocomplete="off"> + <input inputmode="decimal" autocomplete="off"> + <input inputmode="decimal" autocomplete="off"> ) ÷ <input inputmode="decimal" autocomplete="off"></span>
+    <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">mL</span>
+    <span class="cp-eq">÷ 1000 =</span><span class="cp-out">—</span><span class="cp-un">L</span>
+  </div>
+  <div class="cp-row" data-f="N">
+    <span class="cp-no">④</span><span class="cp-nm">몰수 n</span>
+    <span class="cp-ex">( <input inputmode="decimal" autocomplete="off"> × <input inputmode="decimal" autocomplete="off"> ) ÷ ( 0.082 × <input inputmode="decimal" autocomplete="off"> )</span>
+    <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">mol</span>
+  </div>
+  <div class="cp-row" data-f="AVG">
+    <span class="cp-no">⑤</span><span class="cp-nm">질량 Δw — 3회 평균</span>
+    <span class="cp-ex">( <input inputmode="decimal" autocomplete="off"> + <input inputmode="decimal" autocomplete="off"> + <input inputmode="decimal" autocomplete="off"> ) ÷ <input inputmode="decimal" autocomplete="off"></span>
+    <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">g</span>
+  </div>
+  <div class="cp-row" data-f="DIV">
+    <span class="cp-no">⑥</span><span class="cp-nm">몰질량 M</span>
+    <span class="cp-ex"><input inputmode="decimal" autocomplete="off"> ÷ <input inputmode="decimal" autocomplete="off"></span>
+    <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">g/mol</span>
+  </div>
+  <div class="cp-row" data-f="PCT">
+    <span class="cp-no">⑦</span><span class="cp-nm">차이 (%) <span style="font-size:11px;color:var(--mute)">§4</span></span>
+    <span class="cp-ex">| <input inputmode="decimal" autocomplete="off"> − <input inputmode="decimal" autocomplete="off"> | ÷ <input inputmode="decimal" autocomplete="off"> × 100</span>
+    <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">%</span>
+  </div>
+  <div class="cp-row" data-f="ANY">
+    <span class="cp-no">⑧</span><span class="cp-nm">그 밖의 계산</span>
+    <span class="cp-ex"><input inputmode="decimal" autocomplete="off"> <select><option>+</option><option>−</option><option>×</option><option>÷</option></select> <input inputmode="decimal" autocomplete="off"></span>
+    <span class="cp-eq">=</span><span class="cp-out">—</span>
+  </div>
+  <div class="cp-foot">⚠ 어떤 값을 넣을지는 <b>스스로</b> 정한다 — 단위(℃·K, mL·L, mmHg·atm)를 맞추는 것은 계산판이 해 주지 않는다. ③⑤는 값을 <b>두 개만</b> 넣고 2로 나눠도 된다.</div>
+</div>
 <h2>3. 계산에 쓸 자료</h2>
 <div class="note">
-  <b>두 용기에 담긴 기체는 아래 일곱 가지 가운데 하나씩이다.</b>
+  <b>용기에 담긴 기체는 아래 일곱 가지 가운데 하나다.</b>
   구한 몰질량을 표와 견주어 어느 것인지 판별한다. 값이 딱 떨어지지 않는 것은 정상이며,
   <b>가장 가까운 후보가 무엇인지</b> 근거를 들어 판단한다. 계산·판별은 전부 <b>종이 답안지에</b> 한다.
 </div>
@@ -242,19 +298,7 @@
 
 
 
-<button id="calc-fab" class="noprint" type="button">🧮 계산기</button>
-<div id="calc" class="calcbox noprint">
-  <div class="ttl">계산기 — 계산 과정은 종이 답안지에도 적는다</div>
-  <input id="calc-in" inputmode="text" autocomplete="off" spellcheck="false" placeholder="예: 0.575*0.082*292/(0.96*0.326)">
-  <div class="res" id="calc-out">&nbsp;</div>
-  <div class="grid">
-    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="/">÷</button>
-    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="*">×</button>
-    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="op" data-k="-">−</button>
-    <button data-k="0">0</button><button data-k=".">.</button><button data-k="(">(</button><button class="op" data-k="+">＋</button>
-    <button data-k=")">)</button><button class="op" data-k="BS">←</button><button class="op" data-k="C">C</button><button class="eq" data-k="=">=</button>
-  </div>
-</div>
+<button id="calc-fab" class="noprint" type="button">🧮 계산판</button>
 
 </div>
 
@@ -467,7 +511,7 @@ function drawScene(){
     +  '<rect x="'+(canX+4)+'" y="'+(canY+22)+'" width="22" height="18" fill="#6d5a13" opacity="0.65"/>'
     +  '<text x="'+(canX+15)+'" y="'+(canY+34)+'" font-size="7" fill="#fff" text-anchor="middle">상표 가림</text>'
     +  '<rect x="'+(canX+9)+'" y="'+(canY-10)+'" width="12" height="10" rx="2" fill="#b9bfc6" stroke="#8fa2b4"/>'
-    +  '<text x="'+(canX+15)+'" y="'+(weighing ? canY-16 : 324)+'" font-size="10" fill="#6b7784" text-anchor="middle">용기 '+(st.can+1)+'</text>';
+    +  '<text x="'+(canX+15)+'" y="'+(weighing ? canY-16 : 324)+'" font-size="10" fill="#6b7784" text-anchor="middle">용기</text>';
 
   /* 고무관 — 용기 입구 → 물속 → 실린더 입구 "안"으로 (요청 3) */
   if(st.hose && !weighing){
@@ -512,8 +556,7 @@ function render(){ try{ 저장하기(); }catch(_){}
   $('sample-code').textContent = setup ? formatCode(setup.code) : '—';
   $('out-mass').textContent = (st.lastMass == null) ? '—' : st.lastMass.toFixed(4);
   $('out-vol').textContent  = st.lastVol==null ? '—' : String(st.lastVol);
-  $('btn-c1').className = st.can===0 ? 'main' : '';
-  $('btn-c2').className = st.can===1 ? 'main' : '';
+  /* 용기는 하나뿐이다(2026-08-19) — st.can 은 늘 0 이라 갈아 끼울 것이 없다. */
   var ok = st.dh === 0;
   $('rd-dh').innerHTML = st.gasN>0
     ? '<span class="'+(ok?'lvl-ok':'lvl-no')+'">높이차 '+(st.dh>0?'+':'')+st.dh+' mm'+(ok?' · 맞음':'')+'</span>'
@@ -793,8 +836,6 @@ function bind(){
     }
     render();
   };
-  $('btn-c1').onclick = function(){ st.can = 0; actReset(); say('용기 1을 골랐다.'); };
-  $('btn-c2').onclick = function(){ st.can = 1; actReset(); say('용기 2를 골랐다.'); };
   /* 확정 전: 카드를 누르면 그 라벨이 순서 칸에 담긴다 */
   $('cardbox').addEventListener('click', function(ev){
     if(st.planLocked) return;
@@ -816,31 +857,85 @@ function bind(){
   };
 }
 
-/* 계산기 두 벌을 같은 코드로 붙인다 — 붙박이(fab 없음)와 팝업(fab로 여닫음).
-   둘은 입력을 공유하지 않는다. 공유하면 한쪽에서 지운 식이 다른 쪽에서 사라져 더 헷갈린다. */
-function bindCalc(boxId, inId, outId, fabId){
-  var box=$(boxId), inp=$(inId), out=$(outId), fab=fabId?$(fabId):null;
-  if(!box || !inp || !out) return;
-  if(fab) fab.onclick=function(){ box.style.display = box.style.display==='block' ? 'none' : 'block'; if(box.style.display==='block') inp.focus(); };
-  function evalNow(){
-    var e = inp.value.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/\s+/g,'');
-    if(!e){ out.innerHTML='&nbsp;'; return; }
-    if(!/^[0-9+\-*/().]+$/.test(e)){ out.textContent='식에 쓸 수 없는 문자'; return; }
-    try{
-      var v = Function('"use strict";return('+e+')')();
-      out.textContent = (typeof v==='number' && isFinite(v)) ? '= '+(Math.abs(v)>=1e6||Math.abs(v)<1e-4&&v!==0 ? v.toExponential(4) : +v.toPrecision(6)) : '식 오류';
-    }catch(_){ out.textContent='식 오류'; }
+/* 계산판 — 칸마다 값 하나만 받고 묶음(괄호)은 화면이 쥔다.
+   2026-08-19 개편: 자유 입력식 계산기를 걷어냈다. C반 실시에서 「0.414+0.417+0.416/3」처럼
+   괄호 없이 한 줄로 쳐서 연산 순서가 뒤집힌 답안이 다수 나왔다.
+   ⚠ 단위 변환은 자동화하지 않는다 — 무엇을 넣을지가 이 평가의 채점 대상이다.
+   ⚠ 값을 저장하지 않는다(종이 기록 원칙) — 크롬북을 여러 반이 돌려 쓴다. */
+function 계산판(){
+  var pad = $('calcpad'); if(!pad) return;
+  var fab = $('calc-fab');
+  if(fab) fab.onclick = function(){ pad.scrollIntoView({behavior:'smooth', block:'center'}); };
+
+  function num(el){
+    var v = (el.value||'').trim().replace(/,/g,'');
+    if(v === '') return null;
+    var n = Number(v);
+    return isFinite(n) ? n : NaN;
   }
-  box.querySelector('.grid').onclick=function(ev){
-    var k=ev.target.getAttribute && ev.target.getAttribute('data-k'); if(!k) return;
-    if(k==='C'){ inp.value=''; out.innerHTML='&nbsp;'; }
-    else if(k==='BS'){ inp.value=inp.value.slice(0,-1); evalNow(); }
-    else if(k==='='){ evalNow(); }
-    else { inp.value+=k; evalNow(); }
-    inp.focus();
-  };
-  inp.addEventListener('input', evalNow);
-  inp.addEventListener('keydown', function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); evalNow(); } });
+  function calc(row){
+    var vals = [].slice.call(row.querySelectorAll('input')).map(num);
+    var kind = row.getAttribute('data-f');
+    /* 평균은 값이 둘만 있어도 된다 — 이상치를 뺀 평균이 정당한 처리이기 때문이다. */
+    if(kind === 'SUB3'){
+      var out = [];
+      for(var i = 0; i < 6; i += 2){
+        var a = vals[i], b = vals[i+1];
+        out.push((a === null || b === null) ? null : (isNaN(a) || isNaN(b)) ? NaN : a - b);
+      }
+      return out;
+    }
+    if(kind === 'AVG2'){
+      var used2 = vals.slice(0,3).filter(function(v){ return v !== null; });
+      var d2 = vals[3];
+      if(!used2.length || d2 === null) return null;
+      if(used2.some(isNaN) || isNaN(d2)) return NaN;
+      if(d2 === 0) return Infinity;
+      var mean = used2.reduce(function(a,b){ return a+b; }, 0) / d2;
+      return [mean, mean / 1000];
+    }
+    if(kind === 'AVG'){
+      var used = vals.slice(0,3).filter(function(v){ return v !== null; });
+      var d = vals[3];
+      if(!used.length || d === null) return null;
+      if(used.some(isNaN) || isNaN(d)) return NaN;
+      if(d === 0) return Infinity;
+      return used.reduce(function(a,b){ return a+b; }, 0) / d;
+    }
+    if(vals.some(function(v){ return v === null; })) return null;
+    if(vals.some(isNaN)) return NaN;
+    switch(kind){
+      case 'T':   return vals[0] + 273;
+      case 'P2':  return [vals[0] - vals[1], (vals[0] - vals[1]) / 760];
+      case 'N':   return vals[2] === 0 ? Infinity : (vals[0] * vals[1]) / (0.082 * vals[2]);
+      case 'DIV': return vals[1] === 0 ? Infinity : vals[0] / vals[1];
+      case 'PCT': return vals[2] === 0 ? Infinity : Math.abs(vals[0] - vals[1]) / vals[2] * 100;
+      case 'ANY':
+        var sel = row.querySelector('select'), op = sel ? sel.value : '+';
+        if(op === '+') return vals[0] + vals[1];
+        if(op === '−') return vals[0] - vals[1];
+        if(op === '×') return vals[0] * vals[1];
+        return vals[1] === 0 ? Infinity : vals[0] / vals[1];
+    }
+    return null;
+  }
+  function put(out, v){
+    if(v === null || v === undefined){ out.textContent = '—'; out.className = 'cp-out'; return; }
+    if(typeof v !== 'number' || isNaN(v)){ out.textContent = '숫자만'; out.className = 'cp-out'; return; }
+    if(!isFinite(v)){ out.textContent = '0으로 나눌 수 없다'; out.className = 'cp-out'; return; }
+    out.textContent = (Math.abs(v) >= 1e6 || (Math.abs(v) < 1e-4 && v !== 0))
+      ? v.toExponential(4) : String(+v.toPrecision(6));
+    out.className = 'cp-out on';
+  }
+  /* ②처럼 중간값까지 보여 주는 줄이 있어 결과 칸이 여럿일 수 있다. */
+  function show(row){
+    var v = calc(row), arr = Array.isArray(v) ? v : [v];
+    [].slice.call(row.querySelectorAll('.cp-out')).forEach(function(out, i){ put(out, arr[i]); });
+  }
+  [].slice.call(pad.querySelectorAll('.cp-row')).forEach(function(row){
+    row.addEventListener('input',  function(){ show(row); });
+    row.addEventListener('change', function(){ show(row); });
+  });
 }
 
 fillTables();
@@ -848,8 +943,7 @@ fillTables();
 var 해시코드 = 해시에서읽기();
 if(해시코드){ applyCode(해시코드); } else { applyCode(newCode()); }
 bind();
-bindCalc('calc2','calc2-in','calc2-out',null);   /* 무대 아래 붙박이 */
-bindCalc('calc','calc-in','calc-out','calc-fab');  /* 오른쪽 아래 팝업 */
+계산판();
 if(!해시코드) 이어하기묻기();     /* 주소에 코드가 있으면 묻지 않는다 — 같은 학생의 새로고침이다 */
 이탈경고달기();
 저장상태알림();
