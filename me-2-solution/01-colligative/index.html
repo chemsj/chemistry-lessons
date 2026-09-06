@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>용질이 끼어들면 — 증기 압력 내림 · 끓는점 오름 · 어는점 내림</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: 'Pretendard','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif;
+       background: #14161c; color: #e8eaf0; display: flex; flex-direction: column; overflow: hidden; word-break: keep-all; }
+#bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 7px 12px;
+       background: #1d2129; border-bottom: 1px solid #333a48; }
+#bar h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; }
+#bar .sub { font-size: 12.5px; color: #8b94ab; }
+#ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 7px 10px;
+       background: #191d25; border-bottom: 1px solid #333a48; }
+.gl { font-size: 12.5px; font-weight: 700; color: #8b94ab; padding: 0 2px 0 4px; white-space: nowrap; }
+.sep { width: 1px; align-self: stretch; background: #39405266; margin: 0 3px; }
+button { font: inherit; font-size: 13.5px; font-weight: 700; color: #e8eaf0; background: #2a3040;
+         border: 1px solid #48506a; border-radius: 7px; padding: 6px 10px; cursor: pointer; min-height: 34px; }
+button:hover { filter: brightness(1.2); }
+button.on { background: #2b6e4f; border-color: #4bbd8a; color: #fff; }
+button.rec { background: #6b3a24; border-color: #e0922a; }
+input[type=range] { width: 240px; accent-color: #e0922a; }
+#mval { font-size: 22px; font-weight: 800; min-width: 84px; text-align: right; color: #ffd28a; font-variant-numeric: tabular-nums; }
+#stage { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1.15fr; gap: 8px; padding: 8px; min-height: 0; }
+.pane { position: relative; background: #0f1218; border: 1px solid #2b3242; border-radius: 10px; overflow: hidden; min-height: 0; display: flex; flex-direction: column; }
+.pane .cap { position: absolute; left: 10px; top: 8px; right: 300px; font-size: 12.5px; color: #9aa3b8; z-index: 2; pointer-events: none; line-height: 1.35; }
+.pane .cap b { color: #e8eaf0; }
+.pane .cap .rel { color: #d9a24a; font-weight: 700; }
+.pctl { position: absolute; right: 8px; top: 6px; z-index: 3; display: flex; align-items: center; gap: 5px; background: #1d2129cc; border: 1px solid #333a48; border-radius: 8px; padding: 4px 6px; }
+.pctl button { font-size: 12.5px; padding: 4px 8px; min-height: 28px; }
+.pctl .gl { font-size: 11.5px; }
+.pctl input[type=range] { width: 90px; }
+canvas { display: block; width: 100%; height: 100%; }
+#right { display: grid; grid-template-rows: 1.15fr 1fr; gap: 8px; min-height: 0; }
+#foot { background: #1d2129; border-top: 1px solid #333a48; padding: 6px 10px 7px; }
+#chips { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: stretch; }
+.chip { background: #12151b; border: 1px solid #2b3242; border-radius: 7px; padding: 4px 9px; font-size: 12.5px; color: #c6ccda; display: flex; flex-direction: column; min-width: 110px; }
+.chip b { font-size: 16px; color: #fff; font-variant-numeric: tabular-nums; }
+.chip .lab { font-size: 11.5px; color: #8b94ab; }
+.chip.model { border-color: #5a4a2a; }
+.chip.model .lab::after { content: " · 상댓값"; color: #d9a24a; font-weight: 700; }
+.chip.b b { color: #ff8a7a; }
+.chip.f b { color: #7fb8ff; }
+@media (max-width: 900px) { #stage { grid-template-columns: 1fr; } #right { grid-template-rows: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <h1>용질이 끼어들면 — 증기 압력 내림 · 끓는점 오름 · 어는점 내림</h1>
+  <span class="sub">물질과 에너지 Ⅱ-2 · 교과서 52~57쪽 그림 Ⅱ-12·13·14·15와 함께 · 용질은 설탕(비휘발성·비전해질) · 상수는 교과서 56쪽 · 근거·모형 설명은 <b>출처.md</b></span>
+</div>
+
+<div id="ctl">
+  <span class="gl">설탕물의 몰랄 농도</span>
+  <input type="range" id="msl" min="0" max="1" step="0.05" value="0" oninput="setM(+this.value)">
+  <span id="mval">0.00 m</span>
+  <div class="sep"></div>
+  <button id="bRun" class="on" onclick="toggleRun()">⏸ 일시정지</button>
+  <span class="gl" style="font-weight:400">— 그래프마다의 조작 단추는 각 그래프 오른쪽 위에 있다</span>
+</div>
+
+<div id="stage">
+  <div class="pane" id="pL">
+    <div class="cap" style="right:250px"><b>① 표면에서 일어나는 일</b> — 왼쪽 물 · 오른쪽 설탕물 (그림 Ⅱ-12) · <span class="rel">상댓값</span><br>
+      설탕 입자는 증발하지 않고 <b>표면 자리를 차지</b>한다 (물 분자는 비켜 갈 뿐 끌리지 않는다)</div>
+    <div class="pctl"><span class="gl">입자 속도</span><input type="range" id="spd" min="0.3" max="2" step="0.1" value="1" style="accent-color:#4bbd8a" oninput="speed=+this.value;document.getElementById('spdv').textContent=speed.toFixed(1)+'×'"><span id="spdv" style="font-size:12px;color:#c6ccda">1.0×</span><button onclick="resetSim()">↺ 입자 초기화</button></div>
+    <canvas id="cvL"></canvas>
+  </div>
+  <div id="right">
+    <div class="pane">
+      <div class="cap"><b>② 증기압 곡선</b> — 용매(파랑)와 용액(주황) · 1기압 = 760 mmHg 선과 만나는 온도가 <b>끓는점</b> (그림 Ⅱ-13·14)</div>
+      <div class="pctl"><button id="bZoom" onclick="toggleZoom()">끓는점 부근 확대</button></div>
+      <canvas id="cvG"></canvas>
+    </div>
+    <div class="pane">
+      <div class="cap"><b>③ 농도에 비례하는 변화량</b> — 「기록」을 눌러 (m, ΔT)를 점으로 쌓는다 · 직선의 <b>기울기 = K</b> (그림 Ⅱ-15)</div>
+      <div class="pctl"><button class="rec" onclick="recordPoint()">● 지금 농도를 기록</button><button id="bLine" onclick="toggleLine()">직선 보기</button><button onclick="clearPoints()">기록 지우기</button></div>
+      <canvas id="cvK"></canvas>
+    </div>
+  </div>
+</div>
+
+<div id="foot">
+  <div id="chips">
+    <div class="chip"><span class="lab">몰랄 농도 m</span><b id="cM">0.00 m</b></div>
+    <div class="chip"><span class="lab">물의 몰분율 X<sub>물</sub></span><b id="cX">1.0000</b></div>
+    <div class="chip model"><span class="lab">증기압 물 : 설탕물</span><b id="cVap">— : —</b></div>
+    <div class="chip b"><span class="lab">끓는점 (1기압)</span><b id="cTb">100.00 ℃</b></div>
+    <div class="chip b"><span class="lab">ΔT<sub>b</sub> = K<sub>b</sub>·m</span><b id="cDb">0.000 ℃</b></div>
+    <div class="chip f"><span class="lab">어는점</span><b id="cTf">0.00 ℃</b></div>
+    <div class="chip f"><span class="lab">ΔT<sub>f</sub> = K<sub>f</sub>·m</span><b id="cDf">0.000 ℃</b></div>
+  </div>
+</div>
+</div>
+
+<script>
+// ───────────────── 물성 · 계산 ─────────────────
+const KB = 0.51, KF = 1.86;          // 교과서 56쪽 표 (℃·kg/mol)
+const MOL_W = 1000 / 18.015;         // 물 1 kg의 몰수 = 55.51 mol
+function pWater(T) {                 // Antoine (mmHg) — log10 P = A − B/(C+T), 물 1~100 ℃ 계수, 0~110 ℃로 연장
+  return Math.pow(10, 8.07131 - 1730.63 / (233.426 + T));
+}
+function xWater(m) { return MOL_W / (MOL_W + m); }
+function solve(f, lo, hi) {          // f(lo)·f(hi) 부호가 다르다고 가정, 이분법
+  for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; (f(lo) * f(mid) <= 0) ? hi = mid : lo = mid; }
+  return (lo + hi) / 2;
+}
+function boilingPoint(m) { const x = xWater(m); return solve(T => pWater(T) * x - 760, 95, 110); }
+
+// ───────────────── 상태 ─────────────────
+let m = 0, running = true, zoom = false, showLine = false, speed = 1;
+const points = [];                    // {m, db, df}
+
+function setM(v) { m = v; document.getElementById('msl').value = v; rebuildSolute(); updateChips(); }
+function toggleRun() { running = !running; const b = document.getElementById('bRun'); b.classList.toggle('on', running); b.textContent = running ? '⏸ 일시정지' : '▶ 실행'; }
+function toggleZoom() { zoom = !zoom; document.getElementById('bZoom').classList.toggle('on', zoom); }
+function toggleLine() { showLine = !showLine; document.getElementById('bLine').classList.toggle('on', showLine); }
+function recordPoint() { if (!points.some(p => Math.abs(p.m - m) < 1e-6)) points.push({ m, db: KB * m, df: KF * m }); }
+function clearPoints() { points.length = 0; }
+
+function fmt(v, d) { return v.toFixed(d); }
+function updateChips() {
+  const x = xWater(m);
+  document.getElementById('mval').textContent = fmt(m, 2) + ' m';
+  document.getElementById('cM').textContent = fmt(m, 2) + ' m';
+  document.getElementById('cX').textContent = fmt(x, 4);
+  document.getElementById('cTb').textContent = fmt(100 + KB * m, 2) + ' ℃';
+  document.getElementById('cDb').textContent = fmt(KB * m, 3) + ' ℃';
+  document.getElementById('cTf').textContent = fmt(0 - KF * m, 2) + ' ℃';
+  document.getElementById('cDf').textContent = fmt(KF * m, 3) + ' ℃';
+}
+
+// ───────────────── ① 두 비커 입자 모형 (상댓값) ─────────────────
+const cvL = document.getElementById('cvL'), gL = cvL.getContext('2d');
+const SITES = 30;                     // 표면 자리 수
+const N_LIQ = 90;                     // 비커당 액체 물 분자 수
+let beakers = [];
+function makeBeaker(nSolute) {
+  const b = { liq: [], vap: [], solute: [], vapHist: [], nSol: nSolute };
+  for (let i = 0; i < N_LIQ; i++) b.liq.push({ x: Math.random(), y: Math.random(), vx: 0, vy: 0 });
+  // 설탕 입자 — 보이도록 표면 근처에 배치 (그림 Ⅱ-12), 자리 번호로 표면을 막는다
+  const slots = [...Array(SITES).keys()].sort(() => Math.random() - 0.5).slice(0, nSolute);
+  for (const s of slots) b.solute.push({ slot: s, x: (s + 0.5) / SITES, y: 0.06 + Math.random() * 0.12, ph: Math.random() * 6.28 });
+  return b;
+}
+function soluteCount(mm) { return Math.round(mm * 10); }  // 1 m → 표면 30자리 중 10자리 (상댓값 · 보이도록 과장)
+function rebuildSolute() {
+  const nb = makeBeaker(soluteCount(m));
+  if (beakers[1]) { nb.liq = beakers[1].liq; nb.vap = beakers[1].vap; nb.vapHist = beakers[1].vapHist; }
+  beakers[1] = nb;
+}
+function resetSim() { beakers = [makeBeaker(0), makeBeaker(soluteCount(m))]; }
+resetSim();
+
+const EVAP = 0.030, COND = 0.030;     // 프레임당 확률 (빈 자리당 증발 / 증기 분자당 응축) — 정상 상태 증기 수 = EVAP·빈 자리 ÷ COND = 빈 자리 수
+function stepBeaker(b, dt) {
+  // 액체 분자 무작위 걸음
+  const sp = dt * speed;
+  for (const p of b.liq) {
+    p.vx += (Math.random() - 0.5) * 0.006; p.vy += (Math.random() - 0.5) * 0.006;
+    p.vx *= 0.92; p.vy *= 0.92; p.x += p.vx * sp; p.y += p.vy * sp;
+    if (p.x < 0.02) { p.x = 0.02; p.vx *= -1; } if (p.x > 0.98) { p.x = 0.98; p.vx *= -1; }
+    if (p.y < 0.02) { p.y = 0.02; p.vy *= -1; } if (p.y > 0.98) { p.y = 0.98; p.vy *= -1; }
+    // 설탕 입자가 차지한 자리는 물 분자가 통과하지 못한다 — 겹치면 밀어낸다 (끌어당김은 없다 · 교과서 「자리를 차지한다」)
+    for (const q of b.solute) {
+      const dx = (p.x - q.x) * 1.4, dy = p.y - q.y, d = Math.hypot(dx, dy), R = 0.06;
+      if (d < R && d > 1e-6) { const k = (R - d) / d; p.x += dx / 1.4 * k; p.y += dy * k; p.vx += dx * 0.004; p.vy += dy * 0.004; }
+    }
+  }
+  for (const s of b.solute) { s.ph += 0.03 * sp; s.y = 0.10 + 0.04 * Math.sin(s.ph); }
+  // 증발 — 빈 표면 자리마다 확률로
+  const blocked = new Set(b.solute.map(s => s.slot));
+  for (let s = 0; s < SITES; s++) {
+    if (blocked.has(s)) continue;
+    if (Math.random() < EVAP * sp && b.liq.length > 10) {
+      const p = b.liq.pop();
+      b.vap.push({ x: (s + 0.5) / SITES, y: 0.98, vx: (Math.random() - 0.5) * 0.008, vy: -0.008 - Math.random() * 0.008 });
+    }
+  }
+  // 증기 분자 운동 · 응축
+  for (let i = b.vap.length - 1; i >= 0; i--) {
+    const v = b.vap[i];
+    v.vx += (Math.random() - 0.5) * 0.002; v.vy += (Math.random() - 0.5) * 0.002;
+    v.x += v.vx * sp; v.y += v.vy * sp;
+    if (v.x < 0.02) { v.x = 0.02; v.vx *= -1; } if (v.x > 0.98) { v.x = 0.98; v.vx *= -1; }
+    if (v.y < 0.02) { v.y = 0.02; v.vy *= -1; }
+    if (v.y > 0.98) { v.y = 0.98; v.vy *= -1; }
+    // 응축 — 증기 분자마다 같은 확률로 표면에 돌아온다(자리가 막혀 있어도 돌아올 수 있다 · 응축은 자리를 안 가린다)
+    if (Math.random() < COND * sp) { b.vap.splice(i, 1); b.liq.push({ x: v.x, y: 0.03, vx: 0, vy: 0.01 }); }
+  }
+  b.vapHist.push(b.vap.length); if (b.vapHist.length > 600) b.vapHist.shift();
+}
+function vapAvg(b) { return b.vapHist.length ? b.vapHist.reduce((a, c) => a + c, 0) / b.vapHist.length : 0; }
+
+function drawBeakers(W, H) {
+  const pad = 14, top = 66, gap = 24, bw = (W - pad * 2 - gap) / 2, bh = H - top - 74;
+  const a0 = vapAvg(beakers[0]), a1 = vapAvg(beakers[1]);
+  const vapMax = Math.max(a0, a1, 8);
+  beakers.forEach((b, i) => {
+    const x0 = pad + i * (bw + gap), y0 = top;
+    const liqTop = y0 + bh * 0.42;
+    gL.fillStyle = '#151a24'; gL.fillRect(x0, y0, bw, bh);
+    gL.fillStyle = i ? '#2a3b5a' : '#22355a'; gL.fillRect(x0, liqTop, bw, y0 + bh - liqTop);
+    gL.strokeStyle = '#6f7890'; gL.lineWidth = 2; gL.beginPath(); gL.moveTo(x0, y0); gL.lineTo(x0, y0 + bh); gL.lineTo(x0 + bw, y0 + bh); gL.lineTo(x0 + bw, y0); gL.stroke();
+    const blocked = new Set(b.solute.map(s => s.slot));
+    for (let s = 0; s < SITES; s++) {
+      const sx = x0 + (s + 0.5) / SITES * bw;
+      gL.fillStyle = blocked.has(s) ? '#e0922a' : '#5ea0ff88';
+      gL.fillRect(sx - 1.5, liqTop - 3, 3, 3);
+    }
+    gL.fillStyle = '#7fb8ff';
+    for (const p of b.liq) { gL.beginPath(); gL.arc(x0 + p.x * bw, liqTop + p.y * (y0 + bh - liqTop - 4) + 2, 3.2, 0, 6.28); gL.fill(); }
+    gL.fillStyle = '#e0922a';
+    for (const s of b.solute) { gL.beginPath(); gL.arc(x0 + s.x * bw, liqTop + s.y * (y0 + bh - liqTop), 6, 0, 6.28); gL.fill(); }
+    gL.fillStyle = '#bcd9ff';
+    for (const v of b.vap) { gL.beginPath(); gL.arc(x0 + v.x * bw, y0 + 4 + v.y * (liqTop - y0 - 8), 3.2, 0, 6.28); gL.fill(); }
+    // 라벨
+    gL.fillStyle = '#e8eaf0'; gL.font = 'bold 13px sans-serif'; gL.textAlign = 'center';
+    gL.fillText(i ? `설탕물 ${fmt(m, 2)} m` : '순수한 물', x0 + bw / 2, y0 + bh + 16);
+    // 막대 2줄 — 빈 표면 자리 · 증기 분자(평균)
+    const free = SITES - b.solute.length, avg = i ? a1 : a0;
+    const lx = x0, lw = 88, bx = x0 + lw, bwid = bw - lw - 34, rowY = y0 + bh + 26;
+    function bar(y, label, frac, color, txt) {
+      gL.fillStyle = '#9aa3b8'; gL.font = '11.5px sans-serif'; gL.textAlign = 'left'; gL.fillText(label, lx, y + 9);
+      gL.fillStyle = '#12151b'; gL.fillRect(bx, y, bwid, 11);
+      gL.fillStyle = color; gL.fillRect(bx, y, bwid * Math.max(0, Math.min(1, frac)), 11);
+      gL.fillStyle = '#fff'; gL.font = 'bold 12px sans-serif'; gL.textAlign = 'left'; gL.fillText(txt, bx + bwid + 5, y + 10);
+    }
+    bar(rowY, '빈 표면 자리', free / SITES, '#5ea0ff', `${free}/${SITES}`);
+    bar(rowY + 18, '증기 분자(평균)', avg / vapMax, i ? '#e0922a' : '#7fb8ff', avg.toFixed(1));
+  });
+  const ratio = a0 > 0 ? a1 / a0 : 1;
+  document.getElementById('cVap').textContent = (beakers[0].vapHist.length >= 600 && a0 > 2) ? `1.00 : ${fmt(Math.min(1.05, ratio), 2)}` : '— : — (재는 중)';
+}
+
+// ───────────────── ② 증기압 곡선 ─────────────────
+const cvG = document.getElementById('cvG'), gG = cvG.getContext('2d');
+function drawVP(W, H) {
+  const L = 54, R = 16, T0 = 66, B = 34;
+  const pw = W - L - R, ph = H - T0 - B;
+  let tMin, tMax, pMin, pMax;
+  if (zoom) { tMin = 98; tMax = 102; pMin = 700; pMax = 820; }
+  else { tMin = 0; tMax = 110; pMin = 0; pMax = 1100; }
+  const X = t => L + (t - tMin) / (tMax - tMin) * pw, Y = p => T0 + ph - (p - pMin) / (pMax - pMin) * ph;
+  // 축
+  gG.strokeStyle = '#39405288'; gG.lineWidth = 1; gG.fillStyle = '#8b94ab'; gG.font = '11px sans-serif';
+  const tStep = zoom ? 0.5 : 20, pStep = zoom ? 20 : 200;
+  for (let t = tMin; t <= tMax + 1e-9; t += tStep) { gG.beginPath(); gG.moveTo(X(t), T0); gG.lineTo(X(t), T0 + ph); gG.stroke(); gG.textAlign = 'center'; gG.fillText(fmt(t, zoom ? 1 : 0), X(t), T0 + ph + 14); }
+  for (let p = pMin; p <= pMax + 1e-9; p += pStep) { gG.beginPath(); gG.moveTo(L, Y(p)); gG.lineTo(L + pw, Y(p)); gG.stroke(); gG.textAlign = 'right'; gG.fillText(fmt(p, 0), L - 4, Y(p) + 4); }
+  gG.textAlign = 'left'; gG.fillStyle = '#9aa3b8'; gG.fillText('증기압 (mmHg)', L + 4, T0 - 6); gG.textAlign = 'right'; gG.fillText('온도 (℃)', L + pw, T0 + ph + 28);
+  const x = xWater(m);
+  // 곡선
+  function curve(f, color, w, dash) {
+    gG.strokeStyle = color; gG.lineWidth = w; gG.setLineDash(dash || []); gG.beginPath();
+    let first = true;
+    for (let i = 0; i <= 300; i++) { const t = tMin + (tMax - tMin) * i / 300, p = f(t); const yy = Y(p); if (yy < T0 - 2 || yy > T0 + ph + 2) { first = true; continue; } first ? gG.moveTo(X(t), yy) : gG.lineTo(X(t), yy); first = false; }
+    gG.stroke(); gG.setLineDash([]);
+  }
+  curve(pWater, '#7fb8ff', 2.2);
+  if (m > 0) curve(t => pWater(t) * x, '#e0922a', 2.2);
+  {
+    // 1기압 선
+    gG.strokeStyle = '#ff8a7a'; gG.lineWidth = 1.4; gG.setLineDash([5, 4]); gG.beginPath(); gG.moveTo(L, Y(760)); gG.lineTo(L + pw, Y(760)); gG.stroke(); gG.setLineDash([]);
+    gG.fillStyle = '#ff8a7a'; gG.textAlign = 'left'; gG.fillText('1기압 = 760 mmHg', L + 6, Y(760) - 5);
+    const tb0 = 100, tb = m > 0 ? boilingPoint(m) : 100;
+    if (zoom) {
+      markL(X(tb0), Y(760), '#7fb8ff', `물의 끓는점 100 ℃`);                         // 점 왼쪽 위
+      if (m > 0) mark(X(tb), Y(760), '#e0922a', `용액의 끓는점 ${fmt(tb, 2)} ℃`);      // 점 오른쪽 위
+      if (m > 0) bracket(X(tb0), X(tb), Y(760) + 26, `ΔTb = ${fmt(tb - tb0, 2)} ℃`);   // 아래 괄호
+    } else {
+      markL(X(tb0), Y(760), '#7fb8ff', `물의 끓는점 100 ℃`);
+      if (m > 0) { gG.fillStyle = '#e0922a'; gG.beginPath(); gG.arc(X(tb), Y(760), 4.5, 0, 6.28); gG.fill(); gG.textAlign = 'right'; gG.font = 'bold 12px sans-serif'; gG.fillText(`용액의 끓는점 ${fmt(tb, 2)} ℃`, X(tb) - 8, Y(760) + 16); gG.font = '11px sans-serif'; }
+    }
+    if (m > 0 && !zoom) { gG.fillStyle = '#e0922a'; gG.textAlign = 'left'; gG.fillText('같은 온도에서 용액의 증기압이 낮다 → 760에 닿으려면 더 가야 한다 (확대로 보기)', L + 6, T0 + 14); }
+  }
+  function mark(px, py, color, label, below) { gG.fillStyle = color; gG.beginPath(); gG.arc(px, py, 4.5, 0, 6.28); gG.fill(); gG.textAlign = 'left'; gG.font = 'bold 12px sans-serif'; gG.fillText(label, px + 8, below ? py + 16 : py - 8); gG.font = '11px sans-serif'; }
+  function markL(px, py, color, label) { gG.fillStyle = color; gG.beginPath(); gG.arc(px, py, 4.5, 0, 6.28); gG.fill(); gG.textAlign = 'right'; gG.font = 'bold 12px sans-serif'; gG.fillText(label, px - 8, py - 8); gG.font = '11px sans-serif'; }
+  function bracket(x1, x2, y, label) {
+    gG.strokeStyle = '#ffd28a'; gG.lineWidth = 1.6; gG.setLineDash([]);
+    gG.beginPath(); gG.moveTo(x1, y - 7); gG.lineTo(x1, y); gG.lineTo(x2, y); gG.lineTo(x2, y - 7); gG.stroke();
+    gG.strokeStyle = '#ffd28a66'; gG.setLineDash([3, 3]); gG.beginPath(); gG.moveTo(x1, Y(760) + 5); gG.lineTo(x1, y - 7); gG.moveTo(x2, Y(760) + 5); gG.lineTo(x2, y - 7); gG.stroke(); gG.setLineDash([]);
+    gG.fillStyle = '#ffd28a'; gG.textAlign = 'center'; gG.font = 'bold 12px sans-serif'; gG.fillText(label, (x1 + x2) / 2, y + 15); gG.font = '11px sans-serif';
+  }
+}
+
+// ───────────────── ③ 농도–ΔT 그래프 ＋ 온도계 막대 ─────────────────
+const cvK = document.getElementById('cvK'), gK = cvK.getContext('2d');
+function drawK(W, H) {
+  // 오른쪽: 온도계 막대 (그림 Ⅱ-15)
+  const barW = Math.min(150, W * 0.28);
+  const L = 50, R = barW + 30, T0 = 66, B = 32, pw = W - L - R, ph = H - T0 - B;
+  const X = mm => L + mm / 1.0 * pw, Y = d => T0 + ph - d / 2.0 * ph;
+  gK.strokeStyle = '#39405288'; gK.lineWidth = 1; gK.fillStyle = '#8b94ab'; gK.font = '11px sans-serif';
+  for (let mm = 0; mm <= 1.0001; mm += 0.1) { gK.beginPath(); gK.moveTo(X(mm), T0); gK.lineTo(X(mm), T0 + ph); gK.stroke(); gK.textAlign = 'center'; gK.fillText(fmt(mm, 1), X(mm), T0 + ph + 14); }
+  for (let d = 0; d <= 2.0001; d += 0.5) { gK.beginPath(); gK.moveTo(L, Y(d)); gK.lineTo(L + pw, Y(d)); gK.stroke(); gK.textAlign = 'right'; gK.fillText(fmt(d, 1), L - 4, Y(d) + 4); }
+  gK.textAlign = 'left'; gK.fillStyle = '#9aa3b8'; gK.fillText('ΔT (℃)', L + 4, T0 - 6); gK.textAlign = 'right'; gK.fillText('몰랄 농도 (m)', L + pw, T0 + ph + 27);
+  if (showLine) {
+    gK.strokeStyle = '#7fb8ff'; gK.lineWidth = 1.5; gK.setLineDash([5, 4]); gK.beginPath(); gK.moveTo(X(0), Y(0)); gK.lineTo(X(1), Y(KF)); gK.stroke();
+    gK.strokeStyle = '#ff8a7a'; gK.beginPath(); gK.moveTo(X(0), Y(0)); gK.lineTo(X(1), Y(KB)); gK.stroke(); gK.setLineDash([]);
+    gK.fillStyle = '#7fb8ff'; gK.textAlign = 'left'; gK.font = 'bold 12px sans-serif'; gK.fillText('기울기 1.86 = Kf', X(0.62), Y(KF * 0.62) - 10);
+    gK.fillStyle = '#ff8a7a'; gK.fillText('기울기 0.51 = Kb', X(0.62), Y(KB * 0.62) - 10); gK.font = '11px sans-serif';
+  }
+  for (const p of points) {
+    gK.fillStyle = '#7fb8ff'; gK.beginPath(); gK.arc(X(p.m), Y(p.df), 5, 0, 6.28); gK.fill();
+    gK.fillStyle = '#ff8a7a'; gK.beginPath(); gK.arc(X(p.m), Y(p.db), 5, 0, 6.28); gK.fill();
+  }
+  // 현재 농도 위치 (빈 원)
+  gK.strokeStyle = '#7fb8ff'; gK.lineWidth = 1.5; gK.beginPath(); gK.arc(X(m), Y(KF * m), 6, 0, 6.28); gK.stroke();
+  gK.strokeStyle = '#ff8a7a'; gK.beginPath(); gK.arc(X(m), Y(KB * m), 6, 0, 6.28); gK.stroke();
+  gK.fillStyle = '#9aa3b8'; gK.textAlign = 'left'; gK.fillText('● 어는점 내림 ΔTf (파랑)  ● 끓는점 오름 ΔTb (빨강)  ○ 지금 농도', L + 4, T0 + ph + 27 - 0);
+  // 온도계 막대 2개
+  const bx = W - barW - 10, bt = T0, bh = ph;
+  function therm(x, wdt, base, delta, up, color, title) {
+    const range = 2.2, y0 = bt + bh * 0.5;
+    const yv = y0 - (up ? 1 : -1) * (delta / range) * bh * 0.42;
+    gK.fillStyle = '#12151b'; gK.fillRect(x, bt, wdt, bh);
+    gK.strokeStyle = '#39405288'; gK.strokeRect(x, bt, wdt, bh);
+    gK.strokeStyle = '#6f7890'; gK.beginPath(); gK.moveTo(x, y0); gK.lineTo(x + wdt, y0); gK.stroke();
+    gK.fillStyle = color; gK.fillRect(x + 6, Math.min(y0, yv), wdt - 12, Math.max(2, Math.abs(y0 - yv)));
+    gK.fillStyle = '#e8eaf0'; gK.textAlign = 'center'; gK.font = 'bold 12px sans-serif';
+    gK.fillText(title, x + wdt / 2, bt - 6);
+    gK.fillStyle = color; gK.fillText(`${fmt(base + (up ? delta : -delta), 2)} ℃`, x + wdt / 2, up ? yv - 8 : yv + 16);
+    gK.fillStyle = '#9aa3b8'; gK.font = '11px sans-serif'; gK.fillText(`${base} ℃`, x + wdt / 2, up ? y0 + 14 : y0 - 6);
+  }
+  therm(bx, barW / 2 - 6, 100, KB * m, true, '#ff8a7a', '끓는점');
+  therm(bx + barW / 2 + 6, barW / 2 - 6, 0, KF * m, false, '#7fb8ff', '어는점');
+}
+
+// ───────────────── 루프 ─────────────────
+// 캔버스는 CSS 픽셀 좌표로 그린다(고해상도 화면은 dpr 배로 뒷버퍼만 키운다)
+function fit(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, r.width, r.height);
+  return { W: r.width, H: r.height };
+}
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(2, (now - last) / 16.67); last = now;
+  if (running) beakers.forEach(b => stepBeaker(b, dt));
+  let s = fit(cvL); drawBeakers(s.W, s.H);
+  s = fit(cvG); drawVP(s.W, s.H);
+  s = fit(cvK); drawK(s.W, s.H);
+  requestAnimationFrame(loop);
+}
+updateChips();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

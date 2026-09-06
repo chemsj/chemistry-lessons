@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>냉각 곡선 판독 연습 — 어느 값을 어는점으로 읽을까</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: 'Pretendard','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif;
+       background: #14161c; color: #e8eaf0; display: flex; flex-direction: column; overflow: hidden; word-break: keep-all; }
+#bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 7px 12px; background: #1d2129; border-bottom: 1px solid #333a48; }
+#bar h1 { font-size: 16px; font-weight: 800; }
+#bar .sub { font-size: 12.5px; color: #8b94ab; }
+#ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 7px 10px; background: #191d25; border-bottom: 1px solid #333a48; }
+.gl { font-size: 12.5px; font-weight: 700; color: #8b94ab; padding: 0 2px 0 4px; white-space: nowrap; }
+.sep { width: 1px; align-self: stretch; background: #39405266; margin: 0 3px; }
+button { font: inherit; font-size: 13.5px; font-weight: 700; color: #e8eaf0; background: #2a3040; border: 1px solid #48506a; border-radius: 7px; padding: 6px 10px; cursor: pointer; min-height: 34px; }
+button:hover { filter: brightness(1.2); }
+button.on { background: #2b6e4f; border-color: #4bbd8a; color: #fff; }
+button.s0.on { background: #24405c; border-color: #3f7ab8; }
+button.s1.on { background: #4a3b6b; border-color: #9b7fe0; }
+button.s2.on { background: #6b3a24; border-color: #e0922a; }
+button.warn { background: #5a2f2f; border-color: #c25a5a; }
+input[type=range] { width: 140px; accent-color: #4bbd8a; }
+#stage { flex: 1 1 auto; display: grid; grid-template-columns: 1.45fr 1fr; gap: 10px; padding: 10px; min-height: 0; }
+.pane { position: relative; background: #0f1218; border: 1px solid #2b3242; border-radius: 10px; overflow: hidden; min-height: 0; display: flex; flex-direction: column; }
+.pane .cap { position: absolute; left: 10px; top: 8px; font-size: 12.5px; color: #9aa3b8; z-index: 2; pointer-events: none; line-height: 1.35; }
+.pane .cap b { color: #e8eaf0; }
+canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+#side { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: auto; }
+/* 카드 블록 */
+.card { background: #0f1218; border: 1px solid #2b3242; border-radius: 10px; overflow: hidden; }
+.card .ch { display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: #171b24; border-bottom: 1px solid #2b3242; font-size: 13px; font-weight: 800; }
+.card.now .ch { border-left: 4px solid #ffd28a; }
+.card.verdict .ch { border-left: 4px solid #4bbd8a; }
+.card.cond .ch { border-left: 4px solid #9aa3b8; }
+.card.table .ch { border-left: 4px solid #7fb8ff; }
+.card .cb { padding: 9px 12px; font-size: 13px; line-height: 1.5; }
+.card .big { font-size: 22px; color: #ffd28a; font-weight: 800; font-variant-numeric: tabular-nums; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 12.5px; }
+.kv .k { color: #8b94ab; }
+.row { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-top: 1px dashed #2b3242; }
+.row:first-child { border-top: 0; padding-top: 0; }
+.mk { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #fff; }
+.mk.ok { background: #2b6e4f; } .mk.no { background: #8a3a3a; } .mk.warn { background: #6b3a24; } .mk.read { background: #24405c; } .mk.off { background: #46536b; }
+.row b { color: #fff; }
+.row .v { color: #ffd28a; font-variant-numeric: tabular-nums; }
+.hidden { display: none; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th, td { border: 1px solid #2b3242; padding: 4px 6px; text-align: center; font-variant-numeric: tabular-nums; }
+th { background: #171b24; color: #9aa3b8; font-weight: 700; }
+td.v { color: #fff; font-weight: 700; }
+.muted { color: #8b94ab; font-size: 12px; }
+@media (max-width: 900px) { #stage { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <h1>냉각 곡선 판독 연습 — 어느 값을 어는점으로 읽을까</h1>
+  <span class="sub">물질과 에너지 Ⅱ-3 리허설 · 12차시 ㉱ 판독·검산 역할 연습 · 그래프를 <b>클릭</b>해 어는점을 읽는다 · 모형 설명은 <b>출처.md</b></span>
+</div>
+
+<div id="ctl">
+  <span class="gl">시료</span>
+  <button class="s0 on" id="b0" onclick="pick(0)">순수한 물</button>
+  <button class="s1" id="b1" onclick="pick(1)">0.3 m 설탕물</button>
+  <button class="s2" id="b2" onclick="pick(2)">0.6 m 설탕물</button>
+  <div class="sep"></div>
+  <span class="gl">조건</span>
+  <button id="bSc" onclick="toggle('sc')" title="가만히 두거나 아주 맑은 물이면 어는점 아래로 내려가도 얼음 씨가 생기지 않아 잠깐 더 내려간다. 얼기 시작하면 융해열이 나와 어는점까지 되돌아온다.">과냉각 일어남</button>
+  <button id="bStir" class="on" onclick="toggle('stir')" title="젓지 않으면 냉각조에 닿은 벽 쪽부터 얼고 가운데는 따뜻해 값이 흔들린다. 젓기는 온도를 고르게 하고 얼음 씨가 생기게 해 과냉각도 얕게 한다.">잘 젓는다</button>
+  <div class="sep"></div>
+  <button id="bRun" class="on" onclick="toggleRun()">⏸ 일시정지</button>
+  <span class="gl">속도</span><input type="range" id="spd" min="1" max="30" value="10" oninput="speed=+this.value;document.getElementById('spdv').textContent=speed+'×'"><span id="spdv" style="font-size:12.5px;color:#c6ccda">10×</span>
+  <button onclick="restart()">↺ 이 시료 다시 냉각</button>
+  <button onclick="resetAll()">↺ 초기화 (전부)</button>
+  <div class="sep"></div>
+  <button class="warn" onclick="showVerdict()">판정 보기</button>
+  <button onclick="clearReads()">읽은 값 지우기</button>
+</div>
+
+<div id="stage">
+  <div class="pane">
+    <div class="cap"><b>시간–온도 그래프</b> (수집 간격 1초 · 소수 1자리) — <b>클릭</b>하면 그 시점의 값을 「내가 읽은 어는점」으로 적는다 · 판정 표시 ①②③은 오른쪽 「판정」 카드에 설명</div>
+    <canvas id="cv"></canvas>
+  </div>
+  <div id="side">
+    <div class="card now">
+      <div class="ch">지금 시료 — <span id="sName">순수한 물</span></div>
+      <div class="cb">
+        <div style="display:flex;align-items:baseline;gap:14px"><span class="big" id="tCur">20.0 ℃</span><span class="muted">경과 <b id="tNow">0</b> s · 얼음 분율 <b id="fIce">0 %</b></span></div>
+        <div class="kv" style="margin-top:6px">
+          <span class="k">내가 읽은 어는점</span><span id="myRead">아직 없음 — 그래프를 클릭</span>
+          <span class="k">얼음 분율</span><span class="muted">언 만큼 남은 액체가 진해진다 → 설탕물은 평평해지지 않고 천천히 계속 내려간다</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card verdict hidden" id="vcard">
+      <div class="ch">판정 — 그래프의 표시 ①②③</div>
+      <div class="cb" id="vbody"></div>
+    </div>
+
+    <div class="card table">
+      <div class="ch">답안지 §2~§5와 같은 순서 — 읽은 값이 자동으로 들어간다</div>
+      <div class="cb">
+        <table>
+          <tr><th>농도</th><th>읽은 어는점 (℃)</th><th>ΔTf = 물 − 용액</th><th>기울기 = ΔTf ÷ m</th></tr>
+          <tr><td>0 (물)</td><td class="v" id="r0">—</td><td>—</td><td>—</td></tr>
+          <tr><td>0.3 m</td><td class="v" id="r1">—</td><td class="v" id="d1">—</td><td class="v" id="s1">—</td></tr>
+          <tr><td>0.6 m</td><td class="v" id="r2">—</td><td class="v" id="d2">—</td><td class="v" id="s2">—</td></tr>
+          <tr><th colspan="3" style="text-align:right">두 기울기의 평균</th><td class="v" id="sAvg">—</td></tr>
+          <tr><th colspan="3" style="text-align:right">이론 상수 1.86과 비교</th><td class="v" id="sCmp">—</td></tr>
+        </table>
+        <div class="muted" style="margin-top:6px">ΔTf는 <b>§2에 적은 물의 실측값</b>에서 용액을 뺀다 — 물이 0.0이 아닐 수 있다. 기울기는 원점–각 점 두 값의 <b>평균</b>(답안지 §4㉢).</div>
+      </div>
+    </div>
+
+    <div class="card cond">
+      <div class="ch">조건이 뜻하는 것</div>
+      <div class="cb">
+        <div class="row"><span class="mk warn">과</span><span><b>과냉각</b> — 어는점 아래로 잠깐 더 내려갔다가, 얼기 시작하면 융해열이 나와 어는점까지 되돌아온다. 골짜기는 어는점이 아니다.</span></div>
+        <div class="row"><span class="mk off">젓</span><span><b>젓기</b> — 온도를 고르게 하고 얼음 씨가 생기게 해 과냉각을 얕게 한다. 끄면 값이 흔들리고 과냉각이 깊어진다.</span></div>
+        <div class="row"><span class="mk off">영</span><span><b>센서 영점</b> — 센서마다 ±0.2 ℃ 안팎의 영점 차가 있어 물이 0.0에서 평평해지지 않을 수 있다(초기화마다 새 센서). 그래서 §3은 <b>물의 실측값</b>에서 뺀다.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const KF = 1.86, T_BATH = -12, K_COOL = 0.016, CP = 4.18, LF = 334, T0 = 20, DT = 1, T_MAX = 600;   // 수집 간격 1 s
+const M_LIST = [0, 0.3, 0.6], NAMES = ['순수한 물', '0.3 m 설탕물', '0.6 m 설탕물'], COLORS = ['#7fb8ff', '#b39ddb', '#e0922a'];
+let cur = 0, speed = 10, running = true;
+const opt = { sc: false, stir: true };
+let offset = Math.round((Math.random() * 0.4 - 0.2) * 10) / 10;   // 센서 영점 차 — 초기화마다 새로 뽑는다
+let verdictOn = false;
+const runs = [null, null, null];      // 시료별 냉각 기록
+const reads = [null, null, null];     // 시료별 읽은 값 {t, T}
+let acc = 0;
+
+function newRun(i) {
+  const m = M_LIST[i];
+  return { m, t: 0, T: T0, f: 0, data: [], frozenStart: null, superc: opt.sc, scDepth: 1.5 + Math.random() + (opt.stir ? 0 : 1.0), nucleated: false, tfTrue: -KF * m, noise: 0, done: false, valley: null };
+}
+function tf(run) { return -KF * run.m / Math.max(1e-6, 1 - run.f); }   // 남은 물 기준 어는점(진해짐)
+function step(run) {
+  if (run.done) return;
+  const tfNow = tf(run);
+  let dT = -K_COOL * (run.T - T_BATH) * DT;
+  if (!run.nucleated) {
+    if (run.T + dT <= tfNow) {
+      if (run.superc && run.T + dT > tfNow - run.scDepth) { run.T += dT; run.valley = run.t + 1; }   // 과냉각 구간 — 계속 내려간다
+      else if (run.superc) {                                                           // 얼기 시작 → 되돌아옴
+        run.nucleated = true; run.frozenStart = run.t;
+        run.f += CP * (tfNow - run.T) / LF;                                            // 되돌아오며 언 분율
+        run.T = tfNow;
+      } else { run.nucleated = true; run.frozenStart = run.t; run.T = tfNow; }
+    } else run.T += dT;
+  } else if (run.f < 1) {
+    // 어는 중 — 빠져나가는 열만큼 얼음이 늘고, 온도는 (남은 물의) 어는점을 따른다. 한제보다 낮아질 수는 없다
+    const q = K_COOL * (run.T - T_BATH) * DT;
+    run.f = Math.min(1, run.f + CP * q / LF);
+    run.T = Math.max(T_BATH, tf(run));
+  } else {
+    // 다 얼었다 — 얼음이 한제 온도로 식는다 (냉각 곡선의 마지막 내리막)
+    run.T += -K_COOL * (run.T - T_BATH) * DT;
+  }
+  run.noise = 0.7 * run.noise + (Math.random() - 0.5) * 0.06;
+  const stirNoise = opt.stir ? 0 : (Math.random() - 0.5) * 0.5 * (run.nucleated ? 1 : 0.4);
+  const shown = run.T + run.noise + stirNoise + offset;
+  run.data.push({ t: run.t, T: Math.round(shown * 10) / 10 });
+  run.t += DT;
+  if (run.t > T_MAX) run.done = true;
+}
+function pick(i) { cur = i; [0, 1, 2].forEach(k => document.getElementById('b' + k).classList.toggle('on', k === i)); if (!runs[i]) runs[i] = newRun(i); hideVerdict(); updateSide(); }
+function toggle(k) { opt[k] = !opt[k]; document.getElementById({ sc: 'bSc', stir: 'bStir' }[k]).classList.toggle('on', opt[k]); restart(); }
+function toggleRun() { running = !running; const b = document.getElementById('bRun'); b.classList.toggle('on', running); b.textContent = running ? '⏸ 일시정지' : '▶ 실행'; }
+function hideVerdict() { verdictOn = false; document.getElementById('vcard').classList.add('hidden'); }
+function restart() { runs[cur] = newRun(cur); reads[cur] = null; hideVerdict(); updateSide(); }
+function resetAll() {
+  offset = Math.round((Math.random() * 0.4 - 0.2) * 10) / 10;
+  for (let i = 0; i < 3; i++) { runs[i] = null; reads[i] = null; }
+  opt.sc = false; opt.stir = true; document.getElementById('bSc').classList.remove('on'); document.getElementById('bStir').classList.add('on');
+  hideVerdict(); acc = 0; pick(0);
+}
+function clearReads() { for (let i = 0; i < 3; i++) reads[i] = null; hideVerdict(); updateSide(); }
+runs[0] = newRun(0);
+
+// ── 그래프 ──
+const cv = document.getElementById('cv'), g = cv.getContext('2d');
+const AX = { L: 52, R: 16, T: 50, B: 34, tMax: T_MAX, yMin: -14, yMax: 22 };
+function X(t, W) { return AX.L + t / AX.tMax * (W - AX.L - AX.R); }
+function Y(T, H) { return AX.T + (AX.yMax - T) / (AX.yMax - AX.yMin) * (H - AX.T - AX.B); }
+// 배경이 있는 라벨(칩) — 곡선 위에 글자가 겹쳐도 읽힌다
+function chip(ctx, x, y, text, color, align, sc) {
+  sc = sc || 1; ctx.font = `bold ${Math.round(12 * sc)}px sans-serif`;
+  const w = ctx.measureText(text).width + 12 * sc, h = 18 * sc;
+  let x0 = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  ctx.fillStyle = '#0f1218ee'; ctx.strokeStyle = color; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x0, y - h / 2, w, h, 5 * sc) : ctx.rect(x0, y - h / 2, w, h); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = color; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(text, x0 + 6 * sc, y + 0.5); ctx.textBaseline = 'alphabetic';
+}
+function badge(ctx, x, y, n, color, sc) {   // 번호 표식 ①②③
+  sc = sc || 1; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, 10 * sc, 0, 6.28); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = `bold ${Math.round(12 * sc)}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n, x, y + 0.5); ctx.textBaseline = 'alphabetic';
+}
+function verdictPoints(run) {          // 판정에 쓰는 세 점
+  if (!run || run.frozenStart == null) return null;
+  const fs = run.frozenStart, on = run.data[fs] || run.data[run.data.length - 1];
+  let valley = null;
+  if (run.superc && run.valley != null) { let vi = fs, vT = Infinity; for (let k = Math.max(0, fs - 200); k < fs; k++) if (run.data[k].T < vT) { vT = run.data[k].T; vi = k; } valley = run.data[vi]; }
+  let later = null;
+  if (run.m > 0) { const d = run.data[Math.min(run.data.length - 1, fs + 30)]; if (d && d.T < on.T - 0.05) later = d; }
+  return { on, valley, later, tfS: run.tfTrue + offset };
+}
+function annotate(ctx, XX, YY, run, sc) {
+  const v = verdictPoints(run); if (!v) return;
+  ctx.setLineDash([6, 4]); ctx.strokeStyle = '#4bbd8a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(XX(0), YY(v.tfS)); ctx.lineTo(XX(T_MAX), YY(v.tfS)); ctx.stroke(); ctx.setLineDash([]);
+  chip(ctx, XX(T_MAX) - 4, YY(v.tfS) - 12 * sc, `어는점 ${v.tfS.toFixed(1)} ℃`, '#4bbd8a', 'right', sc);
+  ctx.strokeStyle = '#4bbd8a'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.arc(XX(v.on.t), YY(v.on.T), 8 * sc, 0, 6.28); ctx.stroke();
+  badge(ctx, XX(v.on.t) - 16 * sc, YY(v.on.T) - 16 * sc, '1', '#2b6e4f', sc);
+  if (v.valley) { ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 2; const x = XX(v.valley.t), y = YY(v.valley.T), r = 6 * sc; ctx.beginPath(); ctx.moveTo(x - r, y - r); ctx.lineTo(x + r, y + r); ctx.moveTo(x + r, y - r); ctx.lineTo(x - r, y + r); ctx.stroke(); badge(ctx, x, y + 20 * sc, '2', '#8a3a3a', sc); }
+  if (v.later) { ctx.strokeStyle = '#e0922a'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(XX(v.later.t), YY(v.on.T)); ctx.lineTo(XX(v.later.t), YY(v.later.T)); ctx.stroke(); ctx.fillStyle = '#e0922a'; ctx.beginPath(); ctx.arc(XX(v.later.t), YY(v.later.T), 4 * sc, 0, 6.28); ctx.fill(); badge(ctx, XX(v.later.t) + 16 * sc, YY(v.later.T) + 14 * sc, '3', '#6b3a24', sc); }
+}
+function draw(W, H) {
+  g.strokeStyle = '#39405288'; g.lineWidth = 1; g.fillStyle = '#8b94ab'; g.font = '11px sans-serif';
+  for (let t = 0; t <= AX.tMax; t += 60) { g.beginPath(); g.moveTo(X(t, W), AX.T); g.lineTo(X(t, W), H - AX.B); g.stroke(); g.textAlign = 'center'; g.fillText(t, X(t, W), H - AX.B + 14); }
+  for (let T = AX.yMin; T <= AX.yMax; T += 2) { g.beginPath(); g.moveTo(AX.L, Y(T, H)); g.lineTo(W - AX.R, Y(T, H)); g.stroke(); g.textAlign = 'right'; g.fillText(T, AX.L - 4, Y(T, H) + 4); }
+  g.strokeStyle = '#6f7890'; g.beginPath(); g.moveTo(AX.L, Y(0, H)); g.lineTo(W - AX.R, Y(0, H)); g.stroke();
+  g.textAlign = 'left'; g.fillStyle = '#9aa3b8'; g.fillText('온도 (℃)', AX.L + 4, AX.T - 6); g.textAlign = 'right'; g.fillText('시간 (s)', W - AX.R, H - AX.B + 28);
+  g.save(); g.beginPath(); g.rect(AX.L, AX.T, W - AX.L - AX.R, H - AX.T - AX.B); g.clip();
+  runs.forEach((run, i) => {
+    if (!run) return;
+    g.strokeStyle = COLORS[i]; g.lineWidth = i === cur ? 2.4 : 1.2; g.globalAlpha = i === cur ? 1 : 0.4; g.beginPath();
+    run.data.forEach((d, k) => { const x = X(d.t, W), y = Y(d.T, H); k ? g.lineTo(x, y) : g.moveTo(x, y); });
+    g.stroke(); g.globalAlpha = 1;
+  });
+  // 읽은 값 — 세로 점선 ＋ 위쪽 칩(곡선과 안 겹치는 자리)
+  runs.forEach((run, i) => {
+    const r = reads[i]; if (!r) return;
+    g.strokeStyle = COLORS[i]; g.setLineDash([4, 4]); g.lineWidth = 1; g.beginPath(); g.moveTo(X(r.t, W), AX.T); g.lineTo(X(r.t, W), H - AX.B); g.stroke(); g.setLineDash([]);
+    g.fillStyle = COLORS[i]; g.beginPath(); g.arc(X(r.t, W), Y(r.T, H), 5, 0, 6.28); g.fill();
+    chip(g, X(r.t, W), AX.T + 14 + i * 22, `${NAMES[i].slice(0, 5)} 읽음 ${r.T.toFixed(1)} ℃`, COLORS[i], 'center', 1);
+  });
+  if (verdictOn) annotate(g, t => X(t, W), T => Y(T, H), runs[cur], 1);
+  g.restore();
+  // 확대 창 (어는점 부근 −3~1 ℃)
+  const run = runs[cur];
+  if (run && run.data.length) {
+    const zw = Math.min(300, (W - AX.L - AX.R) * 0.42), zh = (H - AX.T - AX.B) * 0.46, zx = W - AX.R - zw - 6, zy = AX.T + 6;
+    g.fillStyle = '#0f1218f2'; g.fillRect(zx, zy, zw, zh); g.strokeStyle = '#48506a'; g.strokeRect(zx, zy, zw, zh);
+    g.save(); g.beginPath(); g.rect(zx, zy, zw, zh); g.clip();
+    const yMinZ = -3.2, yMaxZ = 1.0;
+    const ZX = t => zx + t / AX.tMax * zw, ZY = T => zy + (yMaxZ - T) / (yMaxZ - yMinZ) * zh;
+    g.strokeStyle = '#39405288'; for (let T = -3; T <= 1; T += 0.5) { g.beginPath(); g.moveTo(zx, ZY(T)); g.lineTo(zx + zw, ZY(T)); g.stroke(); g.fillStyle = '#8b94ab'; g.font = '10px sans-serif'; g.textAlign = 'left'; g.fillText(T.toFixed(1), zx + 2, ZY(T) - 2); }
+    g.strokeStyle = COLORS[cur]; g.lineWidth = 2; g.beginPath();
+    run.data.forEach((d, k) => { const x = ZX(d.t), y = ZY(d.T); k ? g.lineTo(x, y) : g.moveTo(x, y); });
+    g.stroke();
+    g.fillStyle = '#9aa3b8'; g.font = '11px sans-serif'; g.textAlign = 'right'; g.fillText('확대: −3 ~ 1 ℃', zx + zw - 4, zy + 12);
+    const r = reads[cur]; if (r) { g.fillStyle = COLORS[cur]; g.beginPath(); g.arc(ZX(r.t), ZY(r.T), 4, 0, 6.28); g.fill(); }
+    if (verdictOn) annotate(g, ZX, ZY, run, 0.8);
+    g.restore();
+  }
+}
+cv.addEventListener('click', e => {
+  const rect = cv.getBoundingClientRect(); const W = rect.width;
+  const t = Math.round((e.clientX - rect.left - AX.L) / (W - AX.L - AX.R) * AX.tMax);
+  const run = runs[cur]; if (!run) return;
+  const d = run.data.find(p => p.t === t) || run.data[run.data.length - 1]; if (!d) return;
+  reads[cur] = { t: d.t, T: d.T }; updateSide(); if (verdictOn) showVerdict();
+});
+
+function updateSide() {
+  const run = runs[cur];
+  document.getElementById('sName').textContent = NAMES[cur];
+  document.getElementById('tNow').textContent = run ? run.t : 0;
+  document.getElementById('tCur').textContent = run && run.data.length ? run.data[run.data.length - 1].T.toFixed(1) + ' ℃' : '—';
+  document.getElementById('fIce').textContent = run ? Math.round(run.f * 100) + ' %' : '—';
+  document.getElementById('myRead').textContent = reads[cur] ? `${reads[cur].T.toFixed(1)} ℃ (${reads[cur].t} s)` : '아직 없음 — 그래프를 클릭';
+  const r0 = reads[0], r1 = reads[1], r2 = reads[2];
+  const set = (id, v) => document.getElementById(id).textContent = v;
+  set('r0', r0 ? r0.T.toFixed(1) : '—'); set('r1', r1 ? r1.T.toFixed(1) : '—'); set('r2', r2 ? r2.T.toFixed(1) : '—');
+  let s1 = null, s2 = null;
+  if (r0 && r1) { const d = r0.T - r1.T; s1 = d / 0.3; set('d1', `${r0.T.toFixed(1)} − (${r1.T.toFixed(1)}) = ${d.toFixed(1)}`); set('s1', s1.toFixed(2)); } else { set('d1', '—'); set('s1', '—'); }
+  if (r0 && r2) { const d = r0.T - r2.T; s2 = d / 0.6; set('d2', `${r0.T.toFixed(1)} − (${r2.T.toFixed(1)}) = ${d.toFixed(1)}`); set('s2', s2.toFixed(2)); } else { set('d2', '—'); set('s2', '—'); }
+  if (s1 !== null && s2 !== null) { const a = (s1 + s2) / 2; set('sAvg', a.toFixed(2)); set('sCmp', a > KF ? `${a.toFixed(2)} > 1.86 — 크다` : a < KF ? `${a.toFixed(2)} < 1.86 — 작다` : '같다'); } else { set('sAvg', '—'); set('sCmp', '—'); }
+}
+function showVerdict() {
+  const run = runs[cur], r = reads[cur], v = verdictPoints(run);
+  const card = document.getElementById('vcard'), body = document.getElementById('vbody');
+  if (!v) { body.innerHTML = '<div class="muted">아직 얼기 시작하지 않았다 — 곡선이 꺾일 때까지 기다린 뒤 다시 누른다.</div>'; card.classList.remove('hidden'); return; }
+  verdictOn = true;
+  const rows = [];
+  rows.push(`<div class="row"><span class="mk ok">1</span><span><b>${run.superc ? '되돌아와 멈춘 최고점' : '평평해지기 시작한 값'} = 어는점</b> <span class="v">${v.on.T.toFixed(1)} ℃</span> (${v.on.t} s)<br><span class="muted">모형의 어는점 ${v.tfS.toFixed(2)} ℃ — 센서 표시 기준${Math.abs(offset) >= 0.05 ? ` · 이 센서는 영점이 ${offset > 0 ? '+' : ''}${offset.toFixed(1)} ℃ 어긋나 있다 → 물의 실측값에서 빼면 사라진다(§3)` : ''}</span></span></div>`);
+  if (v.valley) rows.push(`<div class="row"><span class="mk no">2</span><span><b>과냉각 골짜기 — 어는점 아님</b> <span class="v">${v.valley.T.toFixed(1)} ℃</span><br><span class="muted">얼음 씨가 생기지 않아 잠깐 더 내려간 값. 얼기 시작하면 융해열로 ①까지 되돌아온다</span></span></div>`);
+  if (v.later) rows.push(`<div class="row"><span class="mk warn">3</span><span><b>30초 뒤 값 — 진해진 용액의 어는점</b> <span class="v">${v.later.T.toFixed(1)} ℃</span><br><span class="muted">언 만큼 남은 물이 진해져 계속 내려간다. 여기를 읽으면 어는점을 낮게 → ΔTf 크게 → 기울기 크게</span></span></div>`);
+  rows.push(r ? `<div class="row"><span class="mk read">읽</span><span><b>내가 읽은 값</b> <span class="v">${r.T.toFixed(1)} ℃</span> · ①과의 차이 <span class="v">${(r.T - v.on.T).toFixed(1)} ℃</span>${Math.abs(r.T - v.on.T) < 0.15 ? ' — 잘 읽었다' : (r.T < v.on.T ? ' — 낮게 읽었다(②나 ③ 쪽)' : ' — 높게 읽었다(꺾이기 전 값)')}</span></div>`
+               : `<div class="row"><span class="mk read">읽</span><span class="muted">그래프를 클릭해 값을 고르면 ①과 견주어 준다</span></div>`);
+  body.innerHTML = rows.join(''); card.classList.remove('hidden');
+}
+
+// ── 루프 ──
+function fit(c) { const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1; const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr)); if (c.width !== w || c.height !== h) { c.width = w; c.height = h; } const gg = c.getContext('2d'); gg.setTransform(dpr, 0, 0, dpr, 0, 0); gg.clearRect(0, 0, r.width, r.height); return { W: r.width, H: r.height }; }
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (running) { acc += dt * speed; while (acc >= DT) { acc -= DT; const run = runs[cur]; if (run && !run.done) step(run); } }
+  const s = fit(cv); draw(s.W, s.H); updateSide();
+  requestAnimationFrame(loop);
+}
+updateSide();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
