@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>삼투 — 물은 진한 쪽으로 (반투막을 사이에 두고)</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: 'Pretendard','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif;
+       background: #14161c; color: #e8eaf0; display: flex; flex-direction: column; overflow: hidden; word-break: keep-all; }
+#bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 6px 12px;
+       background: #1d2129; border-bottom: 1px solid #333a48; }
+#bar h1 { font-size: 15.5px; font-weight: 800; letter-spacing: -0.01em; }
+#bar .sub { font-size: 12px; color: #8b94ab; }
+.ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 8px; padding: 6px 10px;
+       background: #191d25; border-bottom: 1px solid #333a48; }
+.gl { font-size: 12.5px; font-weight: 700; color: #8b94ab; padding: 0 2px 0 4px; white-space: nowrap; }
+.sep { width: 1px; align-self: stretch; background: #39405266; margin: 0 3px; }
+button { font: inherit; font-size: 13px; font-weight: 700; color: #e8eaf0; background: #2a3040;
+         border: 1px solid #48506a; border-radius: 7px; padding: 5px 9px; cursor: pointer; min-height: 32px; }
+button:hover { filter: brightness(1.2); }
+button.on { background: #2b6e4f; border-color: #4bbd8a; color: #fff; }
+button.pre { background: #23304a; border-color: #3f5f8a; font-size: 12.5px; line-height: 1.25; }
+button.pre.on { background: #2b6e4f; border-color: #4bbd8a; }
+button.pre .tag { font-weight: 400; color: #8fa8c8; font-size: 10.5px; }
+button.pre.on .tag { color: #cfeede; }
+button.pre.on::before { content: '● '; }
+.grp { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+input[type=range] { width: 112px; accent-color: #e0922a; }
+input#psl { width: 190px; accent-color: #ff8a7a; }
+.num { font-size: 17px; font-weight: 800; min-width: 28px; text-align: right; color: #ffd28a; font-variant-numeric: tabular-nums; }
+#stage { flex: 1 1 auto; display: grid; grid-template-columns: 1.35fr 1fr; gap: 7px; padding: 7px; min-height: 0; }
+.pane { position: relative; background: #0f1218; border: 1px solid #2b3242; border-radius: 10px; overflow: hidden; min-height: 0; }
+.pane .cap { position: absolute; left: 9px; top: 7px; right: 9px; font-size: 12px; color: #9aa3b8; z-index: 2; pointer-events: none; line-height: 1.35; }
+.pane .cap b { color: #e8eaf0; }
+.pane .cap .rel { color: #d9a24a; font-weight: 700; }
+.pctl { position: absolute; right: 7px; top: 5px; z-index: 3; display: flex; align-items: center; gap: 5px; background: #1d2129cc; border: 1px solid #333a48; border-radius: 8px; padding: 3px 6px; }
+.pctl button { font-size: 12px; padding: 3px 7px; min-height: 26px; }
+.pctl .gl { font-size: 11px; }
+canvas { display: block; width: 100%; height: 100%; }
+#right { display: grid; grid-template-rows: 1.15fr 1fr 1fr; gap: 7px; min-height: 0; }
+#foot { background: #1d2129; border-top: 1px solid #333a48; padding: 5px 10px 6px; }
+#chips { display: flex; flex-wrap: wrap; gap: 5px 9px; align-items: stretch; }
+.chip { background: #12151b; border: 1px solid #2b3242; border-radius: 7px; padding: 3px 9px; font-size: 12px; color: #c6ccda; display: flex; flex-direction: column; min-width: 94px; }
+.chip b { font-size: 15.5px; color: #fff; font-variant-numeric: tabular-nums; }
+.chip .lab { font-size: 11px; color: #8b94ab; }
+.chip.model { border-color: #5a4a2a; }
+.chip.model .lab::after { content: " · 상댓값"; color: #d9a24a; font-weight: 700; }
+.chip.lr b { color: #4bbd8a; } .chip.rl b { color: #ff8a7a; } .chip.net b { color: #ffd28a; }
+.chip.verdict { min-width: 232px; border-color: #3f5f8a; }
+.chip.verdict b { font-size: 13.5px; }
+@media (max-width: 980px) { #stage { grid-template-columns: 1fr; } #right { grid-template-rows: 1fr 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <h1>삼투 — 물은 진한 쪽으로 <span style="font-weight:400;color:#8b94ab">(반투막을 사이에 두고)</span></h1>
+  <span class="sub">물질과 에너지 Ⅱ-5 · 교과서 58~61쪽 그림 Ⅱ-17·Ⅱ-19·61쪽 U자관과 함께 · 용질은 설탕(비휘발성·비전해질) · 물은 <b>양쪽으로 오가되 진한 쪽으로 더 많이</b> · 근거·모형·한계는 <b>출처.md</b></span>
+</div>
+
+<div class="ctl">
+  <span class="gl">골라 놓기</span>
+  <button class="pre on" id="p0" onclick="preset(0)">교과서 U자관<br><span class="tag">물 ↔ 설탕물 · 58·61쪽</span></button>
+  <button class="pre" id="p1" onclick="preset(1)">등장액<br><span class="tag">양쪽 같다 · 교과서 밖</span></button>
+  <button class="pre" id="p2" onclick="preset(2)">저장액<br><span class="tag">왼쪽(바깥)이 묽다 · 교과서 밖</span></button>
+  <button class="pre" id="p3" onclick="preset(3)">고장액<br><span class="tag">왼쪽(바깥)이 진하다 · 교과서 밖</span></button>
+  <div class="sep"></div>
+  <span class="grp"><span class="gl">왼쪽 설탕</span><input type="range" id="lsl" min="0" max="24" step="1" value="0" oninput="setNS(0,+this.value)"><span class="num" id="lval">0</span></span>
+  <span class="grp"><span class="gl">오른쪽 설탕</span><input type="range" id="rsl" min="0" max="24" step="1" value="14" oninput="setNS(1,+this.value)"><span class="num" id="rval">14</span></span>
+</div>
+
+<div class="ctl">
+  <span class="grp"><span class="gl" style="color:#ff8a7a">오른쪽에 가하는 압력</span>
+  <input type="range" id="psl" min="0" max="100" step="1" value="0" oninput="setP(+this.value)">
+  <span class="num" id="pval" style="color:#ff8a7a">0</span></span>
+  <button id="bAuto" onclick="toggleAuto()">수위차가 0이 되게 자동으로 맞추기</button>
+  <div class="sep"></div>
+  <button id="bRun" class="on" onclick="toggleRun()">⏸ 일시정지</button>
+  <button onclick="resetSim()">↺ 초기화</button>
+  <button id="bPress" class="on" onclick="togglePress()">수위차의 압력 켜짐</button>
+</div>
+
+<div id="stage">
+  <div class="pane" id="pL">
+    <div class="cap" style="right:192px"><b>① 반투막을 사이에 두고</b> · <span class="rel">상댓값</span> —
+      삼투는 <b>설탕이 물을 끌어당겨서가 아니다</b> — 이 모형은 끌어당김 없이 「자리 차지」만으로 그린다 · 설탕은 구멍보다 커서 못 넘어간다</div>
+    <div class="pctl"><span class="gl">빠르기</span><input type="range" id="spd" min="0.3" max="2" step="0.1" value="1" style="width:66px;accent-color:#4bbd8a" oninput="speed=+this.value;document.getElementById('spdv').textContent=speed.toFixed(1)+'×'"><span id="spdv" style="font-size:11.5px;color:#c6ccda">1.0×</span></div>
+    <canvas id="cvL"></canvas>
+  </div>
+  <div id="right">
+    <div class="pane">
+      <div class="cap" style="right:112px"><b>② 막 구멍을 크게 보면</b> — <b>크기로 거른다</b>(58쪽): 물은 지나가고 설탕은 못 지나간다</div>
+      <div class="pctl"><button onclick="zoomPore(-1)">◀</button><span class="gl" id="zlab">구멍 4</span><button onclick="zoomPore(1)">▶</button></div>
+      <canvas id="cvZ"></canvas>
+    </div>
+    <div class="pane">
+      <div class="cap" style="right:112px"><b>③ 막을 넘은 물은 몇 개인가</b> — 최근 구간 · 양쪽 다 넘어간다, <b>수가 다를 뿐</b></div>
+      <div class="pctl"><button onclick="clearCount()">↺ 계수 지우기</button></div>
+      <canvas id="cvC"></canvas>
+    </div>
+    <div class="pane">
+      <div class="cap"><b>④ 수위차</b> — 멈춘 뒤에도 선이 <b>잘게 떨린다</b>: 물이 멈춘 것이 아니라 양쪽 수가 같아진 것</div>
+      <canvas id="cvH"></canvas>
+    </div>
+  </div>
+</div>
+
+<div id="foot">
+  <div id="chips">
+    <div class="chip verdict"><span class="lab">지금 무슨 일이 일어나는가</span><b id="cV">—</b></div>
+    <div class="chip lr"><span class="lab">막을 넘은 물 → (왼쪽 → 오른쪽)</span><b id="cLR">0</b></div>
+    <div class="chip rl"><span class="lab">막을 넘은 물 ← (오른쪽 → 왼쪽)</span><b id="cRL">0</b></div>
+    <div class="chip net"><span class="lab">순이동 (→ 빼기 ←)</span><b id="cNet">0</b></div>
+    <div class="chip"><span class="lab">최근 구간 → : ←</span><b id="cRecent">— : —</b></div>
+    <div class="chip model"><span class="lab">수위차 (오른쪽 − 왼쪽)</span><b id="cH">0.000</b></div>
+    <div class="chip model"><span class="lab">가한 압력 (단위 없음 · 기압 아님)</span><b id="cP">0</b></div>
+    <div class="chip"><span class="lab">물 분자 왼쪽 : 오른쪽</span><b id="cN">— : —</b></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  모형의 뼈대 — 무엇을 넣고 무엇을 넣지 않았나   (자세히는 출처.md §2·§4)
+//
+//  넣은 것 ①  설탕의 「자리 차지」뿐. 물을 끌어당기는 힘은 없다. 두 가지로 반영한다.
+//              (ㄱ) 같은 높이에서 시작하려면 설탕이 있는 쪽 물이 그만큼 적다
+//              (ㄴ) 물이 막 구멍에 있으려면 「그 자리가 물이어야」 한다 — 설탕이 차지한
+//                   넓이만큼 그 확률이 낮다(waterFrac). 진한 쪽에서 나가는 물이 줄어든다.
+//              ⚠ (ㄴ)은 모형의 명시적 규칙이다. 배제 부피를 넣은 무작위 걸음만으로는
+//                삼투가 나오지 않는다 — 물 분자끼리 부피를 갖지 않으면(이 모형이 그렇다)
+//                막 근처에서 좌우 물 밀도가 평준화되어 순이동이 사라진다(2026-09-09 검증).
+//                13차시 진행표 ②의 판서 설명 「설탕이 자리를 차지해 물이 막에 부딪칠 기회가
+//                적다」를 규칙으로 삼은 것이다(⚠ 교과서 58쪽 원문은 「농도가 작은 쪽에서 큰 쪽으로
+//                용매 입자가 더 많이 이동」까지만 말한다 — 이 기작은 교과서 밖 `참고`).
+//                확률은 화면의 설탕 개수에서 계산한다.
+//  넣은 것 ②  수위차가 만드는 압력(PG·dh). 높아진 쪽의 무게가 물을 되민다.
+//  넣은 것 ③  밖에서 가하는 압력(P_EXT). 오른쪽을 누른다.
+//              P_EXT = 0        → 자연 삼투, 수위차가 벌어지다 멈춘다
+//              P_EXT = 삼투압   → 수위차가 0에서 유지된다   ← 교과서 61쪽 삼투압의 정의
+//              P_EXT > 삼투압   → 역삼투, 물이 진한 쪽에서 묽은 쪽으로   ← 14차시 예고
+//
+//  넣지 않은 것 · 물 분자끼리의 충돌(무작위 걸음으로 대신) · 온도 · 용질의 수화(水化) ·
+//                삼투압의 수치(파이=CRT — 13차시는 정성까지다).
+// ═══════════════════════════════════════════════════════════════
+
+// ───────────────── 상수 (모두 상댓값) ─────────────────
+const N_BASE  = 100;      // 설탕이 없을 때 한쪽 물 분자 수
+const K_SOL   = 1.5;      // 설탕 1개가 차지하는 부피 = 물 1.5개분
+const R_W     = 0.011;    // 물 분자 반지름
+const R_S     = 0.030;    // 설탕 반지름 — 막 구멍보다 크다(반투막은 크기로 거른다)
+const MEM     = 0.5, MEM_HW = 0.014;
+const PORES   = [0.07, 0.17, 0.27, 0.37, 0.47, 0.57];
+const PORE_H  = 0.026;    // 구멍 반높이 — 물(0.011)은 지나가고 설탕(0.030)은 못 지나간다
+const U_LEVEL = 0.0058;   // 물 분자 1개분의 수위
+const PG      = 0.001;    // 수위차 → 되미는 압력 계수 (2026-09-09 튜닝 · 출처.md §5)
+const P_MAX   = 0.0009;   // 슬라이더 100 에 해당하는 외부 압력
+const WIN     = 420;      // 「최근 구간」 프레임 수
+const OUT     = MEM_HW + R_W;
+
+// ───────────────── 상태 ─────────────────
+let nSL = 0, nSR = 14;
+let running = true, speed = 1, usePress = true, P_EXT = 0, pSlider = 0;
+let water = [], solL = [], solR = [];
+let hL = 0, hR = 0;
+let cLR = 0, cRL = 0, evLR = [], evRL = [];
+let frame = 0, hHist = [];
+let zi = 3;
+
+const PRESETS = [
+  { l: 0,  r: 14 },   // 교과서 U자관 — 물 ↔ 설탕물
+  { l: 14, r: 14 },   // 등장액 — 양쪽 같다
+  { l: 4,  r: 20 },   // 저장액 — 바깥(왼쪽)이 묽다 → 물이 오른쪽으로
+  { l: 20, r: 4  },   // 고장액 — 바깥(왼쪽)이 진하다 → 물이 왼쪽으로
+];
+function preset(i) {
+  const p = PRESETS[i];
+  if (autoPi) toggleAuto();
+  nSL = p.l; nSR = p.r; P_EXT = 0; pSlider = 0;
+  document.getElementById('lsl').value = nSL; document.getElementById('rsl').value = nSR;
+  document.getElementById('psl').value = 0;
+  for (let k = 0; k < 4; k++) document.getElementById('p' + k).classList.toggle('on', k === i);
+  syncLabels(); resetSim();
+}
+function clearPreset() { for (let k = 0; k < 4; k++) document.getElementById('p' + k).classList.remove('on'); }
+function setNS(side, v) { if (autoPi) toggleAuto(); if (side) nSR = v; else nSL = v; clearPreset(); syncLabels(); resetSim(); }
+function setP(v) { if (autoPi) toggleAuto(); pSlider = v; P_EXT = v / 100 * P_MAX; syncLabels(); }
+function syncLabels() {
+  document.getElementById('lval').textContent = nSL;
+  document.getElementById('rval').textContent = nSR;
+  document.getElementById('pval').textContent = pSlider;
+}
+function toggleRun() { running = !running; const b = document.getElementById('bRun'); b.classList.toggle('on', running); b.textContent = running ? '⏸ 일시정지' : '▶ 실행'; }
+function togglePress() { usePress = !usePress; const b = document.getElementById('bPress'); b.classList.toggle('on', usePress); b.textContent = usePress ? '수위차의 압력 켜짐' : '수위차의 압력 꺼짐'; }
+function clearCount() { cLR = 0; cRL = 0; evLR = []; evRL = []; if (typeof barMax !== 'undefined') barMax = 14; }
+function zoomPore(d) { zi = (zi + d + PORES.length) % PORES.length; document.getElementById('zlab').textContent = '구멍 ' + (zi + 1); }
+
+// 수위차가 0이 되도록 압력을 스스로 따라가게 한다 — 멈춘 값이 그 농도의 삼투압이다.
+//  ⚠ 한 번의 계산(P + PG·dh)으로는 맞지 않는다. 수위차가 벌어진 상태는 오른쪽이 묽어져
+//    삼투 구동력이 약해진 상태라, 그때 재면 삼투압이 작게 나온다(2026-09-09에 30 vs 실제 50).
+//    그래서 조금씩 밀며 수위차 0을 유지하는 압력을 찾아간다.
+let autoPi = false, pHist = [], autoConv = false;            // pHist: 자동 맞추기 중 압력(슬라이더 단위) 이력 — 수렴 판정용
+function toggleAuto() {
+  // 오른쪽이 진한 쪽이 아니면 오른쪽을 눌러도 수위차를 0으로 만들 수 없다 — 켜지 않는다
+  if (!autoPi && !(nSR > nSL)) { alert('오른쪽이 진한 쪽일 때만 씁니다 — 왼쪽이 진하거나 같으면 오른쪽에 압력을 걸어도 수위차를 0으로 만들 수 없습니다.'); return; }
+  autoPi = !autoPi; pHist = []; autoConv = false;
+  const b = document.getElementById('bAuto');
+  b.classList.toggle('on', autoPi);
+  b.textContent = autoPi ? '자동으로 맞추는 중…' : '수위차가 0이 되게 자동으로 맞추기';
+}
+function pAvg() { return pHist.length ? pHist.reduce((a, c) => a + c, 0) / pHist.length : P_EXT / P_MAX * 100; }
+function autoStep() {
+  if (!autoPi) return;
+  P_EXT = Math.max(0, Math.min(P_MAX, P_EXT + 0.0000008 * (hR - hL)));   // 이득 8e-7 — 2.5e-6이면 압력이 σ 5.8로 흔들렸다(2026-09-09 측정)
+  pHist.push(P_EXT / P_MAX * 100); if (pHist.length > 1800) pHist.shift();   // 30초분
+  const v = Math.round(P_EXT / P_MAX * 100);
+  if (v !== pSlider) { pSlider = v; document.getElementById('psl').value = v; syncLabels(); }
+}
+
+function resetSim() {
+  if (autoPi) toggleAuto();
+  water = []; solL = []; solR = [];
+  const nWL = Math.max(20, Math.round(N_BASE - nSL * K_SOL));
+  const nWR = Math.max(20, Math.round(N_BASE - nSR * K_SOL));
+  for (let i = 0; i < nWL; i++)
+    water.push({ x: 0.03 + Math.random() * (MEM - MEM_HW - 0.05), y: 0.02 + Math.random() * 0.5, vx: 0, vy: 0, sd: -1 });
+  for (let i = 0; i < nWR; i++)
+    water.push({ x: MEM + MEM_HW + 0.02 + Math.random() * (0.97 - MEM - MEM_HW - 0.04), y: 0.02 + Math.random() * 0.5, vx: 0, vy: 0, sd: 1 });
+  for (let i = 0; i < nSL; i++)
+    solL.push({ x: 0.02 + R_S + Math.random() * (MEM - MEM_HW - R_S * 2 - 0.03), y: R_S + Math.random() * 0.45, vx: 0, vy: 0 });
+  for (let i = 0; i < nSR; i++)
+    solR.push({ x: MEM + MEM_HW + R_S + Math.random() * (0.96 - MEM - MEM_HW - R_S * 2), y: R_S + Math.random() * 0.45, vx: 0, vy: 0 });
+  clearCount(); hHist = []; pHist = []; frame = 0; updateLevels();
+}
+
+function countSide() { let l = 0, r = 0; for (const p of water) (p.x < MEM ? l++ : r++); return [l, r]; }
+function updateLevels() {
+  const [nl, nr] = countSide();
+  hL = (nl + nSL * K_SOL) * U_LEVEL;
+  hR = (nr + nSR * K_SOL) * U_LEVEL;
+}
+// 막 구멍 입구의 「그 자리가 물일 확률」 — 설탕이 차지한 넓이를 뺀 비율
+function waterFrac(side) {
+  const h = side < 0 ? hL : hR, n = side < 0 ? nSL : nSR;
+  const A = Math.max(1e-6, 0.48 * h), As = n * Math.PI * R_S * R_S;   // 한쪽이 비어도 0/0 이 되지 않게
+  return Math.max(0.05, (A - As) / A);
+}
+
+// ───────────────── 한 걸음 ─────────────────
+function stepSolute(arr, xMin, xMax, h, sp) {
+  for (const q of arr) {
+    q.vx += (Math.random() - 0.5) * 0.004; q.vy += (Math.random() - 0.5) * 0.004;
+    q.vx *= 0.90; q.vy *= 0.90; q.x += q.vx * sp; q.y += q.vy * sp;
+    if (q.x < xMin) { q.x = xMin; q.vx = Math.abs(q.vx); }
+    if (q.x > xMax) { q.x = xMax; q.vx = -Math.abs(q.vx); }
+    if (q.y < R_S) { q.y = R_S; q.vy = Math.abs(q.vy); }
+    if (q.y > h - R_S) { q.y = Math.max(R_S, h - R_S); q.vy = -Math.abs(q.vy) * 0.5; }
+  }
+  for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) {
+    const a = arr[i], b = arr[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy), R = R_S * 2;
+    if (d < R && d > 1e-6) { const k = (R - d) / d * 0.5; a.x += dx * k; a.y += dy * k; b.x -= dx * k; b.y -= dy * k; }
+  }
+}
+
+function step(dt) {
+  const sp = dt, dh = hR - hL;          // 🔴 빠르기는 여기 곱하지 않는다 — loop()가 걸음 수로 조절한다(시간 간격 불변)
+  stepSolute(solL, 0.02 + R_S, MEM - MEM_HW - R_S, hL, sp);
+  stepSolute(solR, MEM + MEM_HW + R_S, 0.98 - R_S, hR, sp);
+
+  for (const p of water) {
+    p.vx += (Math.random() - 0.5) * 0.006; p.vy += (Math.random() - 0.5) * 0.006;
+    // 막 안에서만 압력을 받는다 — 수위차가 되미는 힘 ＋ 밖에서 가하는 힘 (둘 다 왼쪽으로 민다)
+    if (Math.abs(p.x - MEM) < OUT + R_W) p.vx += -((usePress ? PG * dh : 0) + P_EXT) * sp;
+    p.vx *= 0.92; p.vy *= 0.92;
+    const ox = p.x;
+    p.x += p.vx * sp; p.y += p.vy * sp;
+
+    const atPore = PORES.some(py => Math.abs(p.y - py) < PORE_H);
+    // 막 구멍 안에 있는 동안 — 「그 자리가 물이어야」 머무를 수 있다.
+    //  설탕이 자리를 차지한 만큼 자주 밀려난다. 들어오는 순간에만 한 번 검사하면
+    //  곧바로 재시도해서 효과가 상쇄된다 — 매 걸음 검사한다(출처.md §5 실패 3).
+    if (atPore && Math.abs(p.x - MEM) <= OUT) {
+      if (Math.random() > waterFrac(p.sd)) {
+        p.x = MEM + p.sd * (OUT + R_W); p.vx = p.sd * Math.abs(p.vx);
+      }
+    }
+    if (!atPore) {
+      if (ox < MEM && p.x > MEM - OUT) { p.x = MEM - OUT; p.vx = -Math.abs(p.vx); }
+      if (ox > MEM && p.x < MEM + OUT) { p.x = MEM + OUT; p.vx = Math.abs(p.vx); }
+    }
+    // 막을 「완전히 건너간」 것만 센다 (구멍 안에서 떠는 것은 세지 않는다)
+    if (p.x < MEM - OUT && p.sd > 0) { p.sd = -1; cRL++; evRL.push(frame); }
+    if (p.x > MEM + OUT && p.sd < 0) { p.sd = 1; cLR++; evLR.push(frame); }
+
+    // 설탕과 겹치면 밀려난다 — 끌어당김은 없다
+    for (const q of (p.x < MEM ? solL : solR)) {
+      const dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy), R = R_W + R_S;
+      if (d < R && d > 1e-6) { const k = (R - d) / d; p.x += dx * k; p.y += dy * k; }
+    }
+    if (p.x < 0.02) { p.x = 0.02; p.vx = Math.abs(p.vx); }
+    if (p.x > 0.98) { p.x = 0.98; p.vx = -Math.abs(p.vx); }
+    if (p.y < R_W) { p.y = R_W; p.vy = Math.abs(p.vy); }
+    const h = (p.x < MEM ? hL : hR);
+    if (p.y > h - R_W) { p.y = Math.max(R_W, h - R_W); p.vy = -Math.abs(p.vy) * 0.5; }
+  }
+  updateLevels(); autoStep(); frame++;
+  while (evLR.length && evLR[0] < frame - WIN) evLR.shift();
+  while (evRL.length && evRL[0] < frame - WIN) evRL.shift();
+  hHist.push(hR - hL); if (hHist.length > 900) hHist.shift();
+}
+
+// ───────────────── 그리기 ─────────────────
+function fit(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  const g = cv.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, r.width, r.height);
+  return { W: r.width, H: r.height, g };
+}
+const cvL = document.getElementById('cvL'), cvZ = document.getElementById('cvZ');
+const cvC = document.getElementById('cvC'), cvH = document.getElementById('cvH');
+
+function drawTank(g, W, H) {
+  const pad = 16, top = 52, bot = 32;
+  const x0 = pad, y1 = H - bot, bw = W - pad * 2, bh = y1 - top;
+  const CAP = 0.985, over = hL > CAP || hR > CAP;                 // 탱크 천장 — 「압력 꺼짐」이면 넘칠 수 있다
+  const PX = v => x0 + v * bw, PY = v => y1 - Math.min(v, CAP) * bh;
+  const unit = Math.min(bw, bh), rW = Math.max(2.5, R_W * unit), rS = R_S * unit;   // ②와 같은 크기비 · 수면 위로 안 튀어나오게
+
+  g.fillStyle = '#151a24'; g.fillRect(x0, top, bw, bh);
+  g.fillStyle = nSL ? '#2a3b5a' : '#22355a'; g.fillRect(x0, PY(hL), PX(MEM) - x0, PY(0) - PY(hL));
+  g.fillStyle = nSR ? '#2a3b5a' : '#22355a'; g.fillRect(PX(MEM), PY(hR), x0 + bw - PX(MEM), PY(0) - PY(hR));
+  g.strokeStyle = nSL ? '#e0922a' : '#7fb8ff'; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(x0, PY(hL)); g.lineTo(PX(MEM), PY(hL)); g.stroke();
+  g.strokeStyle = nSR ? '#e0922a' : '#7fb8ff';
+  g.beginPath(); g.moveTo(PX(MEM), PY(hR)); g.lineTo(x0 + bw, PY(hR)); g.stroke();
+
+  const mx0 = PX(MEM - MEM_HW), mw = Math.max(3, PX(MEM + MEM_HW) - mx0);
+  g.fillStyle = '#6f7890'; g.fillRect(mx0, top, mw, bh);
+  PORES.forEach((py, i) => {
+    g.fillStyle = '#151a24';
+    g.fillRect(mx0, PY(py + PORE_H), mw, PY(py - PORE_H) - PY(py + PORE_H));
+    if (i === zi) {
+      g.strokeStyle = '#ffd28a'; g.lineWidth = 1.5;
+      g.strokeRect(mx0 - 3, PY(py + PORE_H) - 2, mw + 6, PY(py - PORE_H) - PY(py + PORE_H) + 4);
+    }
+  });
+
+  g.fillStyle = '#7fb8ff';
+  for (const p of water) { g.beginPath(); g.arc(PX(p.x), PY(p.y), rW, 0, 6.28); g.fill(); }
+  g.fillStyle = '#e0922a';
+  for (const q of solL) { g.beginPath(); g.arc(PX(q.x), PY(q.y), rS, 0, 6.28); g.fill(); }
+  for (const q of solR) { g.beginPath(); g.arc(PX(q.x), PY(q.y), rS, 0, 6.28); g.fill(); }
+  if (over) { g.fillStyle = '#ff8a7a'; g.font = 'bold 12px sans-serif'; g.textAlign = 'center';
+    g.fillText('넘쳤다 — 「수위차의 압력」이 꺼져 있거나 압력이 너무 크다 · ↺ 초기화', x0 + bw / 2, top + 16); }
+
+  // 밖에서 가하는 압력 — 오른쪽 액면을 「위에서」 누르는 피스톤 (교과서 61쪽 U자관의 방향)
+  if (P_EXT > 1e-9) {
+    const rx0 = PX(MEM) + 6, rx1 = x0 + bw - 6, plateY = PY(hR) - 3;
+    const len = 14 + 34 * (P_EXT / P_MAX);
+    g.fillStyle = '#ff8a7a'; g.fillRect(rx0, plateY - 4, rx1 - rx0, 4);      // 피스톤 판
+    g.strokeStyle = '#ff8a7a'; g.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      const ax = rx0 + (rx1 - rx0) * (0.2 + i * 0.3), ay1 = plateY - 6, ay0 = ay1 - len;
+      g.beginPath(); g.moveTo(ax, ay0); g.lineTo(ax, ay1); g.stroke();
+      g.beginPath(); g.moveTo(ax, ay1); g.lineTo(ax - 4, ay1 - 6); g.lineTo(ax + 4, ay1 - 6); g.fill();
+    }
+    g.font = 'bold 11.5px sans-serif'; g.textAlign = 'center';
+    g.fillText('가하는 압력', (rx0 + rx1) / 2, plateY - len - 12);
+  }
+  if (Math.abs(hR - hL) > 0.004) {
+    const xm = PX(MEM) + 20;
+    g.strokeStyle = '#ffd28a'; g.lineWidth = 1.5; g.setLineDash([4, 3]);
+    g.beginPath(); g.moveTo(PX(MEM) + 3, PY(hL)); g.lineTo(xm + 44, PY(hL)); g.stroke();
+    g.setLineDash([]);
+    g.beginPath(); g.moveTo(xm + 34, PY(hL)); g.lineTo(xm + 34, PY(hR)); g.stroke();
+    g.fillStyle = '#ffd28a'; g.font = 'bold 11.5px sans-serif'; g.textAlign = 'left';
+    g.fillText('수위차', xm + 40, (PY(hL) + PY(hR)) / 2 + 4);
+  }
+  g.fillStyle = '#e8eaf0'; g.font = 'bold 12.5px sans-serif'; g.textAlign = 'center';
+  g.fillText(nSL ? '설탕물 (설탕 ' + nSL + ')' : '순수한 물', x0 + (PX(MEM) - x0) / 2, y1 + 19);
+  g.fillText(nSR ? '설탕물 (설탕 ' + nSR + ')' : '순수한 물', PX(MEM) + (x0 + bw - PX(MEM)) / 2, y1 + 19);
+  g.font = '11px sans-serif'; g.fillStyle = '#8b94ab';
+  g.fillText('반투막', PX(MEM), top - 5);
+}
+
+// ② 구멍 확대 — 크기로 거른다(58쪽)
+function drawZoom(g, W, H) {
+  const top = 44, gh = Math.max(24, H - top - 20);
+  // 세로 기준 등방이 원칙(구멍 0.052가 늘 꽉 차게)이나, 패널이 납작하면 가로 시야가 탱크보다 넓어져 구멍이 사라진다 → 가로에 상한
+  const py = PORES[zi], halfY = 0.05, halfX = Math.min(0.09, Math.max(0.03, halfY * W / gh));
+  const x0 = MEM - halfX, x1 = MEM + halfX, y0 = py - halfY, y1 = py + halfY;
+  const PX = v => (v - x0) / (x1 - x0) * W, PY = v => top + gh - (v - y0) / (y1 - y0) * gh;
+  const scale = Math.min(W / (x1 - x0), gh / (y1 - y0));
+
+  g.fillStyle = '#151a24'; g.fillRect(0, top, W, gh);
+  g.fillStyle = '#6f7890'; g.fillRect(PX(MEM - MEM_HW), top, PX(MEM + MEM_HW) - PX(MEM - MEM_HW), gh);
+  g.fillStyle = '#151a24';
+  g.fillRect(PX(MEM - MEM_HW), PY(py + PORE_H), PX(MEM + MEM_HW) - PX(MEM - MEM_HW), PY(py - PORE_H) - PY(py + PORE_H));
+  g.strokeStyle = '#ffd28a66'; g.lineWidth = 1; g.setLineDash([3, 3]);
+  g.beginPath(); g.moveTo(0, PY(py + PORE_H)); g.lineTo(W, PY(py + PORE_H));
+  g.moveTo(0, PY(py - PORE_H)); g.lineTo(W, PY(py - PORE_H)); g.stroke(); g.setLineDash([]);
+
+  g.save(); g.beginPath(); g.rect(0, top, W, gh); g.clip();
+  for (const q of solL.concat(solR)) {
+    if (q.x < x0 - R_S || q.x > x1 + R_S || q.y < y0 - R_S || q.y > y1 + R_S) continue;
+    g.fillStyle = '#e0922a'; g.beginPath(); g.arc(PX(q.x), PY(q.y), R_S * scale, 0, 6.28); g.fill();
+  }
+  for (const p of water) {
+    if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;
+    g.fillStyle = '#7fb8ff'; g.beginPath(); g.arc(PX(p.x), PY(p.y), Math.max(2.5, R_W * scale), 0, 6.28); g.fill();
+  }
+  g.restore();
+  g.fillStyle = '#8b94ab'; g.font = 'bold 11.5px sans-serif';
+  g.textAlign = 'right'; g.fillText('왼쪽', PX(MEM - MEM_HW) - 14, top + 13);
+  g.textAlign = 'left';  g.fillText('오른쪽', PX(MEM + MEM_HW) + 14, top + 13);
+  g.fillStyle = '#9aa3b8'; g.font = '11px sans-serif'; g.textAlign = 'left';
+  g.fillText('구멍 ' + (PORE_H * 2).toFixed(3) + '  ·  물 ' + (R_W * 2).toFixed(3) + '  ·  설탕 ' + (R_S * 2).toFixed(3) + '  (상댓값)', 8, H - 6);
+}
+
+// 막대의 눈금은 천천히 따라간다 — 큰 쪽을 늘 100 %로 그리면 값이 커져도 그림이 그대로다
+//  (2026-09-09 교사 지적: 「막대는 그대로인데 숫자만 커진다」)
+let barMax = 14;
+function drawCount(g, W, H) {
+  const L = evLR.length, R = evRL.length;
+  barMax += (Math.max(L, R, 8) * 1.35 - barMax) * 0.02;   // 큰 쪽이 약 74 %를 차지하게 — 눈금이 천천히 따라온다
+  const pad = 12, top = 46, numW = 40, bw = W - pad * 2 - numW;
+  const avail = Math.max(30, H - top - 6);
+  const barH = Math.max(12, Math.min(22, (avail - 12) / 2.6)), gap = Math.max(6, Math.min(14, barH * 0.6));
+  const y1 = top, y2 = top + barH + gap, dy = y2 + barH + 15;
+  const stepv = barMax > 60 ? 20 : (barMax > 24 ? 10 : 5);
+  g.font = '10px sans-serif'; g.textAlign = 'center';
+  for (let v = stepv; v <= barMax; v += stepv) {
+    const gx = pad + bw * (v / barMax);
+    g.strokeStyle = '#2b3242'; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(gx, y1 - 2); g.lineTo(gx, y2 + barH); g.stroke();
+    g.fillStyle = '#5f6880'; g.fillText(String(v), gx, y1 - 5);
+  }
+  function row(y, label, v, color) {
+    g.fillStyle = '#12151b'; g.fillRect(pad, y, bw, barH);
+    g.fillStyle = color; g.fillRect(pad, y, bw * Math.min(1, v / barMax), barH);
+    g.fillStyle = '#fff'; g.font = 'bold ' + Math.min(12, barH - 4) + 'px sans-serif'; g.textAlign = 'left';
+    g.fillText(label, pad + 6, y + barH / 2 + 4);                       // 라벨은 막대 안 왼쪽 — 겹칠 자리가 없다
+    g.font = 'bold 13px sans-serif'; g.fillText(String(v), pad + bw + 8, y + barH / 2 + 5);   // 숫자는 고정 x에 왼쪽 정렬 — 값이 바뀌어도 안 흔들린다
+  }
+  row(y1, '→  왼쪽 → 오른쪽', L, '#2f9a6a');
+  row(y2, '←  오른쪽 → 왼쪽', R, '#c8564a');
+  if (dy < H - 3) {                                                     // 자리가 있을 때만 — 「최근 구간」임을 밝힌다(순이동 칩은 누적)
+    const d = L - R;
+    g.fillStyle = d > 0 ? '#4bbd8a' : (d < 0 ? '#ff8a7a' : '#8b94ab'); g.font = 'bold 11.5px sans-serif'; g.textAlign = 'left';
+    g.fillText(d === 0 ? '최근 구간: 두 수가 같다' : ('최근 구간: ' + (d > 0 ? '→ 가 ' + d : '← 가 ' + (-d)) + ' 더 많다  (누적은 아래 「순이동」 칩)'), pad, dy);
+  }
+}
+
+function drawH(g, W, H) {
+  const pad = 26, top = 44, bot = 18;
+  const x0 = pad, y1 = H - bot, gw = W - pad - 10, gh = Math.max(20, y1 - top), mid = y1 - gh * 0.5;
+  g.strokeStyle = '#242a3a'; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(x0, y1); g.lineTo(x0 + gw, y1); g.moveTo(x0, top); g.lineTo(x0, y1); g.stroke();
+  const mx = Math.max(0.08, ...hHist.map(Math.abs)) * 1.15;
+  g.strokeStyle = '#394052'; g.setLineDash([3, 3]);
+  g.beginPath(); g.moveTo(x0, mid); g.lineTo(x0 + gw, mid); g.stroke(); g.setLineDash([]);
+  g.fillStyle = '#8b94ab'; g.font = '10.5px sans-serif'; g.textAlign = 'right'; g.fillText('0', x0 - 3, mid + 4);
+  g.textAlign = 'left'; g.fillText('시간 →', x0 + 4, y1 + 14);
+  if (hHist.length > 1) {
+    g.strokeStyle = '#ffd28a'; g.lineWidth = 2; g.beginPath();
+    hHist.forEach((v, i) => {
+      const px = x0 + gw * (i / Math.max(1, hHist.length - 1)), pyy = mid - (v / mx) * gh * 0.45;
+      i ? g.lineTo(px, pyy) : g.moveTo(px, pyy);
+    });
+    g.stroke();
+  }
+}
+
+// ───────────────── 칩 · 판정 ─────────────────
+// 판정 — 거짓을 말하지 않게 세 가지를 지킨다 (2026-09-09 재검토)
+//  · 「이 압력이 삼투압」은 수위차 0 만으로 못 말한다 — 시작 직후는 아무 일도 안 일어나서 0이다.
+//    최근 구간이 한 번 찼고(settled) 넘어가는 수도 양쪽 같아야(balanced) 평형이다.
+//  · 압력을 가하는 동안에는 「등장액이라 순이동이 없다」「순수한 물이라 까닭이 없다」가 거짓이다.
+//  · 「역삼투」는 진한 쪽(오른쪽)을 눌러 물을 거꾸로 보낼 때만 쓰는 말이다. 왼쪽이 진하면
+//    오른쪽을 누르는 것은 삼투와 같은 방향이라 역삼투가 아니다.
+function verdict() {
+  const dh = hR - hL, L = evLR.length, R = evRL.length;
+  // 순간 수위차는 물 한두 개분씩 흔들린다 — 최근 구간의 평균으로 판정한다(출처.md 검증 6)
+  const tail = hHist.slice(-WIN);
+  const dhAvg = tail.length ? tail.reduce((a, c) => a + c, 0) / tail.length : dh;
+  const flat = Math.abs(dhAvg) < 0.025;
+  const balanced = Math.abs(L - R) <= Math.max(3, (L + R) * 0.06);
+  const settled = frame > WIN;
+  const pressing = P_EXT > 1e-9;
+  const conc = nSR > nSL ? 1 : (nSL > nSR ? -1 : 0);      // 진한 쪽은 「농도」로 정한다 — 계수로 정하면 잡음이 순수한 물 쪽을 진한 쪽이라 부른다
+  const concName = conc > 0 ? '오른쪽' : '왼쪽';
+  const G = '#4bbd8a', Y = '#ffd28a', RD = '#ff8a7a', GY = '#8b94ab';
+  if (!pressing) {
+    if (nSL === nSR && nSL > 0) return ['양쪽 농도가 같다 — 순이동이 없다 (등장액 · 교과서 밖 용어)', G];
+    if (nSL === 0 && nSR === 0) return ['양쪽 다 순수한 물 — 삼투가 일어날 까닭이 없다', GY];
+  }
+  if (pressing && conc <= 0) return ['압력이 물을 왼쪽으로 민다 — 오른쪽이 진한 쪽이 아니라 삼투압을 재는 자리가 아니다', Y];
+  // 「삼투압」 단정은 자동 맞추기가 수렴했을 때만. 눈금은 상댓값이라 「값」이 아니라 「세기」로 말한다.
+  if (autoPi) {
+    let conv = false;
+    if (pHist.length >= 1500) {
+      const h = pHist.length >> 1, a = pHist.slice(0, h), b = pHist.slice(h);
+      const ma = a.reduce((x, y) => x + y, 0) / a.length, mb = b.reduce((x, y) => x + y, 0) / b.length;
+      conv = Math.abs(ma - mb) < (autoConv ? 5 : 3);
+    }
+    autoConv = conv;
+    return conv ? ['★ 압력이 멈췄다 — 지금 누르는 이 세기가 삼투압 (61쪽) · 눈금은 상댓값 · 수위차는 0을 오간다', G]
+                : ['자동으로 맞추는 중 — 압력이 수위차 0을 찾아가고 있다 (90초쯤)', Y];
+  }
+  if (pressing && flat && settled && balanced) return ['수위차가 0 근처를 오간다 — 삼투압은 「자동으로 맞추기」로 읽는다', G];
+  if (pressing && dhAvg < -0.06 && R - L >= 3) return ['역삼투 — 가한 압력이 삼투압보다 크다 (14차시)', RD];
+  if (!settled) return ['아직 시작 전', GY];
+  // 진행 중 — 최근 구간의 편향이 잡음보다 크고 「진한 쪽」과 같은 방향일 때만. 반대 방향 편향은 잡음이다
+  const bias = conc * (L - R);
+  if (conc !== 0 && bias > Math.max(3, (L + R) * 0.05)) return ['삼투 — 물이 진한 쪽(' + concName + ')으로 더 많이 넘어간다', Y];
+  return ['멈춤 — 넘어가는 수가 양쪽 같아졌다 (물은 계속 오간다)', G];
+}
+function updateChips() {
+  const [nl, nr] = countSide();
+  document.getElementById('cLR').textContent = cLR;
+  document.getElementById('cRL').textContent = cRL;
+  const net = cLR - cRL;
+  document.getElementById('cNet').textContent = (net > 0 ? '+' : '') + net;
+  document.getElementById('cRecent').textContent = evLR.length + ' : ' + evRL.length;
+  document.getElementById('cH').textContent = (hR - hL).toFixed(3);
+  document.getElementById('cP').textContent = autoPi && pHist.length >= 600 ? Math.round(pAvg()) + ' (30초 평균)' : pSlider;
+  document.getElementById('cN').textContent = nl + ' : ' + nr;
+  const v = verdict();
+  const el = document.getElementById('cV'); el.textContent = v[0]; el.style.color = v[1];
+}
+
+// ───────────────── 루프 ─────────────────
+let last = performance.now(), acc = 0;
+// 🔴 물리는 언제나 「단위 걸음」으로만 돈다 — 고정 스텝 누산기.
+//  변위를 dt·speed에 비례시키면 관문(waterFrac)·킥·감쇠는 프레임당 한 번이라 결과가 주사율·빠르기에
+//  따라 달라진다(60 Hz·1.0×에서 삼투압 51이 120 Hz에선 89, 30 fps에선 29 — 2026-09-09 검증).
+//  걸음 수로 조절하면 기기·빠르기와 무관하고, 출처.md의 검증표(모두 step(1))가 그대로 유효하다.
+function loop(now) {
+  const dt = Math.min(2, (now - last) / 16.67); last = now;
+  if (running) { acc += dt * speed; let k = 0; while (acc >= 1 && k < 6) { acc -= 1; step(1); k++; } if (acc > 6) acc = 0; }
+  let s = fit(cvL); drawTank(s.g, s.W, s.H);
+  s = fit(cvZ); drawZoom(s.g, s.W, s.H);
+  s = fit(cvC); drawCount(s.g, s.W, s.H);
+  s = fit(cvH); drawH(s.g, s.W, s.H);
+  updateChips();
+  requestAnimationFrame(loop);
+}
+syncLabels(); resetSim();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

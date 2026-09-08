@@ -150,7 +150,10 @@ function makeBeaker(nSolute) {
 function soluteCount(mm) { return Math.round(mm * 10); }  // 1 m → 표면 30자리 중 10자리 (상댓값 · 보이도록 과장)
 function rebuildSolute() {
   const nb = makeBeaker(soluteCount(m));
-  if (beakers[1]) { nb.liq = beakers[1].liq; nb.vap = beakers[1].vap; nb.vapHist = beakers[1].vapHist; }
+  // 🔴 vapHist(증기 수 이력)는 물려받지 않는다 — 농도를 바꾸면 새로 재기 시작해야 한다.
+  //    물려받으면 옛 농도의 평균이 남아, 슬라이더를 올린 직후 「설탕물 증기압이 더 높다」는
+  //    정반대 값이 최대 10초간 표시된다(2026-09-09 검증에서 발견).
+  if (beakers[1]) { nb.liq = beakers[1].liq; nb.vap = beakers[1].vap; }
   beakers[1] = nb;
 }
 function resetSim() { beakers = [makeBeaker(0), makeBeaker(soluteCount(m))]; }
@@ -234,7 +237,9 @@ function drawBeakers(W, H) {
     bar(rowY + 18, '증기 분자(평균)', avg / vapMax, i ? '#e0922a' : '#7fb8ff', avg.toFixed(1));
   });
   const ratio = a0 > 0 ? a1 / a0 : 1;
-  document.getElementById('cVap').textContent = (beakers[0].vapHist.length >= 600 && a0 > 2) ? `1.00 : ${fmt(Math.min(1.05, ratio), 2)}` : '— : — (재는 중)';
+  // 「재는 중」 게이트는 두 비커 모두를 본다 — 순수한 물 쪽만 보면 농도를 바꾼 뒤에도 게이트가 열려 있다
+  const ready = beakers[0].vapHist.length >= 600 && beakers[1].vapHist.length >= 600 && a0 > 2;
+  document.getElementById('cVap').textContent = ready ? `1.00 : ${fmt(Math.min(1.05, ratio), 2)}` : '— : — (재는 중)';
 }
 
 // ───────────────── ② 증기압 곡선 ─────────────────
