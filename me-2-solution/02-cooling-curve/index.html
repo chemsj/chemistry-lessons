@@ -64,7 +64,7 @@ td.v { color: #fff; font-weight: 700; }
 
 <div id="ctl">
   <span class="gl">시료</span>
-  <button class="s0 on" id="b0" onclick="pick(0)" title="수업에서는 물을 재지 않는다(물의 어는점은 0.00으로 준다). 이 곡선은 센서가 0.00에서 얼마나 벗어나는지 — 영점 확인 — 를 보여 준다.">순수한 물 · 영점 확인</button>
+  <button class="s0 on" id="b0" onclick="pick(0)" title="수업에서는 물을 재지 않는다(물의 어는점은 선생님이 실측한 0.00으로 준다). 물은 0.00에서 평평하고 설탕물은 그렇지 않다는 대조를 보는 참고 곡선.">순수한 물 (참고)</button>
   <button class="s1" id="b1" onclick="pick(1)">0.3 m 설탕물</button>
   <button class="s2" id="b2" onclick="pick(2)">0.6 m 설탕물</button>
   <div class="sep"></div>
@@ -108,13 +108,13 @@ td.v { color: #fff; font-weight: 700; }
       <div class="cb">
         <table>
           <tr><th>농도</th><th>읽은 어는점 (℃)</th><th>ΔTf = 0.00 − 용액</th><th>기울기 = ΔTf ÷ m</th></tr>
-          <tr><td>0 (물)</td><td class="v"><b>0.00</b> <span class="muted">교사 제시</span></td><td colspan="2" class="muted" style="text-align:left">물 곡선에서 읽은 값 <b id="r0" style="color:#fff">—</b> = 이 센서의 <b>영점 확인값</b>(기준값 아님)</td></tr>
+          <tr><td>0 (물)</td><td class="v"><b>0.00</b> <span class="muted">교사 제시</span></td><td colspan="2" class="muted" style="text-align:left">물 곡선에서 읽은 값 <b id="r0" style="color:#fff">—</b> (참고 — 수업에서는 재지 않는다)</td></tr>
           <tr><td>0.3 m</td><td class="v" id="r1">—</td><td class="v" id="d1">—</td><td class="v" id="s1">—</td></tr>
           <tr><td>0.6 m</td><td class="v" id="r2">—</td><td class="v" id="d2">—</td><td class="v" id="s2">—</td></tr>
           <tr><th colspan="3" style="text-align:right">두 기울기의 평균</th><td class="v" id="sAvg">—</td></tr>
           <tr><th colspan="3" style="text-align:right">이론 상수 1.86과 비교</th><td class="v" id="sCmp">—</td></tr>
         </table>
-        <div class="muted" style="margin-top:6px">ΔTf는 <b>선생님이 준 물의 어는점 0.00</b>에서 용액을 뺀다(답안지 §3). 그래서 센서 영점 어긋남은 빠지지 않고 용액값에 그대로 실린다 — 영점 확인값은 특이 사항에 적어 §5ⓒ 진단에 쓴다. 기울기는 원점–각 점 두 값의 <b>평균</b>(답안지 §4㉢).</div>
+        <div class="muted" style="margin-top:6px">ΔTf는 <b>선생님이 실측한 물의 어는점 0.00</b>에서 용액을 뺀다(답안지 §3). 센서 영점은 맞춰진 것으로 본다. 기울기는 원점–각 점 두 값의 <b>평균</b>(답안지 §4㉢).</div>
       </div>
     </div>
 
@@ -123,7 +123,7 @@ td.v { color: #fff; font-weight: 700; }
       <div class="cb">
         <div class="row"><span class="mk warn">과</span><span><b>과냉각</b> — 어는점 아래로 잠깐 더 내려갔다가, 얼기 시작하면 융해열이 나와 어는점까지 되돌아온다. 골짜기는 어는점이 아니다.</span></div>
         <div class="row"><span class="mk off">젓</span><span><b>젓기</b> — 온도를 고르게 하고 얼음 씨가 생기게 해 과냉각을 얕게 한다. 끄면 값이 흔들리고 과냉각이 깊어진다.</span></div>
-        <div class="row"><span class="mk off">영</span><span><b>센서 영점</b> — 센서마다 ±0.2 ℃ 안팎의 영점 차가 있어 물이 0.00에서 평평해지지 않을 수 있다(초기화마다 새 센서). 물의 어는점은 <b>0.00으로 주어지므로</b> 이 차는 빼도 사라지지 않는다 — 낮게 어긋나면 ΔTf가 커져 기울기가 크게, 높게 어긋나면 작게 나온다. 그래서 측정 전에 <b>얼음물로 영점을 확인</b>해 특이 사항에 적는다(답안지 §5ⓒ ㉲).</span></div>
+        <div class="row"><span class="mk off">영</span><span><b>센서 영점</b> — 이 시뮬과 수업에서는 <b>영점이 맞춰진 것으로 본다</b>(물 곡선이 0.00에서 평평). 그래서 물은 재지 않고 선생님이 실측한 0.00을 기준으로 뺀다.</span></div>
       </div>
     </div>
   </div>
@@ -134,7 +134,7 @@ const KF = 1.86, T_BATH = -12, K_COOL = 0.016, CP = 4.18, LF = 334, T0 = 20, DT 
 const M_LIST = [0, 0.3, 0.6], NAMES = ['순수한 물', '0.3 m 설탕물', '0.6 m 설탕물'], COLORS = ['#7fb8ff', '#b39ddb', '#e0922a'];
 let cur = 0, speed = 10, running = true;
 const opt = { sc: false, stir: true };
-let offset = Math.round((Math.random() * 0.4 - 0.2) * 100) / 100;   // 센서 영점 차 — 초기화마다 새로 뽑는다
+let offset = 0;   // 센서 영점 차 — 2026-09-11 교사 확정: MBL 영점은 맞춰진 것으로 본다(종전 ±0.2 ℃ 무작위)
 let verdictOn = false;
 const runs = [null, null, null];      // 시료별 냉각 기록
 const reads = [null, null, null];     // 시료별 읽은 값 {t, T}
@@ -180,7 +180,7 @@ function toggleRun() { running = !running; const b = document.getElementById('bR
 function hideVerdict() { verdictOn = false; document.getElementById('vcard').classList.add('hidden'); }
 function restart() { runs[cur] = newRun(cur); reads[cur] = null; hideVerdict(); updateSide(); }
 function resetAll() {
-  offset = Math.round((Math.random() * 0.4 - 0.2) * 100) / 100;
+  offset = 0;
   for (let i = 0; i < 3; i++) { runs[i] = null; reads[i] = null; }
   opt.sc = false; opt.stir = true; document.getElementById('bSc').classList.remove('on'); document.getElementById('bStir').classList.add('on');
   hideVerdict(); acc = 0; pick(0);
