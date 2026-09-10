@@ -64,7 +64,7 @@ td.v { color: #fff; font-weight: 700; }
 
 <div id="ctl">
   <span class="gl">시료</span>
-  <button class="s0 on" id="b0" onclick="pick(0)">순수한 물</button>
+  <button class="s0 on" id="b0" onclick="pick(0)" title="수업에서는 물을 재지 않는다(물의 어는점은 0.00으로 준다). 이 곡선은 센서가 0.00에서 얼마나 벗어나는지 — 영점 확인 — 를 보여 준다.">순수한 물 · 영점 확인</button>
   <button class="s1" id="b1" onclick="pick(1)">0.3 m 설탕물</button>
   <button class="s2" id="b2" onclick="pick(2)">0.6 m 설탕물</button>
   <div class="sep"></div>
@@ -83,14 +83,14 @@ td.v { color: #fff; font-weight: 700; }
 
 <div id="stage">
   <div class="pane">
-    <div class="cap"><b>시간–온도 그래프</b> (수집 간격 1초 · 소수 1자리) — <b>클릭</b>하면 그 시점의 값을 「내가 읽은 어는점」으로 적는다 · 판정 표시 ①②③은 오른쪽 「판정」 카드에 설명</div>
+    <div class="cap"><b>시간–온도 그래프</b> (수집 간격 1초 · 소수 2자리) — <b>클릭</b>하면 그 시점의 값을 「내가 읽은 어는점」으로 적는다 · 판정 표시 ①②③은 오른쪽 「판정」 카드에 설명</div>
     <canvas id="cv"></canvas>
   </div>
   <div id="side">
     <div class="card now">
       <div class="ch">지금 시료 — <span id="sName">순수한 물</span></div>
       <div class="cb">
-        <div style="display:flex;align-items:baseline;gap:14px"><span class="big" id="tCur">20.0 ℃</span><span class="muted">경과 <b id="tNow">0</b> s · 얼음 분율 <b id="fIce">0 %</b></span></div>
+        <div style="display:flex;align-items:baseline;gap:14px"><span class="big" id="tCur">20.00 ℃</span><span class="muted">경과 <b id="tNow">0</b> s · 얼음 분율 <b id="fIce">0 %</b></span></div>
         <div class="kv" style="margin-top:6px">
           <span class="k">내가 읽은 어는점</span><span id="myRead">아직 없음 — 그래프를 클릭</span>
           <span class="k">얼음 분율</span><span class="muted">언 만큼 남은 액체가 진해진다 → 설탕물은 평평해지지 않고 천천히 계속 내려간다</span>
@@ -107,14 +107,14 @@ td.v { color: #fff; font-weight: 700; }
       <div class="ch">답안지 §2~§5와 같은 순서 — 읽은 값이 자동으로 들어간다</div>
       <div class="cb">
         <table>
-          <tr><th>농도</th><th>읽은 어는점 (℃)</th><th>ΔTf = 물 − 용액</th><th>기울기 = ΔTf ÷ m</th></tr>
-          <tr><td>0 (물)</td><td class="v" id="r0">—</td><td>—</td><td>—</td></tr>
+          <tr><th>농도</th><th>읽은 어는점 (℃)</th><th>ΔTf = 0.00 − 용액</th><th>기울기 = ΔTf ÷ m</th></tr>
+          <tr><td>0 (물)</td><td class="v"><b>0.00</b> <span class="muted">교사 제시</span></td><td colspan="2" class="muted" style="text-align:left">물 곡선에서 읽은 값 <b id="r0" style="color:#fff">—</b> = 이 센서의 <b>영점 확인값</b>(기준값 아님)</td></tr>
           <tr><td>0.3 m</td><td class="v" id="r1">—</td><td class="v" id="d1">—</td><td class="v" id="s1">—</td></tr>
           <tr><td>0.6 m</td><td class="v" id="r2">—</td><td class="v" id="d2">—</td><td class="v" id="s2">—</td></tr>
           <tr><th colspan="3" style="text-align:right">두 기울기의 평균</th><td class="v" id="sAvg">—</td></tr>
           <tr><th colspan="3" style="text-align:right">이론 상수 1.86과 비교</th><td class="v" id="sCmp">—</td></tr>
         </table>
-        <div class="muted" style="margin-top:6px">ΔTf는 <b>§2에 적은 물의 실측값</b>에서 용액을 뺀다 — 물이 0.0이 아닐 수 있다. 기울기는 원점–각 점 두 값의 <b>평균</b>(답안지 §4㉢).</div>
+        <div class="muted" style="margin-top:6px">ΔTf는 <b>선생님이 준 물의 어는점 0.00</b>에서 용액을 뺀다(답안지 §3). 그래서 센서 영점 어긋남은 빠지지 않고 용액값에 그대로 실린다 — 영점 확인값은 특이 사항에 적어 §5ⓒ 진단에 쓴다. 기울기는 원점–각 점 두 값의 <b>평균</b>(답안지 §4㉢).</div>
       </div>
     </div>
 
@@ -123,7 +123,7 @@ td.v { color: #fff; font-weight: 700; }
       <div class="cb">
         <div class="row"><span class="mk warn">과</span><span><b>과냉각</b> — 어는점 아래로 잠깐 더 내려갔다가, 얼기 시작하면 융해열이 나와 어는점까지 되돌아온다. 골짜기는 어는점이 아니다.</span></div>
         <div class="row"><span class="mk off">젓</span><span><b>젓기</b> — 온도를 고르게 하고 얼음 씨가 생기게 해 과냉각을 얕게 한다. 끄면 값이 흔들리고 과냉각이 깊어진다.</span></div>
-        <div class="row"><span class="mk off">영</span><span><b>센서 영점</b> — 센서마다 ±0.2 ℃ 안팎의 영점 차가 있어 물이 0.0에서 평평해지지 않을 수 있다(초기화마다 새 센서). 그래서 §3은 <b>물의 실측값</b>에서 뺀다.</span></div>
+        <div class="row"><span class="mk off">영</span><span><b>센서 영점</b> — 센서마다 ±0.2 ℃ 안팎의 영점 차가 있어 물이 0.00에서 평평해지지 않을 수 있다(초기화마다 새 센서). 물의 어는점은 <b>0.00으로 주어지므로</b> 이 차는 빼도 사라지지 않는다 — 낮게 어긋나면 ΔTf가 커져 기울기가 크게, 높게 어긋나면 작게 나온다. 그래서 측정 전에 <b>얼음물로 영점을 확인</b>해 특이 사항에 적는다(답안지 §5ⓒ ㉲).</span></div>
       </div>
     </div>
   </div>
@@ -134,7 +134,7 @@ const KF = 1.86, T_BATH = -12, K_COOL = 0.016, CP = 4.18, LF = 334, T0 = 20, DT 
 const M_LIST = [0, 0.3, 0.6], NAMES = ['순수한 물', '0.3 m 설탕물', '0.6 m 설탕물'], COLORS = ['#7fb8ff', '#b39ddb', '#e0922a'];
 let cur = 0, speed = 10, running = true;
 const opt = { sc: false, stir: true };
-let offset = Math.round((Math.random() * 0.4 - 0.2) * 10) / 10;   // 센서 영점 차 — 초기화마다 새로 뽑는다
+let offset = Math.round((Math.random() * 0.4 - 0.2) * 100) / 100;   // 센서 영점 차 — 초기화마다 새로 뽑는다
 let verdictOn = false;
 const runs = [null, null, null];      // 시료별 냉각 기록
 const reads = [null, null, null];     // 시료별 읽은 값 {t, T}
@@ -170,7 +170,7 @@ function step(run) {
   run.noise = 0.7 * run.noise + (Math.random() - 0.5) * 0.06;
   const stirNoise = opt.stir ? 0 : (Math.random() - 0.5) * 0.5 * (run.nucleated ? 1 : 0.4);
   const shown = run.T + run.noise + stirNoise + offset;
-  run.data.push({ t: run.t, T: Math.round(shown * 10) / 10 });
+  run.data.push({ t: run.t, T: Math.round(shown * 100) / 100 });   // 2026-09-10 — 소수 둘째 자리(교사 확정)
   run.t += DT;
   if (run.t > T_MAX) run.done = true;
 }
@@ -180,7 +180,7 @@ function toggleRun() { running = !running; const b = document.getElementById('bR
 function hideVerdict() { verdictOn = false; document.getElementById('vcard').classList.add('hidden'); }
 function restart() { runs[cur] = newRun(cur); reads[cur] = null; hideVerdict(); updateSide(); }
 function resetAll() {
-  offset = Math.round((Math.random() * 0.4 - 0.2) * 10) / 10;
+  offset = Math.round((Math.random() * 0.4 - 0.2) * 100) / 100;
   for (let i = 0; i < 3; i++) { runs[i] = null; reads[i] = null; }
   opt.sc = false; opt.stir = true; document.getElementById('bSc').classList.remove('on'); document.getElementById('bStir').classList.add('on');
   hideVerdict(); acc = 0; pick(0);
@@ -218,7 +218,7 @@ function verdictPoints(run) {          // 판정에 쓰는 세 점
 function annotate(ctx, XX, YY, run, sc) {
   const v = verdictPoints(run); if (!v) return;
   ctx.setLineDash([6, 4]); ctx.strokeStyle = '#4bbd8a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(XX(0), YY(v.tfS)); ctx.lineTo(XX(T_MAX), YY(v.tfS)); ctx.stroke(); ctx.setLineDash([]);
-  chip(ctx, XX(T_MAX) - 4, YY(v.tfS) - 12 * sc, `어는점 ${v.tfS.toFixed(1)} ℃`, '#4bbd8a', 'right', sc);
+  chip(ctx, XX(T_MAX) - 4, YY(v.tfS) - 12 * sc, `어는점 ${v.tfS.toFixed(2)} ℃`, '#4bbd8a', 'right', sc);
   ctx.strokeStyle = '#4bbd8a'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.arc(XX(v.on.t), YY(v.on.T), 8 * sc, 0, 6.28); ctx.stroke();
   badge(ctx, XX(v.on.t) - 16 * sc, YY(v.on.T) - 16 * sc, '1', '#2b6e4f', sc);
   if (v.valley) { ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 2; const x = XX(v.valley.t), y = YY(v.valley.T), r = 6 * sc; ctx.beginPath(); ctx.moveTo(x - r, y - r); ctx.lineTo(x + r, y + r); ctx.moveTo(x + r, y - r); ctx.lineTo(x - r, y + r); ctx.stroke(); badge(ctx, x, y + 20 * sc, '2', '#8a3a3a', sc); }
@@ -242,7 +242,7 @@ function draw(W, H) {
     const r = reads[i]; if (!r) return;
     g.strokeStyle = COLORS[i]; g.setLineDash([4, 4]); g.lineWidth = 1; g.beginPath(); g.moveTo(X(r.t, W), AX.T); g.lineTo(X(r.t, W), H - AX.B); g.stroke(); g.setLineDash([]);
     g.fillStyle = COLORS[i]; g.beginPath(); g.arc(X(r.t, W), Y(r.T, H), 5, 0, 6.28); g.fill();
-    chip(g, X(r.t, W), AX.T + 14 + i * 22, `${NAMES[i].slice(0, 5)} 읽음 ${r.T.toFixed(1)} ℃`, COLORS[i], 'center', 1);
+    chip(g, X(r.t, W), AX.T + 14 + i * 22, `${NAMES[i].slice(0, 5)} 읽음 ${r.T.toFixed(2)} ℃`, COLORS[i], 'center', 1);
   });
   if (verdictOn) annotate(g, t => X(t, W), T => Y(T, H), runs[cur], 1);
   g.restore();
@@ -276,15 +276,16 @@ function updateSide() {
   const run = runs[cur];
   document.getElementById('sName').textContent = NAMES[cur];
   document.getElementById('tNow').textContent = run ? run.t : 0;
-  document.getElementById('tCur').textContent = run && run.data.length ? run.data[run.data.length - 1].T.toFixed(1) + ' ℃' : '—';
+  document.getElementById('tCur').textContent = run && run.data.length ? run.data[run.data.length - 1].T.toFixed(2) + ' ℃' : '—';
   document.getElementById('fIce').textContent = run ? Math.round(run.f * 100) + ' %' : '—';
-  document.getElementById('myRead').textContent = reads[cur] ? `${reads[cur].T.toFixed(1)} ℃ (${reads[cur].t} s)` : '아직 없음 — 그래프를 클릭';
+  document.getElementById('myRead').textContent = reads[cur] ? `${reads[cur].T.toFixed(2)} ℃ (${reads[cur].t} s)` : '아직 없음 — 그래프를 클릭';
   const r0 = reads[0], r1 = reads[1], r2 = reads[2];
   const set = (id, v) => document.getElementById(id).textContent = v;
-  set('r0', r0 ? r0.T.toFixed(1) : '—'); set('r1', r1 ? r1.T.toFixed(1) : '—'); set('r2', r2 ? r2.T.toFixed(1) : '—');
+  set('r0', r0 ? r0.T.toFixed(2) : '—'); set('r1', r1 ? r1.T.toFixed(2) : '—'); set('r2', r2 ? r2.T.toFixed(2) : '—');
+  // 2026-09-10 — 기준은 교사 제시 0.00 고정(물은 재지 않는다). 물 곡선에서 읽은 값은 영점 확인값으로만 보인다.
   let s1 = null, s2 = null;
-  if (r0 && r1) { const d = r0.T - r1.T; s1 = d / 0.3; set('d1', `${r0.T.toFixed(1)} − (${r1.T.toFixed(1)}) = ${d.toFixed(1)}`); set('s1', s1.toFixed(2)); } else { set('d1', '—'); set('s1', '—'); }
-  if (r0 && r2) { const d = r0.T - r2.T; s2 = d / 0.6; set('d2', `${r0.T.toFixed(1)} − (${r2.T.toFixed(1)}) = ${d.toFixed(1)}`); set('s2', s2.toFixed(2)); } else { set('d2', '—'); set('s2', '—'); }
+  if (r1) { const d = 0 - r1.T; s1 = d / 0.3; set('d1', `0.00 − (${r1.T.toFixed(2)}) = ${d.toFixed(2)}`); set('s1', s1.toFixed(2)); } else { set('d1', '—'); set('s1', '—'); }
+  if (r2) { const d = 0 - r2.T; s2 = d / 0.6; set('d2', `0.00 − (${r2.T.toFixed(2)}) = ${d.toFixed(2)}`); set('s2', s2.toFixed(2)); } else { set('d2', '—'); set('s2', '—'); }
   if (s1 !== null && s2 !== null) { const a = (s1 + s2) / 2; set('sAvg', a.toFixed(2)); set('sCmp', a > KF ? `${a.toFixed(2)} > 1.86 — 크다` : a < KF ? `${a.toFixed(2)} < 1.86 — 작다` : '같다'); } else { set('sAvg', '—'); set('sCmp', '—'); }
 }
 function showVerdict() {
@@ -293,10 +294,10 @@ function showVerdict() {
   if (!v) { body.innerHTML = '<div class="muted">아직 얼기 시작하지 않았다 — 곡선이 꺾일 때까지 기다린 뒤 다시 누른다.</div>'; card.classList.remove('hidden'); return; }
   verdictOn = true;
   const rows = [];
-  rows.push(`<div class="row"><span class="mk ok">1</span><span><b>${run.superc ? '되돌아와 멈춘 최고점' : '평평해지기 시작한 값'} = 어는점</b> <span class="v">${v.on.T.toFixed(1)} ℃</span> (${v.on.t} s)<br><span class="muted">모형의 어는점 ${v.tfS.toFixed(2)} ℃ — 센서 표시 기준${Math.abs(offset) >= 0.05 ? ` · 이 센서는 영점이 ${offset > 0 ? '+' : ''}${offset.toFixed(1)} ℃ 어긋나 있다 → 물의 실측값에서 빼면 사라진다(§3)` : ''}</span></span></div>`);
-  if (v.valley) rows.push(`<div class="row"><span class="mk no">2</span><span><b>과냉각 골짜기 — 어는점 아님</b> <span class="v">${v.valley.T.toFixed(1)} ℃</span><br><span class="muted">얼음 씨가 생기지 않아 잠깐 더 내려간 값. 얼기 시작하면 융해열로 ①까지 되돌아온다</span></span></div>`);
-  if (v.later) rows.push(`<div class="row"><span class="mk warn">3</span><span><b>30초 뒤 값 — 진해진 용액의 어는점</b> <span class="v">${v.later.T.toFixed(1)} ℃</span><br><span class="muted">언 만큼 남은 물이 진해져 계속 내려간다. 여기를 읽으면 어는점을 낮게 → ΔTf 크게 → 기울기 크게</span></span></div>`);
-  rows.push(r ? `<div class="row"><span class="mk read">읽</span><span><b>내가 읽은 값</b> <span class="v">${r.T.toFixed(1)} ℃</span> · ①과의 차이 <span class="v">${(r.T - v.on.T).toFixed(1)} ℃</span>${Math.abs(r.T - v.on.T) < 0.15 ? ' — 잘 읽었다' : (r.T < v.on.T ? ' — 낮게 읽었다(②나 ③ 쪽)' : ' — 높게 읽었다(꺾이기 전 값)')}</span></div>`
+  rows.push(`<div class="row"><span class="mk ok">1</span><span><b>${run.superc ? '되돌아와 멈춘 최고점' : '평평해지기 시작한 값'} = 어는점</b> <span class="v">${v.on.T.toFixed(2)} ℃</span> (${v.on.t} s)<br><span class="muted">모형의 어는점 ${v.tfS.toFixed(2)} ℃ — 센서 표시 기준${Math.abs(offset) >= 0.05 ? ` · 이 센서는 영점이 ${offset > 0 ? '+' : ''}${offset.toFixed(2)} ℃ 어긋나 있다 → 기준 0.00에서 빼므로 사라지지 않는다 → ΔTf ${offset < 0 ? '크게' : '작게'} → 기울기 ${offset < 0 ? '크게' : '작게'}(§5ⓒ ㉲)` : ''}</span></span></div>`);
+  if (v.valley) rows.push(`<div class="row"><span class="mk no">2</span><span><b>과냉각 골짜기 — 어는점 아님</b> <span class="v">${v.valley.T.toFixed(2)} ℃</span><br><span class="muted">얼음 씨가 생기지 않아 잠깐 더 내려간 값. 얼기 시작하면 융해열로 ①까지 되돌아온다</span></span></div>`);
+  if (v.later) rows.push(`<div class="row"><span class="mk warn">3</span><span><b>30초 뒤 값 — 진해진 용액의 어는점</b> <span class="v">${v.later.T.toFixed(2)} ℃</span><br><span class="muted">언 만큼 남은 물이 진해져 계속 내려간다. 여기를 읽으면 어는점을 낮게 → ΔTf 크게 → 기울기 크게</span></span></div>`);
+  rows.push(r ? `<div class="row"><span class="mk read">읽</span><span><b>내가 읽은 값</b> <span class="v">${r.T.toFixed(2)} ℃</span> · ①과의 차이 <span class="v">${(r.T - v.on.T).toFixed(2)} ℃</span>${Math.abs(r.T - v.on.T) < 0.15 ? ' — 잘 읽었다' : (r.T < v.on.T ? ' — 낮게 읽었다(②나 ③ 쪽)' : ' — 높게 읽었다(꺾이기 전 값)')}</span></div>`
                : `<div class="row"><span class="mk read">읽</span><span class="muted">그래프를 클릭해 값을 고르면 ①과 견주어 준다</span></div>`);
   body.innerHTML = rows.join(''); card.classList.remove('hidden');
 }
