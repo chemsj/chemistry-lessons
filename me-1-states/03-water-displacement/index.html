@@ -53,6 +53,11 @@
   .card .bd{ flex:1; font-size:13px; line-height:1.4; }
   .card button{ flex:0 0 auto; }
   .card.slider{ grid-column:1 / -1; }
+  /* v3.0 I — 순서 확정 뒤: 카드를 확정한 순서로 다시 놓고 몇 번째 단계인지 붙인다 */
+  .card .steps{ flex:0 0 auto; font-size:11.5px; font-weight:700; color:#18432a; background:#eef6ef;
+                border:1px solid #cde3d2; border-radius:10px; padding:1px 7px; white-space:nowrap; }
+  .card.unused{ opacity:.55; }
+  .card.unused .steps{ color:#777; background:#f3f3f3; border-color:#ddd; }
   .card input[type=range]{ flex:1; accent-color:var(--accent); min-width:130px; }
 
   button{ font-family:inherit; font-size:13px; padding:5px 12px; border-radius:6px;
@@ -820,11 +825,19 @@ function 채널이어받기(code){
   st.roundsDone = o.st.roundsDone || 0;
   st.warnedAvg  = !!o.st.warnedAvg;
   st.warnedM    = !!o.st.warnedM;
+  /* v3.0 I — 확정한 순서도 잇는다(2026-09-15 교사 확정). 새로고침으로 순서 확정을 풀고 결과를 본 뒤
+     다른 순서를 담는 길을 막는다. 장치는 처음으로 돌아가도 순서는 그대로 — 답안지 §1과 화면이 어긋나지 않는다. */
+  if(o.st.planLocked && o.st.plan && o.st.plan.length){
+    st.plan = o.st.plan.slice();
+    st.planLocked = true;
+  }
 }
 
 /* 저장이 있으면 이어서 할지 물어본다 — 자동 복원 금지 */
-function 이어하기묻기(){
-  var o = 저장읽기(); if(!o) return false;
+function 이어하기묻기(o){
+  /* v3.0 I — 저장은 새 코드를 뽑기 **전에** 읽어 넘겨받는다. 종전엔 여기서 읽었는데, 그 사이 applyCode(newCode())가
+     render()→저장하기()로 남은 저장을 덮어써 「이어서 하기」가 방금 뽑은 새 코드를 되살렸다(탭 닫기 복구가 안 됐다). */
+  if(!o) return false;
   var box = document.createElement('div');
   box.className = 'refresh-warn';
   box.style.borderWidth = '2px';
@@ -837,7 +850,9 @@ function 이어하기묻기(){
   head.parentNode.insertBefore(box, head.nextSibling);
   document.getElementById('btn-resume').onclick = function(){
     if(applyCode(o.code)){
-      st = o.st; render(); 저장하기();
+      st = o.st;
+      조작잠금(!st.planLocked); 계획그리기();   /* v3.0 I — 되살린 확정 상태를 화면에도(종전엔 잠김·빈 칸으로 남았다) */
+      render(); 저장하기();
       say('하던 실험을 이어서 합니다 — 장치 상태를 되살렸습니다. 잰 값은 답안지를 보세요.');
     } else {
       /* v3.0 — 이전 판(글자·진수가 다른 코드)의 저장은 이어갈 수 없다 */
@@ -911,6 +926,38 @@ function 계획그리기(){
   $('plan-panel').style.display = st.planLocked ? 'none' : 'block';
   $('plan-done').style.display = st.planLocked ? 'block' : 'none';
   if(st.planLocked) $('plan-done-seq').textContent = st.plan.join(' → ');
+  확정순서배열();
+}
+/* v3.0 I — 순서를 확정하면 카드를 그 순서로 다시 놓는다(확정 전에는 코드마다 섞인 배열 그대로).
+   같은 라벨이 두 번 담겼으면(예: 저울 두 번) 처음 나온 자리에 놓고 「1·8단계」처럼 모두 적는다.
+   순서에 없는 카드는 뒤로 보내 흐리게 두되 누를 수는 있다(잘못된 절차는 결과로 돌아온다 — 종전과 같다).
+   확정 전에는 표시를 걷어낸다 — 새 시료를 받으면 shuffleCards 가 배열을 다시 섞는다. */
+function 확정순서배열(){
+  var box = $('cardbox'); if(!box) return;
+  var cards = [].slice.call(box.querySelectorAll('.card'));
+  cards.forEach(function(c){
+    var old = c.querySelector('.steps'); if(old) old.remove();
+    c.classList.remove('unused');
+  });
+  if(!st.planLocked) return;
+  var 자리 = function(c){ return st.plan.indexOf(c.querySelector('.tag').textContent); };
+  var 원래 = cards.slice();
+  cards.sort(function(a,b){
+    var x = 자리(a), y = 자리(b);
+    if(x < 0 && y < 0) return 원래.indexOf(a) - 원래.indexOf(b);
+    if(x < 0) return 1;
+    if(y < 0) return -1;
+    return x - y;
+  });
+  cards.forEach(function(c){
+    var lab = c.querySelector('.tag').textContent, n = [];
+    st.plan.forEach(function(p, i){ if(p === lab) n.push(i + 1); });
+    var s = document.createElement('span'); s.className = 'steps';
+    s.textContent = n.length ? n.join('·') + '단계' : '순서에 없음';
+    if(!n.length) c.classList.add('unused');
+    c.querySelector('.tag').insertAdjacentElement('afterend', s);
+    box.appendChild(c);
+  });
 }
 
 function applyCode(text, opts){
@@ -1095,10 +1142,11 @@ function 계산판(){
 fillTables();
 /* 시료를 정하는 순서 — ① 주소칸의 코드(새로고침 복구) ② 이 기기의 저장(탭 닫기 복구) ③ 새로 뽑기 */
 var 해시코드 = 해시에서읽기();
+var 남은저장 = 해시코드 ? null : 저장읽기();   /* 새 코드가 저장을 덮어쓰기 전에 읽어 둔다 */
 if(해시코드){ applyCode(해시코드); } else { applyCode(newCode()); }
 bind();
 계산판();
-if(!해시코드) 이어하기묻기();     /* 주소에 코드가 있으면 묻지 않는다 — 같은 학생의 새로고침이다 */
+if(!해시코드) 이어하기묻기(남은저장);     /* 주소에 코드가 있으면 묻지 않는다 — 같은 학생의 새로고침이다 */
 이탈경고달기();
 저장상태알림();
 </script>
