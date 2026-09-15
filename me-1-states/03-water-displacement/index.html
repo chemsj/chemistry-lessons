@@ -111,7 +111,28 @@
   .cp-row[data-f="SUB3"] .cp-ex input{ width:74px; }
   .cp-row[data-f="SUB3"] .cp-out{ min-width:70px; margin-right:10px; }
   .calcpad .cp-foot{ border-top:1px solid var(--line); margin-top:4px; padding-top:6px;
-                     font-size:12.5px; color:var(--warn); }
+                     font-size:12.5px; color:var(--warn);
+                     display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .calcpad .cp-foot .txt{ flex:1 1 300px; }
+  /* v3.0 C — 「모두 지우기」는 값 칸에서 멀리(맨 아래 오른쪽) · 두 번 눌러야 지워진다 */
+  #cp-clear{ flex:0 0 auto; font-size:12.5px; }
+  #cp-clear.armed{ background:#fff7f2; border-color:var(--warn); color:var(--warn); font-weight:700; }
+  /* v3.0 G — ⑦ 차이 %가 5를 넘으면 붉게 */
+  .cp-out.warn{ color:var(--bad); }
+  .cp-warn-txt{ font-size:12px; color:var(--bad); font-weight:700; }
+  /* v3.0 F — §6 재계산 칸(내 실험값 칸과 분리) */
+  .cp-sub{ margin-top:8px; padding-top:6px; border-top:2px solid var(--line); }
+  .cp-sub .cp-sttl{ font-weight:700; font-size:13px; margin:2px 0 2px; }
+  .cp-sub .cp-sttl span{ font-weight:400; color:var(--mute); font-size:12.5px; }
+  .cp-row[data-f="ML"] .cp-out{ min-width:76px; }
+  /* v3.0 H — 회차 미완 경고(막지 않는다 · 「확인」 하나) */
+  #warn-modal{ position:fixed; inset:0; background:rgba(22,32,43,0.45); z-index:100;
+               display:flex; align-items:center; justify-content:center; padding:16px; }
+  #warn-modal .box{ background:#fff; border:2px solid var(--warn); border-radius:10px; max-width:460px;
+                    padding:16px 18px; font-size:14px; line-height:1.6; box-shadow:0 8px 30px rgba(0,0,0,0.25); }
+  #warn-modal .box b{ color:var(--warn); }
+  #warn-modal .box .n{ font-size:22px; font-weight:800; color:var(--bad); }
+  #warn-modal button{ margin-top:10px; }
 </style>
 </head>
 <body>
@@ -122,7 +143,7 @@
   <div class="meta">
     <span><b>과목</b> 물질과 에너지 (진로선택)</span>
     <span><b>영역</b> Ⅰ. 물질의 세 가지 상태</span>
-    <span><b>차시</b> Ⅰ-3 · 본 수행평가</span>
+    <span><b>차시</b> Ⅰ-4 · 본 수행평가 (Ⅰ-3 연습 겸용)</span>
   </div>
   <div class="std">
     <b>성취기준 [12물에01-01]</b> 기체의 온도, 압력, 부피, 몰수 사이의 관계를 통합적으로 이해하고,
@@ -132,7 +153,8 @@
   <div class="who">
     <small>이 화면에는 아무것도 입력하지 않는다 — <b>반·번호를 포함한 모든 기록은 종이 답안지에</b> 적는다.
       이름은 적지 않는다. 제출물은 <b>반·번호로만</b> 식별한다.</small>
-    <span class="sample"><span class="cap">배정된 시료 코드</span><span class="code" id="sample-code">—</span></span>
+    <span class="sample"><span class="cap">배정된 시료 코드</span><span class="code" id="sample-code">—</span>
+      <span class="cap">글자 I·K·O·U·S·Q·Z·B·G는 쓰지 않는다 — 숫자와 헷갈리지 않게</span></span>
   </div>
   <div class="refresh-warn">
     ⚠ 시료 코드를 <b>종이 답안지 머리에 먼저 옮겨 적으세요.</b>
@@ -163,6 +185,8 @@
   <b>먼저 순서를 정해 확정</b>한 뒤에야 조작할 수 있다. 확정한 순서를 답안지에 옮겨 적고 그대로 수행한다.
   잘못된 순서로 확정해도 막지 않지만, <b>잘못된 결과가 그대로 돌아온다.</b>
   <b>3회 반복</b>하고 평균을 쓴다.
+  눈금을 읽을 때마다 뜨는 <b>확인 문자</b> 두 글자를 답안지 §2 그 회차 줄의 <b>「확인 문자」 칸</b>에 적는다.
+  오른쪽 위 <b>「눈금까지 읽은 회차」</b>가 3이 되기 전에 평균을 내면 화면이 한 번 묻는다.
   
   <div style="margin-top:6px; padding-top:5px; border-top:1px dashed #e2d391">
     🧮 <b>계산판은 실험 그림 아래</b>에 있다. 화면 <b>오른쪽 아래 「🧮 계산판」</b> 단추로도 갈 수 있다.
@@ -180,7 +204,8 @@
   <div class="side">
     <div class="lab">
       <div class="g"><span class="lb">분석저울 <span style="color:#888">(마지막으로 읽은 값)</span></span><span class="vl rd" id="out-mass">—</span><span class="un">g</span></div>
-      <div class="g"><span class="lb">눈금 (마지막으로 읽은 값)</span><span class="vl rd" id="out-vol">—</span><span class="un">mL</span></div>
+      <div class="g"><span class="lb">눈금 (마지막으로 읽은 값) · 확인 문자 <b id="out-chk" class="rd">—</b></span><span class="vl rd" id="out-vol">—</span><span class="un">mL</span></div>
+      <div class="g"><span class="lb">눈금까지 읽은 회차</span><span class="vl rd" id="out-rounds">0</span><span class="un">회</span></div>
     </div>
 
     <div id="plan-panel" class="paper" style="margin-bottom:8px">
@@ -279,13 +304,44 @@
     <span class="cp-no">⑦</span><span class="cp-nm">차이 (%) <span style="font-size:11px;color:var(--mute)">§4</span></span>
     <span class="cp-ex">| <input inputmode="decimal" autocomplete="off"> − <input inputmode="decimal" autocomplete="off"> | ÷ <input inputmode="decimal" autocomplete="off"> × 100</span>
     <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">%</span>
+    <span class="cp-warn-txt" hidden>⚠ 5 %를 넘는다 — 답안지 §4의 재검토 안내대로 다시 본다</span>
   </div>
   <div class="cp-row" data-f="ANY">
     <span class="cp-no">⑧</span><span class="cp-nm">그 밖의 계산</span>
     <span class="cp-ex"><input inputmode="decimal" autocomplete="off"> <select><option>+</option><option>−</option><option>×</option><option>÷</option></select> <input inputmode="decimal" autocomplete="off"></span>
     <span class="cp-eq">=</span><span class="cp-out">—</span>
   </div>
-  <div class="cp-foot">⚠ 어떤 값을 넣을지는 <b>스스로</b> 정한다 — 단위(℃·K, mL·L, mmHg·atm)를 맞추는 것은 계산판이 해 주지 않는다. ③⑤는 값을 <b>두 개만</b> 넣고 2로 나눠도 된다.</div>
+  
+  <div class="cp-sub">
+    <div class="cp-sttl">§6 오류 찾기 — 고쳐 계산하는 칸 <span>· 지문의 값을 여기에 넣는다. 위의 내 실험값 칸은 그대로 둔다. 무엇을 어느 칸에 넣을지는 역시 스스로 정한다.</span></div>
+    <div class="cp-row" data-f="T" data-s6="1">
+      <span class="cp-no">①</span><span class="cp-nm">절대 온도 T</span>
+      <span class="cp-ex"><input inputmode="decimal" autocomplete="off"> + 273</span>
+      <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">K</span>
+    </div>
+    <div class="cp-row" data-f="P2" data-s6="1">
+      <span class="cp-no">②</span><span class="cp-nm">기체의 압력 P</span>
+      <span class="cp-ex">( <input inputmode="decimal" autocomplete="off"> − <input inputmode="decimal" autocomplete="off"> )</span>
+      <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">mmHg</span>
+      <span class="cp-eq">÷ 760 =</span><span class="cp-out">—</span><span class="cp-un">atm</span>
+    </div>
+    <div class="cp-row" data-f="ML" data-s6="1">
+      <span class="cp-no">③</span><span class="cp-nm">부피 V</span>
+      <span class="cp-ex"><input inputmode="decimal" autocomplete="off"> ÷ 1000</span>
+      <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">L</span>
+    </div>
+    <div class="cp-row" data-f="N" data-s6="1">
+      <span class="cp-no">④</span><span class="cp-nm">몰수 n</span>
+      <span class="cp-ex">( <input inputmode="decimal" autocomplete="off"> × <input inputmode="decimal" autocomplete="off"> ) ÷ ( 0.082 × <input inputmode="decimal" autocomplete="off"> )</span>
+      <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">mol</span>
+    </div>
+    <div class="cp-row" data-f="DIV" data-s6="1">
+      <span class="cp-no">⑥</span><span class="cp-nm">몰질량 M</span>
+      <span class="cp-ex"><input inputmode="decimal" autocomplete="off"> ÷ <input inputmode="decimal" autocomplete="off"></span>
+      <span class="cp-eq">=</span><span class="cp-out">—</span><span class="cp-un">g/mol</span>
+    </div>
+  </div>
+  <div class="cp-foot"><span class="txt">⚠ 어떤 값을 넣을지는 <b>스스로</b> 정한다 — 단위(℃·K, mL·L, mmHg·atm)를 맞추는 것은 계산판이 해 주지 않는다. ③⑤는 값을 <b>두 개만</b> 넣고 2로 나눠도 된다.</span><button id="cp-clear" type="button">모두 지우기</button></div>
 </div>
 <h2>3. 계산에 쓸 자료</h2>
 <div class="note">
@@ -334,7 +390,13 @@ var 실린더용량 = 500;               /* mL */
    ±150 이면 최대 1.5% — 판별(후보 간격 30%↑)은 여전히 뒤집히지 않는다. */
 var 수면차범위 = 150;               /* mm */
 var 기본수면차 = 90;                /* 세운 직후의 높이차 mm */
-var CODE_ALPHABET = '0123456789ABCDEFGHJLMNPQRSTVWXYZ';
+/* 시료 코드 글자 — v3.0(2026-09-15): 손글씨로 숫자와 헷갈리는 S(5)·Q(0)·Z(2)·B(8)·G(6)를 뺐다(I·K·O·U는 처음부터 없음).
+   27자 · 셋째 글자의 자리 % 7 = 시료. ⚠ 코드 → 시드가 27진수라 2026-2학기(v2.x) 코드는 이 판에서 재현되지 않는다 —
+   그 검산은 _이전버전/기체시뮬레이션-수상치환.v2.3판-260915.bak.html 또는 _생성도구 도구의 --구판 스위치로. */
+var CODE_ALPHABET = '0123456789ACDEFHJLMNPRTVWXY';
+var CODE_ALPHABET_구판 = '0123456789ABCDEFGHJLMNPQRSTVWXYZ';   /* v2.x(2026-2학기 실시분) — 기록용, 이 판에서는 쓰지 않는다 */
+/* 회차 확인 문자용 글자(v3.0 B) — 코드 글자와도 헷갈리지 않게 숫자 닮은꼴과 I·O를 뺀 18자 */
+var CHK_ALPHABET = 'ACEFHJKLMNPRTUVWXY';
 
 /* 온도별 수증기압(mmHg) — 일반 화학 자료(교과서·편람 대조 권장, 교사 검토 대상) */
 var 수증기압표 = {18:15.5, 19:16.5, 20:17.5, 21:18.7, 22:19.8, 23:21.1,
@@ -369,7 +431,7 @@ function normalizeCode(text){
   return s;
 }
 function seedFromCode(raw){
-  var n=0; for(var i=0;i<5;i++) n = n*32 + CODE_ALPHABET.indexOf(raw.charAt(i));
+  var n=0; for(var i=0;i<5;i++) n = n*CODE_ALPHABET.length + CODE_ALPHABET.indexOf(raw.charAt(i));   /* v3.0: 27진수 */
   return n;
 }
 function formatCode(raw){ return raw.slice(0,2)+'-'+raw.slice(2); }
@@ -382,7 +444,7 @@ function middleLettersFor(idx){
 function newCode(){
   var idx = Math.floor(Math.random()*시료후보.length);
   var mid = middleLettersFor(idx);
-  function any(){ return CODE_ALPHABET[Math.floor(Math.random()*32)]; }
+  function any(){ return CODE_ALPHABET[Math.floor(Math.random()*CODE_ALPHABET.length)]; }
   return any()+any()+mid[Math.floor(Math.random()*mid.length)]+any()+any();
 }
 /* 코드 → 실험실 조건 · 용기 2개(서로 다른 시료) · 회당 방출량 */
@@ -431,7 +493,13 @@ var st = { can:0,            /* 0|1 — 선택된 용기 인덱스 */
            lastVol:null,
            lastMass:null,
            readNo:0,
-           flash:null };     /* 'coll' | 'lost' | null — 기포 표시 */
+           flash:null,       /* 'coll' | 'lost' | null — 기포 표시 */
+           /* v3.0 — 회차·확인 문자·경고 상태 */
+           roundsDone:0,     /* 눈금까지 읽은 회차 — 세우기 뒤 기체를 모아 처음 읽었을 때만 +1(재읽기 제외) */
+           roundOpen:false,  /* 새로 세운 눈금실린더에서 아직 눈금을 안 읽었나 */
+           warnedAvg:false,  /* ③⑤ 평균 단계의 회차 경고를 띄웠나 */
+           warnedM:false,    /* ⑥ 몰질량 단계의 회차 경고를 띄웠나 */
+           lastChk:null };   /* 마지막 눈금 읽기의 확인 문자 */
 /* 저울 초기 영점 어긋남 — 코드에서 결정. 상수라서 질량차에서는 상쇄된다(실제와 같다) */
 function zeroDrift(){ return 0.0008 + unit(setup.seed, 0x5A45524F) * 0.0040; }
 /* 지금 저울이 가리키는 값 (실시간) */
@@ -446,6 +514,30 @@ function balanceRaw(){
 function balanceShown(){ return balanceRaw() - st.zeroRef; }
 function $(id){ return document.getElementById(id); }
 function say(t){ $('msg').textContent = t || ''; }
+
+
+function 확인문자(k){
+  var L = CHK_ALPHABET.length;
+  var off = Math.floor(unit(setup.seed, 0x43484B30) * L);                    /* 'CHK0' */
+  var a = CHK_ALPHABET.charAt((off + k) % L);
+  var b = CHK_ALPHABET.charAt(Math.floor(unit(setup.seed, mix32(0x43484B31, k)) * L));   /* 'CHK1' × k */
+  return a + b;
+}
+/* v3.0 H — 회차 미완 경고. 막지 않는다 — 「확인」 하나뿐이고 조작·계산판은 그대로 열려 있다.
+   문구는 답안지에 이미 있는 것(§2 세 줄 · 「3회 반복하고 평균」)만 되풀이한다. */
+function 회차경고(단계){
+  var n = st.roundsDone || 0;
+  var old = $('warn-modal'); if(old) old.remove();
+  var m = document.createElement('div'); m.id = 'warn-modal';
+  m.innerHTML = '<div class="box"><b>⚠ 회차 확인</b><br>'
+    + (단계 === '몰질량' ? '몰질량을 구하기 전에 한 번 더 — ' : '')
+    + '눈금까지 읽은 회차가 <span class="n">' + n + '회</span>입니다.<br>'
+    + '답안지 §2에 <b>3회</b>가 채워졌는지 확인하고, 아니면 측정으로 돌아가세요.'
+    + '<br><button class="main" type="button" id="warn-ok">확인</button></div>';
+  document.body.appendChild(m);
+  $('warn-ok').onclick = function(){ m.remove(); };
+  try{ $('warn-ok').focus(); }catch(_){}
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    [5] 장면 그리기 — 수조(위 열림)·거꾸로 세운 눈금실린더·고무관·온도 표기
@@ -564,6 +656,8 @@ function render(){ try{ 저장하기(); }catch(_){}
   $('sample-code').textContent = setup ? formatCode(setup.code) : '—';
   $('out-mass').textContent = (st.lastMass == null) ? '—' : st.lastMass.toFixed(4);
   $('out-vol').textContent  = st.lastVol==null ? '—' : String(st.lastVol);
+  $('out-chk').textContent  = st.lastChk || '—';                 /* v3.0 B */
+  $('out-rounds').textContent = String(st.roundsDone || 0);     /* v3.0 H — 늘 보이는 회차 */
   /* 용기는 하나뿐이다(2026-08-19) — st.can 은 늘 0 이라 갈아 끼울 것이 없다. */
   var ok = st.dh === 0;
   $('rd-dh').innerHTML = st.gasN>0
@@ -595,6 +689,7 @@ function actZero(){
 }
 function actStand(){
   st.cyl = true; st.gasN = 0; st.dh = 기본수면차; $('sl-dh').value = 기본수면차; st.lastVol = null; st.flash = null;
+  st.roundOpen = true;                  /* v3.0 H — 새로 세운 실린더 = 새 회차. 기체를 모아 처음 읽을 때 회차가 하나 는다 */
   say('눈금실린더에 물을 가득 채워 수조에 거꾸로 세웠다.');
   render();
 }
@@ -635,7 +730,9 @@ function actRead(){
   st.readNo++;
   var noise = 1 + (unit(setup.seed, mix32(0x52454144, st.readNo)) * 2 - 1) * 부피노이즈;
   st.lastVol = Math.round(기체부피mL(st.gasN, st.dh) * noise);
-  say('눈금: ' + st.lastVol + ' mL — 종이 답안지에 적는다.'
+  st.lastChk = 확인문자(st.readNo);                                   /* v3.0 B */
+  if(st.roundOpen){ st.roundsDone = (st.roundsDone || 0) + 1; st.roundOpen = false; }   /* v3.0 H — 같은 실린더의 재읽기는 안 센다 */
+  say('눈금: ' + st.lastVol + ' mL · 확인 문자 ' + st.lastChk + ' — 답안지 §2 이 회차 줄의 부피·확인 문자 칸에 적는다.'
       + (st.dh !== 0 ? ' (⚠ 수면 높이가 맞지 않은 채 읽었다)' : ''));
   render();
 }
@@ -712,6 +809,18 @@ function 저장읽기(){
 }
 function 저장지우기(){ try{ localStorage.removeItem(저장키); }catch(_){} }
 function nowMs(){ return (new Date()).getTime(); }
+/* v3.0 A — 새로고침·재시작 뒤에도 올린·읽은 순번을 이어 간다.
+   같은 코드의 저장이 이 기기에 있으면 카운터(placeNo·readNo·회차·경고 여부)만 이어받는다.
+   장치는 처음으로 돌아가지만(용기 다시 가득) 잔떨림·눈금 노이즈 채널은 이어지므로 같은 값이 되풀이되지 않는다.
+   저장이 막힌 기기(file:// 등)에서는 이어받을 것이 없어 종전처럼 0부터다 — 화면 머리의 저장 상태 안내가 그 경우를 알린다. */
+function 채널이어받기(code){
+  var o = 저장읽기(); if(!o || o.code !== code || !o.st) return;
+  st.placeNo    = o.st.placeNo    || 0;
+  st.readNo     = o.st.readNo     || 0;
+  st.roundsDone = o.st.roundsDone || 0;
+  st.warnedAvg  = !!o.st.warnedAvg;
+  st.warnedM    = !!o.st.warnedM;
+}
 
 /* 저장이 있으면 이어서 할지 물어본다 — 자동 복원 금지 */
 function 이어하기묻기(){
@@ -727,9 +836,15 @@ function 이어하기묻기(){
   var head = document.querySelector('.head');
   head.parentNode.insertBefore(box, head.nextSibling);
   document.getElementById('btn-resume').onclick = function(){
-    if(applyCode(o.code)){ st = o.st; render(); 저장하기(); }
+    if(applyCode(o.code)){
+      st = o.st; render(); 저장하기();
+      say('하던 실험을 이어서 합니다 — 장치 상태를 되살렸습니다. 잰 값은 답안지를 보세요.');
+    } else {
+      /* v3.0 — 이전 판(글자·진수가 다른 코드)의 저장은 이어갈 수 없다 */
+      저장지우기();
+      say('이전 판의 저장이라 이어갈 수 없습니다 — 새 시료로 시작합니다. 답안지 머리의 시료 코드를 새로 적으세요.');
+    }
     box.remove();
-    say('하던 실험을 이어서 합니다 — 장치 상태를 되살렸습니다. 잰 값은 답안지를 보세요.');
   };
   document.getElementById('btn-fresh').onclick = function(){
     저장지우기(); applyCode(newCode()); box.remove();
@@ -798,11 +913,13 @@ function 계획그리기(){
   if(st.planLocked) $('plan-done-seq').textContent = st.plan.join(' → ');
 }
 
-function applyCode(text){
+function applyCode(text, opts){
   var s = setupFromCode(text); if(!s) return false;
   setup = s;
   st = { can:0, cyl:false, hose:false, gasN:0, dh:기본수면차, onPan:false, zeroRef:0, placeNo:0,
-         lastVol:null, lastMass:null, readNo:0, flash:null, plan:[], planLocked:false };
+         lastVol:null, lastMass:null, readNo:0, flash:null, plan:[], planLocked:false,
+         roundsDone:0, roundOpen:false, warnedAvg:false, warnedM:false, lastChk:null };
+  if(!(opts && opts.fresh)) 채널이어받기(s.code);   /* v3.0 A — 재시작해도 순번을 잇는다. 검산 복원(fresh)만 0부터 */
   $('sl-dh').value = 기본수면차;
   say('');
   shuffleCards();
@@ -914,6 +1031,7 @@ function 계산판(){
     if(vals.some(isNaN)) return NaN;
     switch(kind){
       case 'T':   return vals[0] + 273;
+      case 'ML':  return vals[0] / 1000;                 /* v3.0 F — §6 칸의 부피(값 하나) */
       case 'P2':  return [vals[0] - vals[1], (vals[0] - vals[1]) / 760];
       case 'N':   return vals[2] === 0 ? Infinity : (vals[0] * vals[1]) / (0.082 * vals[2]);
       case 'DIV': return vals[1] === 0 ? Infinity : vals[0] / vals[1];
@@ -939,11 +1057,39 @@ function 계산판(){
   function show(row){
     var v = calc(row), arr = Array.isArray(v) ? v : [v];
     [].slice.call(row.querySelectorAll('.cp-out')).forEach(function(out, i){ put(out, arr[i]); });
+    var kind = row.getAttribute('data-f'), first = arr[0];
+    var got = (typeof first === 'number') && isFinite(first);
+    /* v3.0 G — ⑦ 차이 %가 5를 넘으면 붉게. 답안지 §4 「5 % 넘으면 재검토」를 화면에서도 */
+    if(kind === 'PCT'){
+      var over = got && first > 5;
+      var o0 = row.querySelector('.cp-out'); if(o0){ if(over) o0.classList.add('warn'); else o0.classList.remove('warn'); }
+      var wt = row.querySelector('.cp-warn-txt'); if(wt) wt.hidden = !over;
+    }
+    /* v3.0 H — 회차 미완 경고: 3회를 마치지 않은 채 평균(③⑤)이 처음 값을 내면 한 번, 몰질량(⑥)이 나오면 한 번 더.
+       §6 재계산 칸(data-s6)은 내 실험값이 아니라 제외. 막지 않는다. */
+    if(got && !row.hasAttribute('data-s6') && (st.roundsDone || 0) < 3){
+      if((kind === 'AVG2' || kind === 'AVG') && !st.warnedAvg){ st.warnedAvg = true; 저장하기(); 회차경고('평균'); }
+      else if(kind === 'DIV' && !st.warnedM){ st.warnedM = true; 저장하기(); 회차경고('몰질량'); }
+    }
   }
   [].slice.call(pad.querySelectorAll('.cp-row')).forEach(function(row){
     row.addEventListener('input',  function(){ show(row); });
     row.addEventListener('change', function(){ show(row); });
   });
+  /* v3.0 C — 「모두 지우기」: 첫 누름은 예고, 4초 안에 한 번 더 누르면 계산판의 칸을 모두 비운다(회차·확인 문자는 그대로) */
+  var clr = $('cp-clear'), armed = null;
+  function 지우기해제(){ if(armed){ clearTimeout(armed); armed = null; } clr.classList.remove('armed'); clr.textContent = '모두 지우기'; }
+  if(clr) clr.onclick = function(){
+    if(armed){
+      지우기해제();
+      [].slice.call(pad.querySelectorAll('input')).forEach(function(i){ i.value = ''; });
+      [].slice.call(pad.querySelectorAll('select')).forEach(function(s){ s.selectedIndex = 0; });
+      [].slice.call(pad.querySelectorAll('.cp-row')).forEach(function(row){ show(row); });
+      return;
+    }
+    clr.classList.add('armed'); clr.textContent = '한 번 더 누르면 모두 지워집니다';
+    armed = setTimeout(지우기해제, 4000);
+  };
 }
 
 fillTables();
