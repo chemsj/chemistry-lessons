@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>헤스 법칙 확인 — 두 길의 열량</title>
+<style>
+/* 16차시 전자칠판·크롬북용 · 1280×720 무대를 창 크기에 맞춰 늘이고 줄인다(세로 넘침 0)
+   역할 — 시뮬레이션은 「실험으로 얻을 데이터」만 준다(온도). 온도 변화·질량·열량·ΔH·합·비교는 학생이 계산해 빈칸에 적는다.
+   맞으면 ✓, 틀리면 ✗와 짧은 힌트만 — 정답 숫자는 어디에도 띄우지 않는다.
+   색 언어: 발열 = 파랑 · 흡열 = 빨강(이 화면에는 흡열이 없다) · 온도계 = 주황 · 학생 입력 = 노랑 */
+:root { --bg:#14161c; --bar:#1d2129; --pane:#0f1218; --line:#2b3242; --line2:#333a48; --tx:#e8eaf0; --mu:#8b94ab;
+  --exo:#3d9be0; --exo2:#2b7fb8; --exoL:#9fd0f5; --endo:#e2546f; --th:#e0922a; --q:#ffd28a; --ok:#4bbd8a; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: var(--bg); overflow: hidden; }
+body { font-family: 'Pretendard','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif; color: var(--tx); word-break: keep-all; }
+#app { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform-origin: 0 0; display: flex; flex-direction: column; background: var(--bg); }
+#bar { height: 50px; display: flex; align-items: center; gap: 14px; padding: 0 14px; background: var(--bar); border-bottom: 1px solid var(--line2); }
+#bar h1 { font-size: 19px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; }
+#bar h1 small { font-size: 13px; font-weight: 400; color: var(--mu); margin-left: 6px; }
+#tabs { display: flex; gap: 5px; margin-left: auto; }
+button { font: inherit; font-size: 14px; font-weight: 700; color: var(--tx); background: #2a3040; border: 1px solid #48506a; border-radius: 8px; padding: 6px 11px; cursor: pointer; min-height: 34px; }
+button:hover:not(:disabled) { filter: brightness(1.2); }
+button:disabled { opacity: .38; cursor: default; }
+#tabs button { font-size: 13px; padding: 5px 9px; min-height: 32px; background: #222838; }
+#tabs button.on { background: #2b6e4f; border-color: #4bbd8a; color: #fff; }
+button.go { background: #23405e; border-color: #3d9be0; }
+button.next { background: #2b6e4f; border-color: #4bbd8a; }
+button.sel { background: #2b6e4f; border-color: var(--ok); color: #fff; }
+button.rbtn { font-size: 13px; padding: 4px 10px; min-height: 28px; background: #2a2414; border-color: #8a6b2a; color: var(--q); }
+#main { position: relative; flex: 1 1 auto; min-height: 0; }
+.step { position: absolute; inset: 0; padding: 10px 14px; display: none; }
+.step.on { display: block; }
+.pane { background: var(--pane); border: 1px solid var(--line); border-radius: 12px; position: relative; }
+.ttl { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+.ttl .k { color: var(--mu); font-weight: 700; font-size: 15px; margin-right: 8px; }
+.q { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.45; }
+.q b { color: var(--q); }
+.mu { color: var(--mu); }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 9px; background: #1b2030; border: 1px solid var(--line2); font-size: 15px; font-weight: 700; }
+.chip.exo { border-color: var(--exo); color: var(--exoL); background: #13283b; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.flow .ar { font-size: 19px; color: var(--mu); font-weight: 800; }
+.hide { display: none !important; }
+.formula { font-size: 28px; font-weight: 800; letter-spacing: 0.02em; text-align: center; padding: 8px 0 2px; }
+.formula sub { font-size: 14px; }
+.legend3 { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 15px; margin: 4px auto 0; width: max-content; }
+.legend3 b { color: var(--q); text-align: right; }
+
+/* 학생 입력 */
+input.ans, textarea.ans { font: inherit; font-size: 17px; font-weight: 800; padding: 4px 7px; border-radius: 7px; border: 1.5px solid #48506a; background: #0b0e14; color: var(--q); font-variant-numeric: tabular-nums; }
+input.ans { width: 104px; text-align: right; }
+input.ans::placeholder { color: #4b5366; font-weight: 400; }
+input.ans:disabled { opacity: .35; }
+input.ans.ok { border-color: var(--ok); color: #bff0d8; }
+input.ans.bad { border-color: var(--endo); }
+input.ans:focus { outline: none; border-color: var(--q); }
+textarea.ans { width: 100%; height: 36px; font-size: 13px; font-weight: 500; resize: none; color: var(--tx); }
+.fb { font-size: 13px; font-weight: 700; }
+.fb.ok { color: var(--ok); } .fb.bad { color: var(--endo); }
+.calc { display: grid; grid-template-columns: 116px 1fr; align-items: center; gap: 3px 8px; padding: 5px 8px; border-radius: 9px; background: #151922; border: 1px solid var(--line); }
+.calc .lab { font-size: 13px; color: var(--mu); font-weight: 700; line-height: 1.2; }
+.calc .lab b { display: block; color: var(--tx); font-size: 15px; }
+.calc .ex { font-size: 15px; font-variant-numeric: tabular-nums; display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+.eqline { font-size: 15px; padding: 6px 8px; border-radius: 9px; background: #13283b; border: 1px solid var(--exo2); color: #dcecfa; }
+.eqline .v { color: var(--exoL); font-weight: 800; }
+.choice { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 15px; font-weight: 700; }
+.choice button { font-size: 14px; padding: 4px 10px; min-height: 30px; }
+
+/* 실험 단계 */
+.exp { display: grid; grid-template-columns: 395px 440px 1fr; gap: 10px; height: 100%; }
+.exp .left { padding: 8px 10px; display: flex; flex-direction: column; }
+.exp .mid { padding: 8px 12px; display: flex; flex-direction: column; }
+.exp .right { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.ctrls { display: flex; flex-wrap: wrap; gap: 5px; margin: 2px 0 5px; }
+.ctrls button { font-size: 13px; padding: 5px 8px; }
+.read { font-size: 40px; font-weight: 800; color: var(--th); font-variant-numeric: tabular-nums; text-align: center; line-height: 1; }
+.read small { font-size: 18px; color: var(--mu); }
+.readlab { text-align: center; font-size: 13px; color: var(--mu); margin-top: 2px; }
+.note { font-size: 13.5px; color: #c6ccda; line-height: 1.45; background: #171b24; border: 1px dashed var(--line2); border-radius: 8px; padding: 6px 10px; }
+.note b { color: #fff; }
+.rt { font-size: 14px; color: var(--mu); font-weight: 700; }
+
+/* 비교 · 계단 */
+.cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 280px; }
+.cmp .pane { padding: 6px 10px; overflow: hidden; }
+.row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.row .pane { flex: 1; padding: 7px 12px; }
+.stairs { display: grid; grid-template-columns: 720px 1fr; gap: 12px; height: 100%; }
+.side { padding: 8px 12px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
+.side .pane { padding: 5px 10px !important; }
+.side .chip { font-size: 13px; padding: 4px 8px; }
+.side button { min-height: 30px; padding: 4px 9px; font-size: 13px; }
+.eqs { font-size: 14px; line-height: 1.5; }
+.eqs .v { color: var(--exoL); font-weight: 800; }
+
+#foot { height: 124px; display: flex; align-items: center; gap: 14px; padding: 0 14px; background: var(--bar); border-top: 1px solid var(--line2); }
+#tbl { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+#tbl th, #tbl td { border: 1px solid #3a4256; padding: 1px 9px; text-align: center; }
+#tbl th { font-size: 12px; color: var(--mu); font-weight: 700; background: #181c25; white-space: nowrap; }
+#tbl th.r { text-align: left; color: var(--tx); }
+#tbl td { font-size: 14.5px; font-weight: 800; color: var(--q); min-width: 150px; }
+#tbl td.meas { color: var(--th); }
+#tbl caption { caption-side: top; text-align: left; font-size: 12px; color: var(--mu); padding-bottom: 2px; }
+#nav { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+#nav .r { display: flex; align-items: center; gap: 8px; }
+#cnt { font-size: 14px; color: var(--mu); min-width: 46px; text-align: center; }
+#src { font-size: 11px; color: #6f7890; max-width: 300px; line-height: 1.35; }
+svg text { font-family: 'Pretendard','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="bar">
+  <h1>헤스 법칙 확인 — 두 길의 열량<small>교과서 78~79쪽 · 측정은 화면이, 계산은 내가</small></h1>
+  <div id="tabs"></div>
+</div>
+
+<div id="main">
+
+  <!-- 1 · 간이 열량계 -->
+  <section class="step" data-t="열량계">
+    <div style="display:grid;grid-template-columns:450px 1fr;gap:14px;height:100%">
+      <div class="pane" style="padding:6px"><svg viewBox="0 0 545 560" width="100%" height="510" id="calSvg"></svg></div>
+      <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div class="ttl"><span class="k">1</span>간이 열량계 — 열을 어떻게 재나</div>
+        <div class="pane" style="padding:10px 16px">
+          <div class="q">반응에서 나온 열은 눈에 보이지 않습니다. 그 열이 <b>용액을 데우면</b>, 용액의 온도 변화로 열량을 거꾸로 셀 수 있습니다.</div>
+          <div class="formula">Q = c<sub>용액</sub> × m<sub>용액</sub> × Δt</div>
+          <div class="legend3"><b>c</b><span>용액의 비열 — <b style="color:#fff">4.2 J/(g·℃)</b> (1 g을 1 ℃ 올리는 데 드는 열)</span>
+            <b>m</b><span>온도가 변한 <b style="color:#fff">용액 전체의 질량</b> (g)</span>
+            <b>Δt</b><span>온도 변화 — 나중 온도 − 처음 온도 (℃)</span></div>
+        </div>
+        <div class="pane" style="padding:8px 16px">
+          <div class="rt" style="margin-bottom:5px">이 계산이 맞으려면 — 약속 세 가지</div>
+          <div class="flow"><span class="chip">열량계 밖으로 열이 드나들지 않는다</span><span class="chip">모든 용액의 비열 = 4.2</span><span class="chip">염산 1 mL = 1 g</span></div>
+        </div>
+        <div class="pane" style="padding:10px 16px">
+          <div class="q">온도계가 올라갔다 — <b>열을 내놓은 것</b>은 누구일까?</div>
+          <div class="choice" style="margin-top:7px"><button data-c1="sol">용액</button><button data-c1="rx">반응</button><button data-c1="th">온도계</button><span class="fb" id="fb1"></span></div>
+          <div class="flow hide" id="r1" style="margin-top:8px">
+            <span class="chip exo">반응 = 계</span><span class="ar">— 열을 내놓음 →</span><span class="chip">용액 = 주위</span><span class="ar">→</span><span class="chip">온도 ↑</span><span class="ar">⇒</span><span class="chip exo">ΔH &lt; 0 · 발열</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · 두 길 지도 -->
+  <section class="step" data-t="두 길">
+    <div class="ttl"><span class="k">2</span>두 길 — 처음과 나중이 같은 두 경로 <span class="mu" style="font-size:15px;font-weight:400">(교과서 76쪽 그림 Ⅲ-2와 같은 구조)</span></div>
+    <div style="display:grid;grid-template-columns:800px 1fr;gap:12px;height:calc(100% - 40px)">
+      <div class="pane"><svg viewBox="0 0 840 520" width="100%" height="482" id="mapSvg"></svg></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="pane" style="padding:12px 14px">
+          <div class="rt" style="margin-bottom:6px">실험과 길 맞추기</div>
+          <div style="font-size:16px;line-height:1.7">
+            <b style="color:var(--exoL)">경로 1</b> = 실험 1<br>
+            &nbsp;① 고체 NaOH를 물에 녹인다 <span class="mu">T₁ → T₂</span><br>
+            &nbsp;② 그 용액에 염산을 넣는다 <span class="mu">T₃ → T₄</span><br>
+            <b style="color:var(--exoL)">경로 2</b> = 실험 2<br>
+            &nbsp;③ 고체 NaOH를 염산에 바로 <span class="mu">T₅ → T₆</span>
+          </div>
+        </div>
+        <div class="pane" style="padding:12px 14px">
+          <div class="q">두 길에서 나온 열을 각각 더하면 <b>같을까, 다를까?</b></div>
+          <div class="mu" style="font-size:14px;margin-top:6px">다음 화면부터 하나씩 잽니다. 화면은 <b style="color:#fff">온도</b>만 알려 주고, 나머지는 내가 구해서 아래 표에 적습니다 — 아래 표는 <b style="color:#fff">교과서 79쪽 결과 표</b>와 같은 칸이니 교과서에도 함께 적습니다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3·4·5 · 실험 -->
+  <section class="step" data-t="경로1 ①" data-exp="e1"></section>
+  <section class="step" data-t="경로1 ②" data-exp="e2"></section>
+  <section class="step" data-t="경로2 ③" data-exp="e3"></section>
+
+  <!-- 6 · 온도 vs 열량 -->
+  <section class="step" data-t="온도 vs 열량">
+    <div class="ttl"><span class="k">6</span>두 길 비교 — 온도로 더할까, 열량으로 더할까 <span class="mu" style="font-size:14px;font-weight:400">(막대는 내가 적은 값으로 그려진다)</span></div>
+    <div class="cmp">
+      <div class="pane"><svg viewBox="0 0 600 400" width="100%" height="264" id="cmpT"></svg></div>
+      <div class="pane"><svg viewBox="0 0 600 400" width="100%" height="264" id="cmpQ"></svg></div>
+    </div>
+    <div class="row">
+      <div class="pane"><div class="calc" style="background:none;border:0;padding:0;grid-template-columns:auto 1fr"><div class="lab"><b>경로 1 합</b>Δt① + Δt②</div><div class="ex">= <input class="ans" data-s="sumT" placeholder="0.0" disabled> ℃ <span class="fb" id="fbSumT"></span></div></div></div>
+      <div class="pane"><div class="calc" style="background:none;border:0;padding:0;grid-template-columns:auto 1fr"><div class="lab"><b>경로 1 합</b>Q① + Q②</div><div class="ex">= <input class="ans" data-s="sumQ" placeholder="0.000" disabled> kJ <span class="fb" id="fbSumQ"></span></div></div></div>
+    </div>
+    <div class="row">
+      <div class="pane"><div class="choice">온도 변화로 더하면 두 길은 <button data-c6="T:같다">같다</button><button data-c6="T:다르다">다르다</button><span class="fb" id="fb6T"></span></div></div>
+      <div class="pane"><div class="choice">열량으로 더하면 두 길은 <button data-c6="Q:같다">같다</button><button data-c6="Q:다르다">다르다</button><span class="fb" id="fb6Q"></span></div></div>
+    </div>
+    <div class="row">
+      <div class="pane" style="min-height:50px">
+        <div class="choice">왜 온도로 더하면 안 맞을까? <button data-c6w="t">온도계가 달라서</button><button data-c6w="m">데워진 용액의 질량이 달라서</button><button data-c6w="s">시간이 달라서</button><span class="fb" id="fb6w"></span></div>
+        <div class="hide" id="cmpWhy" style="font-size:15px;margin-top:4px;color:#dfe5f1">②·③은 ①보다 <b>데워진 용액이 많다</b> — 같은 열도 질량이 크면 온도가 덜 오른다(Q = c·<b>m</b>·Δt). 그래서 두 길은 <b style="color:var(--q)">열량(Q)</b>으로 비교해야 한다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · 엔탈피 계단 -->
+  <section class="step" data-t="엔탈피 계단">
+    <div class="stairs">
+      <div class="pane" style="overflow:hidden"><svg viewBox="0 0 760 590" width="100%" height="522" id="stairSvg"></svg></div>
+      <div class="side">
+        <div class="ttl" style="margin:0;font-size:18px"><span class="k">7</span>엔탈피 계단 <span class="mu" style="font-size:13px;font-weight:400">— 내가 구한 ΔH로 그린다</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          <button class="go" id="s1" disabled>경로 1 내려가기</button>
+          <button class="go" id="s2" disabled>경로 2 내려가기</button>
+          <button id="s3">교과서 76쪽 값 겹치기</button>
+        </div>
+        <div class="pane" style="padding:7px 10px">
+          <div class="eqs">
+            ① NaOH(s) → NaOH(aq) <span class="v" id="eq1">ΔH₁ = ____</span><br>
+            ② NaOH(aq) + HCl(aq) → NaCl(aq) + H₂O(l) <span class="v" id="eq2">ΔH₂ = ____</span><br>
+            ③ NaOH(s) + HCl(aq) → NaCl(aq) + H₂O(l) <span class="v" id="eq3">ΔH₃ = ____</span>
+          </div>
+        </div>
+        <div class="pane" style="padding:6px 10px;display:flex;flex-direction:column;gap:4px">
+          <div class="calc" style="background:none;border:0;padding:0;grid-template-columns:150px 1fr"><div class="lab"><b>경로 1 전체</b>ΔH₁ + ΔH₂</div><div class="ex">= <input class="ans" data-s="sumH" placeholder="±00.00" disabled> kJ <span class="fb" id="fbSumH"></span></div></div>
+          <div class="calc" style="background:none;border:0;padding:0;grid-template-columns:150px 1fr"><div class="lab"><b>두 길의 차이</b>ΔH₃ − (ΔH₁ + ΔH₂)</div><div class="ex">= <input class="ans" data-s="diffH" placeholder="0.00" disabled> kJ <span class="fb" id="fbDiffH"></span></div></div>
+        </div>
+        <div class="pane" style="padding:7px 10px">
+          <div class="choice">두 길의 ΔH 합은 <button data-c7="같다">거의 같다</button><button data-c7="다르다">다르다</button><span class="fb" id="fb7"></span><button class="rbtn" id="s4" disabled style="margin-left:auto">결론 보기</button></div>
+          <div class="hide" id="concl" style="margin-top:7px">
+            <div class="flow"><span class="chip">처음 같다</span><span class="chip">나중 같다</span><span class="ar">→</span><span class="chip">어느 길로 가도</span><span class="ar">→</span><span class="chip exo">ΔH₁ + ΔH₂ = ΔH₃</span></div>
+            <div style="font-size:14px;font-weight:800;margin-top:4px">헤스 법칙 — 반응 경로와 관계없이 반응 엔탈피의 총합은 일정하다</div>
+            <div style="font-size:13px;color:#dfe5f1;margin-top:3px">→ 교과서 <b>79쪽 정리 1</b>(열화학 반응식 세 개 — 위 ①②③)과 <b>정리 2</b>(경로와 반응 엔탈피의 관계)를 쓴다.</div>
+          </div>
+        </div>
+        <div class="pane hide" id="cmpBook" style="padding:7px 10px">
+          <div class="q" style="font-size:14px">내 값이 교과서 값보다 조금씩 <b>작다</b>. 왜일까? — 약속 세 가지 중 실제와 달랐던 것은?</div>
+          <div class="choice" style="margin-top:4px"><button data-c7w="leak">열량계 밖으로 열이 조금 새서</button><button data-c7w="naoh">NaOH를 너무 많이 넣어서</button><button data-c7w="hcl">염산이 모자라서</button><span class="fb" id="fb7w"></span></div>
+          <div class="hide" id="rLoss" style="font-size:13px;margin-top:4px;line-height:1.35">간이 열량계로 <b>열이 조금 새어 나가고</b> 컵·온도계도 열을 받는다 — 「열이 드나들지 않는다」는 약속이 실제로는 조금 어긋난다. 그래도 두 길을 <b>같은 방식</b>으로 재서 새는 몫이 비슷하게 들어가므로 합끼리는 거의 같다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="foot">
+  <table id="tbl">
+    <caption>79쪽 결과 표 — <b style="color:var(--th)">주황 = 화면이 잰 것</b> · <b style="color:var(--q)">노랑 = 내가 구해 적은 것</b>(맞으면 들어온다) → 다 채우면 <b>교과서 79쪽에 옮겨 적는다</b></caption>
+    <tr><th></th><th>실험 1 과정 2 (T₁→T₂)</th><th>실험 1 과정 3 (T₃→T₄)</th><th>실험 2 과정 2 (T₅→T₆)</th></tr>
+    <tr><th class="r">온도(℃) 처음 → 최고</th><td class="meas" id="tT1">— → —</td><td class="meas" id="tT2">— → —</td><td class="meas" id="tT3">— → —</td></tr>
+    <tr><th class="r">온도 변화(℃)</th><td id="tDt1">—</td><td id="tDt2">—</td><td id="tDt3">—</td></tr>
+    <tr><th class="r">발생한 열량(kJ)</th><td id="tQ1">—</td><td id="tQ2">—</td><td id="tQ3">—</td></tr>
+    <tr><th class="r">반응 엔탈피(kJ/mol)</th><td id="tH1">—</td><td id="tH2">—</td><td id="tH3">—</td></tr>
+  </table>
+  <div id="src">측정값: 미래엔 「물질과 에너지」 교사용 지도서의 탐구 예시 결과 · 과정과 조건: 교과서 78~79쪽 · 비교값: 교과서 76쪽 그림 Ⅲ-2</div>
+  <div id="nav">
+    <div class="r"><button id="measAll" style="font-size:12px;min-height:28px;padding:3px 8px">측정 건너뛰기 (교사용 · ?t=1)</button></div>
+    <div class="r"><button id="prev">◀</button><span id="cnt">1 / 7</span><button id="nextb" class="next">▶</button></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+'use strict';
+/* ── 데이터(앵커) ── 미래엔 지도서 예시 측정값 · 교과서 조건. 정답 숫자는 판정에만 쓰고 화면에 띄우지 않는다 */
+const C = 4.2, NMOL = 4.0 / 40.0;
+const T = { T1: 20.8, T2: 30.3, T3: 21.1, T4: 27.6, T5: 21.0, T6: 32.4 };
+const BOOK = { H1: -44.5, H2: -55.8, H3: -100.3 };
+const minus = s => String(s).replace('-', '−');
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const $ = id => document.getElementById(id);
+const sub = k => k.replace(/T(\d)/, (_, d) => 'T' + '₀₁₂₃₄₅₆₇₈₉'[d]);
+
+const EXP = {
+  e1: { no: 3, title: '경로 1 — ① 고체 NaOH를 물에 녹인다', sub: '실험 1 과정 1·2', start: T.T1, end: T.T2, ks: 'T1', ke: 'T2',
+        mass0: [['물', 100, 'water']], addMass: ['NaOH', 4.0, 'naoh'], add: '고체 NaOH 4.0 g 넣기',
+        liq0: '물 100 g', liq1: 'NaOH 수용액', H: 'ΔH₁', eq: 'NaOH(s) → NaOH(aq)', pel: true },
+  e2: { no: 4, title: '경로 1 — ② 그 용액에 염산을 넣는다', sub: '실험 1 과정 3', start: T.T3, end: T.T4, ks: 'T3', ke: 'T4',
+        mass0: [['물', 100, 'water'], ['NaOH', 4.0, 'naoh']], addMass: ['염산', 100, 'hcl'], add: '1.0 M 염산 100 g 넣기',
+        liq0: 'NaOH 수용액', liq1: 'NaCl 수용액', H: 'ΔH₂', eq: 'NaOH(aq) + HCl(aq) → NaCl(aq) + H₂O(l)', cool: T.T2 },
+  e3: { no: 5, title: '경로 2 — ③ 고체 NaOH를 염산에 바로 넣는다', sub: '실험 2 과정 1·2', start: T.T5, end: T.T6, ks: 'T5', ke: 'T6',
+        mass0: [['물', 100, 'water'], ['염산', 100, 'hcl']], addMass: ['NaOH', 4.0, 'naoh'], add: '고체 NaOH 4.0 g 넣기',
+        liq0: '물 + 염산 200 g', liq1: 'NaCl 수용액', H: 'ΔH₃', eq: 'NaOH(s) + HCl(aq) → NaCl(aq) + H₂O(l)', pel: true },
+};
+for (const k in EXP) {
+  const x = EXP[k];
+  x.dt = Math.round((x.end - x.start) * 10) / 10;
+  x.m = x.mass0.reduce((s, a) => s + a[1], 0) + x.addMass[1];
+  x.QJ = C * x.m * x.dt; x.QkJ = x.QJ / 1000; x.dH = -x.QkJ / NMOL;
+}
+/* 학생이 맞힌 값만 쌓인다 — 이것으로 6·7 화면을 그린다 */
+const S = { e1: {}, e2: {}, e3: {}, sumT: null, sumQ: null, sumH: null, diffH: null, c6: {}, c7: null };
+const f1 = v => v.toFixed(1), f3 = v => v.toFixed(3), fH = v => minus(v.toFixed(2));
+const parseNum = s => parseFloat(String(s).replace(/[−–]/g, '-').replace(',', '.').trim());
+
+/* ── 판정 — 정답은 돌려주지 않고 ✓/✗와 짧은 힌트만 ── */
+const TOL = { dt: 0.051, m: 0.51, Q: 0.031, n: 0.0051, dH: 0.31 };
+function checkExp(x, k, v) {
+  const exp = { dt: x.dt, m: x.m, Q: x.QkJ, n: NMOL, dH: x.dH }[k];
+  if (Number.isNaN(v)) return [false, '숫자로'];
+  if (Math.abs(v - exp) <= TOL[k]) return [true, '✓'];
+  if (k === 'Q' && Math.abs(v - x.QJ) <= 6) return [false, '✗ 단위 — kJ로 바꾸기'];
+  if (k === 'Q' && Math.abs(v - x.QkJ * 10) <= 0.3) return [false, '✗ 자릿수를 다시'];
+  if (k === 'dH' && Math.abs(-v - exp) <= TOL.dH) return [false, '✗ 부호 — 열을 내놓은 반응이다'];
+  if (k === 'dH' && Math.abs(Math.abs(v) - x.QkJ) <= 0.05) return [false, '✗ 1 mol당으로'];
+  if (k === 'm') return [false, '✗ 그때 열량계 안에 든 것 전부'];
+  if (k === 'dt') return [false, '✗ 최고 온도 − 처음 온도'];
+  return [false, '✗ 다시'];
+}
+function setFb(input, fbEl, ok, msg) {
+  input.classList.toggle('ok', ok); input.classList.toggle('bad', !ok);
+  fbEl.textContent = msg; fbEl.className = 'fb ' + (ok ? 'ok' : 'bad');
+}
+
+/* ── 실험 화면 ── */
+const CUP = { x0: 40, x1: 200, top: 70, bot: 330, wall: 9 };
+const PXG = 1.05, TMIN = 15, TMAX = 35;
+function buildExp(sec, key) {
+  const x = EXP[key];
+  sec.innerHTML = `
+  <div class="exp">
+    <div class="pane left">
+      <div class="ttl" style="font-size:18px;margin-bottom:1px"><span class="k">${x.no}</span>${x.title}</div>
+      <div class="mu" style="font-size:12.5px">${x.sub} · 교과서 78~79쪽</div>
+      <svg viewBox="0 0 380 400" width="100%" height="326" class="cupSvg"></svg>
+      <div class="read"><span class="rd">—</span><small> ℃</small></div>
+      <div class="readlab">온도계 읽음</div>
+    </div>
+    <div class="pane mid">
+      <div class="ctrls"></div>
+      <svg viewBox="0 0 430 330" width="100%" height="276" class="graph"></svg>
+      <div class="note" style="margin-top:5px"></div>
+    </div>
+    <div class="pane right">
+      <div class="rt">계산 — 내가 구해서 적는다 <span style="font-weight:400">(측정이 끝나면 칸이 열린다 · 맞으면 ✓)</span></div>
+      <div class="calc"><div class="lab"><b>① 온도 변화</b>Δt</div><div class="ex">${sub(x.ke)} − ${sub(x.ks)} = <input class="ans" data-k="dt" placeholder="0.0" disabled> ℃ <span class="fb"></span></div></div>
+      <div class="calc"><div class="lab"><b>② 용액 질량</b>m</div><div class="ex">데워진 용액 전체 = <input class="ans" data-k="m" placeholder="g" disabled> g <span class="fb"></span></div></div>
+      <div class="calc"><div class="lab"><b>③ 열량</b>Q = c·m·Δt</div><div class="ex">4.2 × m × Δt = <input class="ans" data-k="Q" placeholder="0.000" disabled> kJ <span class="fb"></span></div></div>
+      <div class="calc"><div class="lab"><b>④ NaOH의 양</b>n</div><div class="ex">4.0 g ÷ 40.0 g/mol = <input class="ans" data-k="n" placeholder="0.00" disabled> mol <span class="fb"></span></div></div>
+      <div class="calc"><div class="lab"><b>⑤ 반응 엔탈피</b>1 mol당</div><div class="ex">${x.H} = <input class="ans" data-k="dH" placeholder="±00.00" disabled> kJ/mol <span class="fb"></span></div></div>
+      <div class="eqline">${x.eq}&nbsp; <span class="v">${x.H} = ____ kJ</span></div>
+      <div class="flow hide sign"><span class="chip">용액 온도 ↑</span><span class="ar">→</span><span class="chip exo">반응이 열을 내놓음 · ΔH &lt; 0</span></div>
+      <div class="flow hide alldone"><span class="chip" style="border-color:var(--ok);color:#bff0d8;background:#12291f">✓ 다섯 칸 모두 맞음 — 아래 표에 들어갔다 · 다음 화면 ▶</span></div>
+    </div>
+  </div>`;
+  const st = { key, x, sec, phase: 'idle', pts: [], temp: null, mass: x.mass0.slice(), anim: null, liqLab: x.liq0, pelAt: 0 };
+  sec._st = st;
+  const ctr = sec.querySelector('.ctrls'), note = sec.querySelector('.note');
+  const btns = [];
+  const mk = (t, cls, fn) => { const b = document.createElement('button'); b.textContent = t; if (cls) b.className = cls; b.onclick = fn; return b; };
+  if (x.cool != null) {
+    btns.push(mk('실온으로 식히기', 'go', () => coolDown(st)));
+    note.innerHTML = '앞 화면 ①에서 녹인 NaOH 수용액(<b>' + x.cool.toFixed(1) + ' ℃</b>)을 그대로 쓴다. 먼저 실온으로 식힌다(교과서 과정 3) — <b>왜 식혀서 다시 잴까?</b><div class="choice" style="margin-top:4px;font-size:13px"><button data-rc="a">①의 열이 섞이면 ②의 열만 못 재니까</button><button data-rc="b">NaOH가 다 녹기를 기다리려고</button><button data-rc="c">염산이 차가워야 하니까</button><span class="fb cfb"></span></div><span class="hide cw">→ ①에서 나온 열을 빼고, <b>②(중화)에서 나온 열만</b> 재려고.</span>';
+    st.temp = x.cool;
+  } else {
+    note.innerHTML = '처음 온도를 재고 → 넣고 → 저으며 <b>가장 높이 올라간 온도</b>를 읽는다. 그래프는 시간에 따른 온도다(모양만).';
+  }
+  btns.push(mk('처음 온도 재기 (' + sub(x.ks) + ')', 'go', () => baseline(st)));
+  btns.push(mk(x.add, 'go', () => react(st)));
+  btns.push(mk('다시', '', () => resetExp(st)));
+  btns.forEach(b => ctr.appendChild(b));
+  st.btns = btns;
+  sec.querySelectorAll('button[data-rc]').forEach(b => b.onclick = () => {
+    sec.querySelectorAll('button[data-rc]').forEach(x => x.classList.remove('sel')); b.classList.add('sel');
+    const ok = b.dataset.rc === 'a', fb = sec.querySelector('.cfb');
+    fb.textContent = ok ? '✓' : '✗ 과정 3은 어느 반응의 열을 재는 단계?'; fb.className = 'fb cfb ' + (ok ? 'ok' : 'bad');
+    sec.querySelector('.cw').classList.toggle('hide', !ok);
+  });
+  sec.querySelectorAll('input.ans').forEach(inp => inp.addEventListener('change', () => onExpInput(st, inp)));
+  drawCup(st); drawGraph(st); setBtns(st); updRead(st);
+}
+function onExpInput(st, inp) {
+  const k = inp.dataset.k, v = parseNum(inp.value);
+  const [ok, msg] = checkExp(st.x, k, v);
+  setFb(inp, inp.parentElement.querySelector('.fb'), ok, msg);
+  S[st.key][k] = ok ? v : null;
+  st.sec.querySelector('.alldone').classList.toggle('hide', !['dt', 'm', 'Q', 'n', 'dH'].every(q => S[st.key][q] != null));
+  if (k === 'dH') {
+    st.sec.querySelector('.eqline .v').textContent = ok ? st.x.H + ' = ' + fH(v) + ' kJ' : st.x.H + ' = ____ kJ';
+    st.sec.querySelector('.sign').classList.toggle('hide', !ok);
+  }
+  if (k === 'm') drawCup(st);
+  updTable(); updGates();
+}
+function setBtns(st) {
+  const b = st.btns, cool = st.x.cool != null;
+  let i = 0;
+  if (cool) { b[i].disabled = st.phase !== 'idle'; i++; }
+  b[i].disabled = !(st.phase === (cool ? 'cooled' : 'idle')); i++;
+  b[i].disabled = st.phase !== 'based'; i++;
+  b[i].disabled = st.phase === 'idle' || st.phase === 'running';
+  st.sec.querySelectorAll('input.ans').forEach(inp => inp.disabled = st.phase !== 'done');
+}
+function updRead(st) {
+  st.sec.querySelector('.rd').textContent = st.temp == null ? '—' : st.temp.toFixed(1);
+  st.sec.querySelector('.readlab').innerHTML = st.phase === 'done'
+    ? '온도계 읽음 · <b style="color:#ffd28a">기록한 최고 온도 ' + sub(st.x.ke) + ' = ' + st.x.end.toFixed(1) + ' ℃</b>' : '온도계 읽음';
+}
+function drawCup(st) {
+  const svg = st.sec.querySelector('.cupSvg'); svg.innerHTML = '';
+  const { x0, x1, top, bot, wall } = CUP;
+  el('path', { d: `M${x0} ${top} L${x0 + 10} ${bot} L${x1 - 10} ${bot} L${x1} ${top} Z`, fill: '#e9e4d8', stroke: '#b9b2a0', 'stroke-width': 1.5 }, svg);
+  el('path', { d: `M${x0 + wall} ${top + 6} L${x0 + 10 + wall} ${bot - wall} L${x1 - 10 - wall} ${bot - wall} L${x1 - wall} ${top + 6} Z`, fill: '#1a2130', stroke: '#9c9584', 'stroke-width': 1 }, svg);
+  const mTot = st.mass.reduce((s, a) => s + a[1], 0), h = mTot * PXG, yTop = bot - wall - h;
+  const clip = el('clipPath', { id: 'cl' + st.key }, svg);
+  el('path', { d: `M${x0 + wall} ${top + 6} L${x0 + 10 + wall} ${bot - wall} L${x1 - 10 - wall} ${bot - wall} L${x1 - wall} ${top + 6} Z` }, clip);
+  const liqCol = st.liqLab === st.x.liq1 ? '#6fb0d8' : (st.key === 'e3' ? '#76c0a8' : '#5aa9e6');
+  el('rect', { x: x0, y: yTop, width: x1 - x0, height: h + 2, fill: liqCol, opacity: 0.85, 'clip-path': `url(#cl${st.key})` }, svg);
+  el('text', { x: (x0 + x1) / 2 - 18, y: Math.min(bot - 18, yTop + 26), 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 800, fill: '#0b1a2a' }, svg, st.liqLab);
+  el('rect', { x: x0 - 8, y: top - 16, width: x1 - x0 + 16, height: 16, rx: 3, fill: '#8d94a3', stroke: '#5d6575' }, svg);
+  el('line', { x1: x0 + 52, y1: top - 46, x2: x0 + 52, y2: bot - 30, stroke: '#c9ced8', 'stroke-width': 3 }, svg);
+  el('ellipse', { cx: x0 + 52, cy: bot - 30, rx: 22, ry: 6, fill: 'none', stroke: '#c9ced8', 'stroke-width': 3 }, svg);
+  el('text', { x: x0 + 52, y: top - 52, 'text-anchor': 'middle', 'font-size': 13, fill: '#aab2c4' }, svg, '젓개');
+  const tx = x1 - 52;
+  el('rect', { x: tx - 6, y: 18, width: 12, height: bot - 50, rx: 6, fill: '#f2f5fa', stroke: '#c5ccd8' }, svg);
+  el('circle', { cx: tx, cy: bot - 34, r: 11, fill: '#e0922a', stroke: '#c5ccd8' }, svg);
+  const tv = st.temp == null ? TMIN : st.temp;
+  const colTop = bot - 40 - (Math.max(TMIN, Math.min(TMAX, tv)) - TMIN) / (TMAX - TMIN) * (bot - 80);
+  el('rect', { x: tx - 3, y: colTop, width: 6, height: (bot - 34) - colTop, fill: '#e0922a' }, svg);
+  for (let t = 15; t <= 35; t += 5) {
+    const yy = bot - 40 - (t - TMIN) / (TMAX - TMIN) * (bot - 80);
+    el('line', { x1: tx + 6, y1: yy, x2: tx + 13, y2: yy, stroke: '#c5ccd8' }, svg);
+    el('text', { x: tx + 16, y: yy + 4, 'font-size': 11, fill: '#aab2c4' }, svg, t);
+  }
+  el('text', { x: tx, y: 12, 'text-anchor': 'middle', 'font-size': 13, fill: '#aab2c4' }, svg, '온도계');
+  // 데워지는 용액 — 블록으로 쌓이지만 합계는 적지 않는다(학생이 구한다)
+  const bx = 290, bw = 54, scale = 1.32, colors = { water: '#5aa9e6', naoh: '#f2f2f2', hcl: '#8fd19e' };
+  let yb = bot;
+  st.mass.forEach(([nm, g, c]) => {
+    const hh = Math.max(g * scale, 6); yb -= hh;
+    el('rect', { x: bx, y: yb, width: bw, height: hh, fill: colors[c], stroke: '#0f1218', 'stroke-width': 1 }, svg);
+    el('text', { x: bx - 6, y: yb + hh / 2 + 5, 'text-anchor': 'end', 'font-size': 13, fill: '#d6dbe6' }, svg, nm + ' ' + (c === 'naoh' ? g.toFixed(1) : g) + ' g');
+  });
+  const mOk = S[st.key].m != null;
+  el('text', { x: bx + bw / 2, y: yb - 10, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 800, fill: '#ffd28a' }, svg, 'm = ' + (mOk ? S[st.key].m + ' g' : '?'));
+  el('text', { x: bx + bw / 2, y: bot + 18, 'text-anchor': 'middle', 'font-size': 12, fill: '#8b94ab' }, svg, '데워지는 용액');
+  const pf = st.pelAt ? (performance.now() - st.pelAt) / 1000 : 2;
+  if (pf < 1) {
+    const solid = st.x.pel;
+    [[-14, 0], [0, -8], [12, 4], [-4, 10], [8, -14]].forEach(([dx, dy]) => el('circle', {
+      cx: (x0 + x1) / 2 - 20 + dx, cy: top - 40 + dy + pf * 120, r: solid ? 4 : 3, fill: solid ? '#fff' : '#8fd19e', opacity: 1 - pf }, svg));
+  }
+}
+const G = { x0: 46, x1: 414, y0: 290, y1: 18, tmax: 150 };
+const gx = t => G.x0 + (t / G.tmax) * (G.x1 - G.x0);
+const gy = v => G.y0 - (v - TMIN) / (TMAX - TMIN) * (G.y0 - G.y1);
+function drawGraph(st) {
+  const svg = st.sec.querySelector('.graph'); svg.innerHTML = '';
+  for (let t = 15; t <= 35; t += 5) {
+    el('line', { x1: G.x0, y1: gy(t), x2: G.x1, y2: gy(t), stroke: '#232a38' }, svg);
+    el('text', { x: G.x0 - 6, y: gy(t) + 4, 'text-anchor': 'end', 'font-size': 12, fill: '#8b94ab' }, svg, t);
+  }
+  for (let t = 0; t <= 150; t += 30) el('text', { x: gx(t), y: G.y0 + 18, 'text-anchor': 'middle', 'font-size': 12, fill: '#8b94ab' }, svg, t);
+  el('line', { x1: G.x0, y1: G.y0, x2: G.x1, y2: G.y0, stroke: '#55617a' }, svg);
+  el('line', { x1: G.x0, y1: G.y0, x2: G.x0, y2: G.y1, stroke: '#55617a' }, svg);
+  el('text', { x: G.x1, y: G.y0 + 34, 'text-anchor': 'end', 'font-size': 12, fill: '#8b94ab' }, svg, '시간(초) — 모양만 보는 그림');
+  el('text', { x: 6, y: 12, 'font-size': 12, fill: '#8b94ab' }, svg, '온도(℃)');
+  if (st.pts.length > 1) el('polyline', { points: st.pts.map(p => gx(p[0]) + ',' + gy(p[1])).join(' '), fill: 'none', stroke: '#e0922a', 'stroke-width': 3, 'stroke-linejoin': 'round' }, svg);
+  const x = st.x;
+  if (st.phase !== 'idle' && st.phase !== 'cooled') {
+    el('circle', { cx: gx(0), cy: gy(x.start), r: 5, fill: '#fff' }, svg);
+    el('text', { x: gx(0) + 8, y: gy(x.start) + 20, 'font-size': 15, 'font-weight': 800, fill: '#fff' }, svg, sub(x.ks) + ' = ' + x.start.toFixed(1));
+  }
+  if (st.phase === 'done') {
+    const tp = 60;
+    el('circle', { cx: gx(tp), cy: gy(x.end), r: 6, fill: '#ffd28a' }, svg);
+    el('text', { x: gx(tp) + 10, y: gy(x.end) - 8, 'font-size': 15, 'font-weight': 800, fill: '#ffd28a' }, svg, '최고 온도 ' + sub(x.ke) + ' = ' + x.end.toFixed(1));
+    el('line', { x1: gx(tp), y1: gy(x.end), x2: gx(tp), y2: gy(x.start), stroke: '#ffd28a', 'stroke-dasharray': '4 4' }, svg);
+    el('text', { x: gx(tp) + 8, y: (gy(x.end) + gy(x.start)) / 2 + 5, 'font-size': 14, fill: '#ffd28a' }, svg, 'Δt = ?');
+  }
+}
+function curveT(x, t) {
+  if (t <= 20) return x.start;
+  const tr = 40;
+  if (t <= 20 + tr) { const u = (t - 20) / tr; return x.start + (x.end - x.start) * (1 - Math.pow(1 - u, 3)); }
+  return x.end - 0.006 * (t - 20 - tr);
+}
+function run(st, t0, t1, ms, done) {
+  const startAt = performance.now(); cancelAnimationFrame(st.anim);
+  const step = now => {
+    const f = Math.min(1, (now - startAt) / ms), t = t0 + (t1 - t0) * f;
+    const last = st.pts.length ? st.pts[st.pts.length - 1][0] : -1;
+    for (let tt = Math.max(last + 1, t0); tt <= t; tt += 1) st.pts.push([tt, curveT(st.x, tt)]);
+    st.temp = curveT(st.x, t); updRead(st); drawGraph(st);
+    st._tick = (st._tick || 0) + 1; if (st._tick % 2 === 0) drawCup(st);
+    if (f < 1) st.anim = requestAnimationFrame(step); else done && done();
+  };
+  st.anim = requestAnimationFrame(step);
+}
+function coolDown(st) {
+  st.phase = 'running'; setBtns(st);
+  const a = st.x.cool, b = st.x.start, t0 = performance.now(), ms = 1500;
+  const step = now => {
+    const f = Math.min(1, (now - t0) / ms);
+    st.temp = a + (b - a) * f; updRead(st); drawCup(st);
+    if (f < 1) st.anim = requestAnimationFrame(step); else { st.phase = 'cooled'; setBtns(st); }
+  };
+  st.anim = requestAnimationFrame(step);
+}
+function baseline(st) {
+  st.phase = 'running'; setBtns(st); st.pts = []; st.temp = st.x.start;
+  run(st, 0, 20, 1100, () => { st.phase = 'based'; setBtns(st); updTable(); drawGraph(st); });
+}
+function react(st) {
+  st.phase = 'running'; setBtns(st);
+  st.mass = st.x.mass0.concat([st.x.addMass]); st.liqLab = st.x.liq1; st.pelAt = performance.now();
+  drawCup(st);
+  run(st, 20, 150, 4200, () => finish(st));
+}
+function finish(st) { st.phase = 'done'; setBtns(st); updRead(st); updTable(); drawGraph(st); drawCup(st); }
+function instant(st) {
+  cancelAnimationFrame(st.anim);
+  st.mass = st.x.mass0.concat([st.x.addMass]); st.liqLab = st.x.liq1; st.pelAt = 0;
+  st.pts = []; for (let t = 0; t <= 150; t++) st.pts.push([t, curveT(st.x, t)]);
+  st.temp = curveT(st.x, 150); finish(st);
+}
+function resetExp(st) {
+  cancelAnimationFrame(st.anim);
+  st.phase = 'idle'; st.pts = []; st.mass = st.x.mass0.slice(); st.liqLab = st.x.liq0; st.pelAt = 0;
+  st.temp = st.x.cool != null ? st.x.cool : null;
+  const cw = st.sec.querySelector('.cw'); if (cw) cw.classList.add('hide');
+  updRead(st); drawCup(st); drawGraph(st); setBtns(st); updTable();
+}
+
+/* ── 아래 표(79쪽 결과 표) ── */
+function updTable() {
+  ['e1', 'e2', 'e3'].forEach((k, i) => {
+    const st = steps.find(s => s.dataset.exp === k)._st, x = st.x, c = i + 1;
+    const measured = st.phase === 'done', based = st.phase === 'based' || st.phase === 'done' || (st.phase === 'running' && st.pts.length > 0);
+    $('tT' + c).textContent = (based ? x.start.toFixed(1) : '—') + ' → ' + (measured ? x.end.toFixed(1) : '—');
+    $('tDt' + c).textContent = S[k].dt != null ? f1(S[k].dt) : '—';
+    $('tQ' + c).textContent = S[k].Q != null ? f3(S[k].Q) : '—';
+    $('tH' + c).textContent = S[k].dH != null ? fH(S[k].dH) : '—';
+  });
+}
+
+/* ── 1 · 열량계 그림 ── */
+function drawCal() {
+  const s = $('calSvg'), x0 = 110, x1 = 330, top = 200, bot = 500, w = 16;
+  el('path', { d: `M${x0} ${top} L${x0 + 14} ${bot} L${x1 - 14} ${bot} L${x1} ${top} Z`, fill: '#e9e4d8', stroke: '#b9b2a0', 'stroke-width': 2 }, s);
+  el('path', { d: `M${x0 + w} ${top + 8} L${x0 + 14 + w} ${bot - w} L${x1 - 14 - w} ${bot - w} L${x1 - w} ${top + 8} Z`, fill: '#1a2130', stroke: '#9c9584' }, s);
+  el('path', { d: `M${x0 + w + 6} ${top + 100} L${x0 + 14 + w} ${bot - w} L${x1 - 14 - w} ${bot - w} L${x1 - w - 6} ${top + 100} Z`, fill: '#5aa9e6', opacity: .85 }, s);
+  el('rect', { x: x0 - 12, y: top - 22, width: x1 - x0 + 24, height: 22, rx: 4, fill: '#8d94a3', stroke: '#5d6575' }, s);
+  el('rect', { x: 255, y: 40, width: 14, height: 420, rx: 7, fill: '#f2f5fa', stroke: '#c5ccd8' }, s);
+  el('circle', { cx: 262, cy: 462, r: 13, fill: '#e0922a' }, s);
+  el('rect', { x: 258.5, y: 250, width: 7, height: 205, fill: '#e0922a' }, s);
+  el('line', { x1: 180, y1: 70, x2: 180, y2: 445, stroke: '#c9ced8', 'stroke-width': 4 }, s);
+  el('ellipse', { cx: 180, cy: 445, rx: 30, ry: 8, fill: 'none', stroke: '#c9ced8', 'stroke-width': 4 }, s);
+  const lab = (x, y, tx, ty, t) => { el('line', { x1: x, y1: y, x2: tx, y2: ty, stroke: '#8b94ab' }, s); el('text', { x: tx + (tx > x ? 6 : -6), y: ty + 5, 'text-anchor': tx > x ? 'start' : 'end', 'font-size': 17, fill: '#e8eaf0', 'font-weight': 700 }, s, t); };
+  lab(269, 80, 360, 80, '온도계'); lab(180, 110, 70, 110, '젓개'); lab(330, 190, 380, 160, '뚜껑'); lab(320, 330, 380, 300, '스타이로폼 컵'); lab(300, 400, 380, 420, '반응물(용액)');
+  el('text', { x: 380, y: 322, 'font-size': 13, fill: '#8b94ab' }, s, '두 겹 · 열이 잘 안 샌다');
+  el('text', { x: 220, y: 545, 'text-anchor': 'middle', 'font-size': 14, fill: '#8b94ab' }, s, '간이 열량계 (교과서 78쪽 그림 Ⅲ-3과 같은 구조)');
+}
+/* ── 2 · 두 길 지도 ── */
+function drawMap() {
+  const s = $('mapSvg');
+  const box = (x, y, w, h, t1, t2) => {
+    el('rect', { x, y, width: w, height: h, rx: 10, fill: '#1b2030', stroke: '#48506a', 'stroke-width': 2 }, s);
+    el('text', { x: x + w / 2, y: y + h / 2 - 4, 'text-anchor': 'middle', 'font-size': 19, 'font-weight': 800, fill: '#fff' }, s, t1);
+    el('text', { x: x + w / 2, y: y + h / 2 + 20, 'text-anchor': 'middle', 'font-size': 14, fill: '#9aa3b8' }, s, t2);
+  };
+  const arrow = (x1, y1, x2, y2, label, sub2, lx) => {
+    el('line', { x1, y1, x2, y2, stroke: '#9aa3b8', 'stroke-width': 4 }, s);
+    el('path', { d: `M${x2 - 9} ${y2 - 14} L${x2} ${y2} L${x2 + 9} ${y2 - 14} Z`, fill: '#9aa3b8' }, s);
+    el('text', { x: lx, y: (y1 + y2) / 2 - 2, 'font-size': 18, 'font-weight': 800, fill: '#e8eaf0', 'text-anchor': lx < x1 ? 'end' : 'start' }, s, label);
+    el('text', { x: lx, y: (y1 + y2) / 2 + 20, 'font-size': 14, fill: '#9aa3b8', 'text-anchor': lx < x1 ? 'end' : 'start' }, s, sub2);
+  };
+  el('text', { x: 20, y: 30, 'font-size': 15, fill: '#8b94ab' }, s, '엔탈피 ↑');
+  el('line', { x1: 30, y1: 40, x2: 30, y2: 500, stroke: '#55617a', 'stroke-width': 2 }, s);
+  box(150, 40, 560, 70, '처음 상태', 'NaOH(s) · 물 · 염산 HCl(aq)');
+  box(110, 230, 300, 66, 'NaOH(aq) · 염산', '중간 상태(경로 1만 들른다)');
+  box(150, 420, 560, 70, '나중 상태', 'NaCl(aq) · H₂O(l)');
+  arrow(260, 110, 260, 228, '① 녹인다', '실험 1 · T₁ → T₂', 248);
+  arrow(260, 296, 260, 418, '② 중화한다', '실험 1 · T₃ → T₄', 248);
+  arrow(600, 110, 600, 418, '③ 바로 중화한다', '실험 2 · T₅ → T₆', 616);
+  el('text', { x: 260, y: 515, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 800, fill: '#9fd0f5' }, s, '경로 1');
+  el('text', { x: 600, y: 515, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 800, fill: '#9fd0f5' }, s, '경로 2');
+}
+
+/* ── 6 · 막대 — 학생이 맞힌 값으로만 ── */
+function drawCmp(id, kind) {
+  const s = $(id); s.innerHTML = '';
+  const isT = kind === 'T', k = isT ? 'dt' : 'Q';
+  const a = S.e1[k], b = S.e2[k], c = S.e3[k];
+  const max = isT ? 18 : 11, unit = isT ? '℃' : 'kJ', y0 = 340, H = 268, sc = H / max;
+  el('text', { x: 300, y: 28, 'text-anchor': 'middle', 'font-size': 20, 'font-weight': 800, fill: isT ? '#e0922a' : '#ffd28a' }, s, isT ? '온도 변화 Δt로 더하면' : '열량 Q로 더하면');
+  for (let v = 0; v <= max; v += isT ? 3 : 2) {
+    el('line', { x1: 70, y1: y0 - v * sc, x2: 560, y2: y0 - v * sc, stroke: '#232a38' }, s);
+    el('text', { x: 62, y: y0 - v * sc + 4, 'text-anchor': 'end', 'font-size': 12, fill: '#8b94ab' }, s, v);
+  }
+  el('text', { x: 20, y: 60, 'font-size': 12, fill: '#8b94ab' }, s, unit);
+  el('line', { x1: 70, y1: y0, x2: 560, y2: y0, stroke: '#55617a', 'stroke-width': 2 }, s);
+  const fa = v => isT ? f1(v) : f3(v);
+  const bar = (x, v0, v, col, lab) => {
+    if (v == null) { el('rect', { x, y: y0 - (v0 || 0) * sc - 40, width: 120, height: 40, fill: 'none', stroke: '#48506a', 'stroke-dasharray': '5 4' }, s);
+      el('text', { x: x + 60, y: y0 - (v0 || 0) * sc - 16, 'text-anchor': 'middle', 'font-size': 13, fill: '#6f7890' }, s, lab + ' 아직'); return; }
+    const h = v * sc;
+    el('rect', { x, y: y0 - (v0 || 0) * sc - h, width: 120, height: h, fill: col, stroke: '#0f1218' }, s);
+    el('text', { x: x + 60, y: y0 - (v0 || 0) * sc - h / 2 + 6, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 800, fill: '#0b1a2a' }, s, lab + ' ' + fa(v));
+  };
+  bar(140, 0, a, isT ? '#f0b366' : '#9fd0f5', '①');
+  bar(140, a, b, isT ? '#e0922a' : '#3d9be0', '②');
+  bar(360, 0, c, isT ? '#e0922a' : '#3d9be0', '③');
+  el('text', { x: 200, y: y0 + 22, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 800, fill: '#e8eaf0' }, s, '경로 1 (① + ②)');
+  el('text', { x: 420, y: y0 + 22, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 800, fill: '#e8eaf0' }, s, '경로 2 (③)');
+  const sum = isT ? S.sumT : S.sumQ;
+  if (sum != null) el('text', { x: 200, y: y0 - sum * sc - 10, 'text-anchor': 'middle', 'font-size': 17, 'font-weight': 800, fill: '#fff' }, s, '합 ' + fa(sum) + ' ' + unit);
+  if (c != null) {
+    el('text', { x: 420, y: y0 - c * sc - 10, 'text-anchor': 'middle', 'font-size': 17, 'font-weight': 800, fill: '#fff' }, s, fa(c) + ' ' + unit);
+    el('line', { x1: 140, y1: y0 - c * sc, x2: 480, y2: y0 - c * sc, stroke: '#fff', 'stroke-dasharray': '5 5', opacity: .55 }, s);
+  }
+  el('text', { x: 300, y: 380, 'text-anchor': 'middle', 'font-size': 14, fill: '#8b94ab' }, s, a != null && b != null && c != null ? '점선과 합의 높이를 눈으로 견주어 보세요' : '3·4·5 화면에서 ' + (isT ? 'Δt' : 'Q') + '를 맞혀 적으면 막대가 생깁니다');
+}
+
+/* ── 7 · 계단 — 학생이 맞힌 ΔH로만 ── */
+const ST = { y0: 70, k: 4.1 };
+const sy = v => ST.y0 - v * ST.k;
+const stair = { p1: false, p2: false, book: false };
+function drawStairs() {
+  const s = $('stairSvg'); s.innerHTML = '';
+  const H1 = S.e1.dH, H2 = S.e2.dH, H3 = S.e3.dH;
+  el('text', { x: 18, y: 30, 'font-size': 15, fill: '#8b94ab' }, s, '엔탈피 ↑');
+  el('line', { x1: 34, y1: 40, x2: 34, y2: 560, stroke: '#55617a', 'stroke-width': 2 }, s);
+  const shelf = (v, xa, xb, t, col) => {
+    el('line', { x1: xa, y1: sy(v), x2: xb, y2: sy(v), stroke: col || '#c9ced8', 'stroke-width': 3 }, s);
+    if (t) el('text', { x: xa + 4, y: sy(v) - 8, 'font-size': 15, 'font-weight': 700, fill: '#d6dbe6' }, s, t);
+  };
+  shelf(0, 50, 740, '처음 상태 — NaOH(s) · 물 · 염산');
+  const arr = (x, va, vb, col, w, dash) => {
+    const ya = sy(va), yb = sy(vb);
+    el('line', { x1: x, y1: ya, x2: x, y2: yb - 12, stroke: col, 'stroke-width': w, 'stroke-dasharray': dash || '' }, s);
+    el('path', { d: `M${x - 10} ${yb - 16} L${x} ${yb} L${x + 10} ${yb - 16} Z`, fill: dash ? 'none' : col, stroke: col, 'stroke-width': dash ? 2 : 0 }, s);
+  };
+  if (stair.book) {
+    arr(318, 0, BOOK.H1, '#7f8ba3', 3, '6 5'); arr(318, BOOK.H1, BOOK.H1 + BOOK.H2, '#7f8ba3', 3, '6 5'); arr(598, 0, BOOK.H3, '#7f8ba3', 3, '6 5');
+    shelf(BOOK.H3, 300, 740, null, '#7f8ba3');
+    el('text', { x: 736, y: sy(BOOK.H3) + 18, 'text-anchor': 'end', 'font-size': 13, fill: '#9aa3b8' }, s, '교과서 ' + minus(BOOK.H3) + ' kJ');
+    el('text', { x: 330, y: sy(BOOK.H1 / 2), 'font-size': 13, fill: '#9aa3b8' }, s, minus(BOOK.H1));
+    el('text', { x: 330, y: sy(BOOK.H1 + BOOK.H2 / 2), 'font-size': 13, fill: '#9aa3b8' }, s, minus(BOOK.H2));
+  }
+  if (stair.p1 && H1 != null && H2 != null) {
+    arr(280, 0, H1, '#3d9be0', 7); shelf(H1, 150, 420, 'NaOH(aq) · 염산', '#3d9be0'); arr(280, H1, H1 + H2, '#3d9be0', 7);
+    el('text', { x: 268, y: sy(H1 / 2) + 6, 'text-anchor': 'end', 'font-size': 19, 'font-weight': 800, fill: '#9fd0f5' }, s, 'ΔH₁ ' + fH(H1));
+    el('text', { x: 268, y: sy(H1 + H2 / 2) + 6, 'text-anchor': 'end', 'font-size': 19, 'font-weight': 800, fill: '#9fd0f5' }, s, 'ΔH₂ ' + fH(H2));
+    shelf(H1 + H2, 150, 420, null, '#3d9be0');
+    el('text', { x: 154, y: sy(H1 + H2) + 24, 'font-size': 15, 'font-weight': 800, fill: '#fff' }, s, S.sumH != null ? '합 ' + fH(S.sumH) + ' kJ' : '합 = ?');
+  }
+  if (stair.p2 && H3 != null) {
+    arr(560, 0, H3, '#3d9be0', 7);
+    el('text', { x: 548, y: sy(H3 / 2) + 6, 'text-anchor': 'end', 'font-size': 19, 'font-weight': 800, fill: '#9fd0f5' }, s, 'ΔH₃ ' + fH(H3));
+    shelf(H3, 450, 740, null, '#3d9be0');
+    el('text', { x: 736, y: sy(H3) - 8, 'text-anchor': 'end', 'font-size': 15, 'font-weight': 800, fill: '#fff' }, s, fH(H3) + ' kJ');
+  }
+  el('text', { x: 400, y: sy(-104) + 30, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 700, fill: '#d6dbe6' }, s, '나중 상태 — NaCl(aq) · H₂O(l)');
+  el('text', { x: 280, y: 584, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 800, fill: '#9fd0f5' }, s, '경로 1');
+  el('text', { x: 560, y: 584, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 800, fill: '#9fd0f5' }, s, '경로 2');
+  if (stair.p1 && stair.p2 && S.diffH != null && H3 != null) el('text', { x: 420, y: sy(H3) - 34, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 800, fill: '#4bbd8a' }, s, '차이 ' + Math.abs(S.diffH).toFixed(2) + ' kJ');
+}
+
+/* ── 6·7 입력 판정 ── */
+function onSumInput(inp) {
+  const k = inp.dataset.s, v = parseNum(inp.value);
+  const fb = { sumT: $('fbSumT'), sumQ: $('fbSumQ'), sumH: $('fbSumH'), diffH: $('fbDiffH') }[k];
+  let ok = false, msg = '✗ 다시';
+  if (Number.isNaN(v)) msg = '숫자로';
+  else if (k === 'sumT') ok = Math.abs(v - (S.e1.dt + S.e2.dt)) <= 0.06;
+  else if (k === 'sumQ') ok = Math.abs(v - (S.e1.Q + S.e2.Q)) <= 0.006;
+  else if (k === 'sumH') { ok = Math.abs(v - (S.e1.dH + S.e2.dH)) <= 0.31; if (!ok && Math.abs(-v - (S.e1.dH + S.e2.dH)) <= 0.31) msg = '✗ 부호'; }
+  else if (k === 'diffH') ok = Math.abs(Math.abs(v) - Math.abs(S.e3.dH - (S.e1.dH + S.e2.dH))) <= 0.11;
+  if (ok) msg = '✓';
+  setFb(inp, fb, ok, msg);
+  S[k] = ok ? v : null;
+  updGates();
+}
+function updGates() {
+  const all = k => ['e1', 'e2', 'e3'].every(e => S[e][k] != null);
+  document.querySelector('[data-s="sumT"]').disabled = !(S.e1.dt != null && S.e2.dt != null);
+  document.querySelector('[data-s="sumQ"]').disabled = !(S.e1.Q != null && S.e2.Q != null);
+  document.querySelector('[data-s="sumH"]').disabled = !(S.e1.dH != null && S.e2.dH != null);
+  document.querySelector('[data-s="diffH"]').disabled = !all('dH');
+  $('s1').disabled = !(S.e1.dH != null && S.e2.dH != null);
+  $('s2').disabled = S.e3.dH == null;
+  $('s4').disabled = !(S.c7 && stair.p1 && stair.p2) || !$('concl').classList.contains('hide');
+  ['e1', 'e2', 'e3'].forEach((e, i) => $('eq' + (i + 1)).textContent = 'ΔH' + '₁₂₃'[i] + ' = ' + (S[e].dH != null ? fH(S[e].dH) + ' kJ' : '____'));
+  drawCmp('cmpT', 'T'); drawCmp('cmpQ', 'Q'); drawStairs();
+}
+
+/* ── 단계 넘기기 ── */
+const steps = Array.from(document.querySelectorAll('.step'));
+let cur = 0;
+steps.forEach((sec, i) => {
+  const b = document.createElement('button'); b.textContent = (i + 1) + ' ' + sec.dataset.t; b.onclick = () => go(i); $('tabs').appendChild(b);
+  if (sec.dataset.exp) buildExp(sec, sec.dataset.exp);
+});
+function go(i) {
+  cur = Math.max(0, Math.min(steps.length - 1, i));
+  steps.forEach((s, j) => s.classList.toggle('on', j === cur));
+  document.querySelectorAll('#tabs button').forEach((b, j) => b.classList.toggle('on', j === cur));
+  $('cnt').textContent = (cur + 1) + ' / ' + steps.length;
+  $('prev').disabled = cur === 0; $('nextb').disabled = cur === steps.length - 1;
+  updGates();
+}
+$('prev').onclick = () => go(cur - 1); $('nextb').onclick = () => go(cur + 1);
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') go(cur + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(cur - 1);
+});
+/* 1 · 누가 열을 내놓았나 — 고른 뒤에만 사슬이 열린다 */
+document.querySelectorAll('button[data-c1]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('button[data-c1]').forEach(x => x.classList.remove('sel')); b.classList.add('sel');
+  const ok = b.dataset.c1 === 'rx';
+  $('fb1').textContent = ok ? '✓' : '✗ 데워진 쪽이 아니라, 데운 쪽은?'; $('fb1').className = 'fb ' + (ok ? 'ok' : 'bad');
+  $('r1').classList.toggle('hide', !ok);
+});
+/* 6 */
+document.querySelectorAll('button[data-c6]').forEach(b => b.onclick = () => {
+  const [kind, val] = b.dataset.c6.split(':');
+  document.querySelectorAll('button[data-c6^="' + kind + '"]').forEach(x => x.classList.remove('sel')); b.classList.add('sel');
+  S.c6[kind] = val;
+  const ok = kind === 'T' ? val === '다르다' : val === '같다', fb = $('fb6' + kind);
+  fb.textContent = ok ? '✓' : '✗ 막대와 점선을 다시 견주어 보세요'; fb.className = 'fb ' + (ok ? 'ok' : 'bad');
+  updGates();
+});
+document.querySelectorAll('button[data-c6w]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('button[data-c6w]').forEach(x => x.classList.remove('sel')); b.classList.add('sel');
+  const ok = b.dataset.c6w === 'm';
+  $('fb6w').textContent = ok ? '✓' : '✗ Q = c·m·Δt에서 세 경우에 달랐던 것은?'; $('fb6w').className = 'fb ' + (ok ? 'ok' : 'bad');
+  $('cmpWhy').classList.toggle('hide', !ok);
+});
+/* 7 */
+document.querySelectorAll('button[data-c7]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('button[data-c7]').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); S.c7 = b.dataset.c7;
+  const ok = S.c7 === '같다'; $('fb7').textContent = ok ? '✓' : '✗ 두 값의 차이를 다시 보세요'; $('fb7').className = 'fb ' + (ok ? 'ok' : 'bad');
+  updGates();
+});
+$('s1').onclick = () => { stair.p1 = true; drawStairs(); updGates(); };
+$('s2').onclick = () => { stair.p2 = true; drawStairs(); updGates(); };
+$('s3').onclick = () => { stair.book = !stair.book; $('s3').classList.toggle('next', stair.book); $('cmpBook').classList.toggle('hide', !stair.book); drawStairs(); };
+$('s4').onclick = () => { $('concl').classList.remove('hide'); updGates(); };
+document.querySelectorAll('button[data-c7w]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('button[data-c7w]').forEach(x => x.classList.remove('sel')); b.classList.add('sel');
+  const ok = b.dataset.c7w === 'leak';
+  $('fb7w').textContent = ok ? '✓' : '✗ 양은 교과서와 같다 — 약속 중 무엇이 깨졌나?'; $('fb7w').className = 'fb ' + (ok ? 'ok' : 'bad');
+  $('rLoss').classList.toggle('hide', !ok);
+});
+document.querySelectorAll('input.ans[data-s]').forEach(inp => inp.addEventListener('change', () => onSumInput(inp)));
+/* 교사용 — 측정만 한 번에(계산은 그대로 학생 몫) */
+$('measAll').onclick = () => { steps.forEach(sec => sec._st && instant(sec._st)); };
+if (!/[?&]t=1/.test(location.search)) $('measAll').style.display = 'none';   // 학생 크롬북에서는 숨김 — 교사는 주소 뒤에 ?t=1
+
+function fit() {
+  const s = Math.min(innerWidth / 1280, innerHeight / 720), app = $('app');
+  app.style.transform = `scale(${s})`;
+  app.style.left = ((innerWidth - 1280 * s) / 2) + 'px'; app.style.top = ((innerHeight - 720 * s) / 2) + 'px';
+}
+addEventListener('resize', fit);
+drawCal(); drawMap(); updTable(); fit(); go(0);
+</script>
+</body>
+</html>
